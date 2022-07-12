@@ -1,3 +1,3 @@
-## Under construction
+## Redundant
 
-[link alle slide](linear_regression/Linear-Regression-part_1.html)
+[IFCS22: Biplots in dimension reduction and clustering](Biplots_in_JDR/biplots_in_dm_clust_IFCS22.html)
