@@ -1,0 +1,112 @@
+---
+title: "Biplots in JDR"
+author: "IFCS"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+library("fastDummies")
+library("clustrd")
+library("ca")
+library("tidyverse")
+library("kableExtra")
+library("gganimate")
+library("gapminder")
+library("patchwork")
+library("av")
+source("R/plot_ca_da.R")
+```
+
+
+## Categorical data
+### Reproducing the biplot in practice examples
+#### contribution biplot of the benthos data
+
+
+Import the $\texttt{benthos}$ data set 
+```{r}
+benthos = read_csv2(file="data/benthos.csv") %>% dplyr::rename(species = `...1`)
+benthos %>% slice_sample(n=10)  %>% kbl()%>% kable_paper()
+
+
+```
+Import the $\texttt{women}$ data set 
+```{r}
+women = read_csv2(file="data/women_concat.csv") %>% dplyr::rename(row_labels = `...1`) %>% 
+  filter(str_detect(row_labels,"^m\\d"))
+
+women %>%
+  dplyr::select(1:12) %>% slice(1:10)  %>% kbl()%>% kable_paper()
+
+
+```
+
+#### CA solution
+
+Compute the solution, ca package-based computation and visualization
+
+```{r}
+benthos_ca_dat = data.frame(benthos)
+row.names(benthos_ca_dat)=benthos$species
+ca_benthos = ca(benthos_ca_dat[,-1])
+plot(ca_benthos, what=c("all","all"),map="colgreen",labels = c(2,2),arrows = c(TRUE,FALSE))
+women_ca_dat = women[,-1] 
+row.names(women_ca_dat) = women %>% pull(row_labels)
+ca_women = ca(t(women_ca_dat))
+
+plot(ca_women, what=c("all","all"),map="symmetric",labels = c(2,2),arrows = c(FALSE,FALSE))
+
+```
+
+### Preparing the coordinates for the contribution biplot
+
+```{r,fig.align='center'}
+
+all_plots = plot_ca_da(ca_benthos)
+all_plots$contribution_biplot
+all_plots$ani_biplot
+  
+all_plots = plot_ca_da(ca_women)
+(all_plots$contribution_biplot|all_plots$col_biplot)/all_plots$symmetric_map
+all_plots$ani_biplot
+```
+
+### contribution biplot for Zoo
+
+```{r}
+library("mlbench")
+data(Zoo)
+Zoo = as_tibble(Zoo) %>% filter(type %in% c("mammal","bird","fish","insect")) %>% 
+  mutate(across(everything(),as_factor))
+
+animal_names=rownames(Zoo)
+type = Zoo %>% mutate(type= fct_drop(type)) %>% pull(type)
+Zoo = Zoo %>% select(-type)
+zoo_cca = clusmca(Zoo,nclus=4,ndim = 3,nstart=100,gamma = TRUE)
+Zk = dummy_columns(zoo_cca$cluster,remove_selected_columns = TRUE) %>% data.matrix()
+colnames(Zk) = str_replace(colnames(Zk),pattern = ".data",replacement = "cluster" )
+Z_zoo = dummy_columns(Zoo,remove_selected_columns = TRUE) %>% data.matrix()
+
+Zk_Z_zoo = t(Zk) %*% Z_zoo
+zoo_ca = ca(t(Zk_Z_zoo))
+discarded_rows = zoo_ca$rownames  %>% str_which("_FALSE")
+zoo_ca$rowcoord = zoo_ca$rowcoord[-discarded_rows,]
+zoo_ca$rownames = zoo_ca$rownames[-discarded_rows] %>% str_remove(pattern="_TRUE")
+zoo_ca$rowmass = zoo_ca$rowmass[-discarded_rows]
+
+
+all_plots = plot_ca_da(zoo_ca,thresh = .5)
+
+all_plots$symmetric_map
+all_plots$col_biplot 
+all_plots$contribution_biplot 
+all_plots$ani_biplot
+```
+
+
+## Continuous data
+
+
