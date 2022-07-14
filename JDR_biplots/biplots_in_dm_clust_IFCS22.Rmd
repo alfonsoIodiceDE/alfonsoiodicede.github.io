@@ -50,6 +50,7 @@ library(xaringanExtra)
 library(FactoMineR)
 library("gganimate")
 library(magick)
+library(palmerpenguins)
 library(fastDummies)
 library(mlbench)
 library(tidyverse)
@@ -390,6 +391,7 @@ class: animated fadeIn
 the toy example: adding 4 noise variables  $X_{j}\sim N(0,6), \ j=3,\ldots,6$. 
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%",eval=TRUE,cache=FALSE}
+
 toy_points_noise %>%   mutate(
 cluster_full = kmeans(x=toy_points_noise %>% select(starts_with("d")), centers=3,nstart = 10)$cluster %>% as_factor()
 ) %>% 
@@ -644,6 +646,112 @@ class: animated fadeIn inverse center middle
 ## biplots in JDR
 ### for
 ### cluster characterization
+
+---
+class: animated fadeIn middle
+### The Palmer Penguins data set (not iris)
+
+
+---
+class: animated fadeIn middle
+### The Palmer Penguins: tandem 
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+set.seed(1234)
+pengs = penguins %>% select(species,ends_with("_mm"),ends_with("_g")) %>% na.omit
+pca_pengs = PCA(pengs %>% select(ends_with("_mm"),ends_with("_g")),graph=FALSE)
+kmeans_sol = kmeans(pca_pengs$ind$coord[,1:2],3,2,nstart=100)$cluster  
+
+scores_pca = pca_pengs$ind$coord %>% as_tibble() %>% select(1,2) %>% rename(d1=Dim.1,d2=Dim.2)%>%
+  mutate(cluster = fct_inorder(factor(kmeans_sol)),
+         cluster=fct_recode(cluster,a="2",b="1",c="3"),
+         mtd="tandem",what="obs", true_cluster = pengs %>% pull(species))
+
+
+scores_rkm = read.csv("data/penguin_scores_RKM.csv",sep=";") %>% 
+  mutate(cluster=factor(cluster),
+  cluster=fct_recode(cluster,a="1",b="2",c="3"),
+  mtd="rkm",what="obs",d2 = d2*-1, true_cluster = pengs %>% pull(species))
+   
+scores_fkm = read.csv("data/penguin_scores_FKM.csv",sep=";")%>% 
+  mutate(cluster=factor(cluster),
+         cluster=fct_recode(cluster,a="1",b="2",c="3"),
+         mtd="fkm",what="obs",true_cluster = pengs %>% pull(species))
+                                                                             
+
+vars_rkm = read.csv("data/vars_penguin_RKM.csv",sep=";") %>% mutate(mtd="rkm",what="vars",d2 = d2*-1)
+vars_fkm = read.csv("data/vars_penguin_FKM.csv",sep=";") %>% mutate(mtd="fkm",what="vars") %>% rename(varname=var_names)
+
+varname=rownames(pca_pengs$var$coord)          
+
+vars_pca  = pca_pengs$var$coord %>% as_tibble() %>% select(1,2) %>% 
+  mutate(varname=varname,mtd="tandem",what="vars") %>% rename(d1=Dim.1,d2=Dim.2)
+
+all_scores=rbind(scores_pca,scores_rkm, scores_fkm) %>% mutate(mtd=fct_inorder(mtd))
+all_vars = rbind(vars_pca,vars_rkm,vars_fkm)
+
+selected_scores = all_scores %>% filter(mtd %in% c("tandem","rkm")) %>% mutate(mtd=fct_drop(mtd))
+selected_vars = all_vars %>% filter(mtd %in% c("tandem","rkm")) %>% mutate(mtd=fct_drop(mtd))
+
+tandem_to_rkm = selected_scores   %>%
+  ggplot(aes(d1,d2,color=cluster, shape=true_cluster)) + geom_point()+
+  geom_segment(data=selected_vars,aes(x=0,xend=d1,y=0,yend=d2),
+                 arrow=arrow(length = unit(.1,"inches")),
+               color="dodgerblue",inherit.aes = FALSE) +
+  theme_minimal() + theme(legend.position="none")+
+  geom_text(data=selected_vars,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+  transition_states(states = mtd,wrap = FALSE,transition_length = 1) +  view_follow()
+
+ anim_save(filename="./figures/tandem_to_rkm_anim.gif", tandem_to_rkm)
+
+# all_scores
+
+# table(pengs %>% pull(species),scores_pca$cluster)
+# table(pengs %>% pull(species),scores_fkm$cluster)
+# table(pengs %>% pull(species),scores_rkm$cluster)
+# table(scores_pca$cluster,scores_rkm$cluster)
+
+
+fkm_map = scores_fkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster))+
+   geom_segment(data=vars_fkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
+                 arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
+  geom_label(data=vars_fkm,aes(x=d1,y=d2,label=varname)) +
+  theme(legend.position = "none") + ggtitle("FKM")+theme_minimal()
+
+rkm_map = scores_rkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5) +
+   geom_segment(data=vars_rkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
+                 arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
+  geom_label(data=vars_rkm,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+  theme(legend.position = "none") + ggtitle("RKM")+theme_minimal()
+
+pca_map = scores_pca %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster))+
+   geom_segment(data=vars_pca,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
+                 arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
+geom_label(data=vars_pca,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+  theme(legend.position = "none") + ggtitle("tandem")+theme_minimal()
+
+pca_map
+
+```
+
+---
+class: animated fadeIn middle
+### The Palmer Penguins: tandem to RKM
+
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+knitr::include_graphics("./figures/tandem_to_rkm_anim.gif")         
+```
+
+---
+class: animated fadeIn middle
+### The Palmer Penguins:  RKM
+
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+rkm_map
+```
+
 
 ---
 class: animated fadeIn middle
