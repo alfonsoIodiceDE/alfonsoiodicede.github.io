@@ -195,7 +195,7 @@ MCA generalizes the application of CA to $p$ categorical variables, each with $q
 
 - ${\bf Z}^{\star}_{j}$ is the one-hot-encoding of the $j^{th}$ categorical variable.
 
-- ${\bf Z}^{\star}=[{\bf Z}^{\star}_{1},\ldots,{\bf Z}^{\star}_{p}]$ and ${\bf Z}=\frac{{\bf Z}^{\star}}{n\times Q}$, with $Q=\sum_{j=1}^{p}{q_{j}}$; 
+- ${\bf Z}^{\star}=[{\bf Z}^{\star}_{1},\ldots,{\bf Z}^{\star}_{p}]$ and ${\bf Z}=\frac{{\bf Z}^\star}{n\times Q}$, with $Q=\sum_{j=1}^{p}{q_{j}}$; 
 
 - the margins are ${\bf r}=\frac{1}{n}{\bf 1}_{n}$ and ${\bf s}={\bf Z}^{{\sf T}}{\bf 1}_{n}$  
 
