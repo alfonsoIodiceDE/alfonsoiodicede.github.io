@@ -137,8 +137,10 @@ ${\bf X}$ is the $n \times p$ standardized data matrix
 
 The PCA loss function can be defined as:
 
+**
 $$\min_{\mathbf{A,B}}\left\Vert \mathbf{Y}-n^{1/2}\mathbf{AB}^{\sf T}p^{1/2}\right\Vert ^{2} \ \ s.t. \ \
 p\mathbf{B}^{\sf T}\mathbf{B}=\mathbf{I}_{d}$$
+**
 
 where $\mathbf{Y}=n^{-1/2}\mathbf{X}p^{-1/2}$.
 
@@ -163,8 +165,10 @@ ${\bf P}$ is a two-way table with relative frequencies, crossing two categorical
 
 The CA loss function is:
 
+**
 $$\min_{\mathbf{A,B}}\left\Vert \mathbf{\tilde{P}-D}_{r}^{1/2}\mathbf{AB}^{\sf T}\mathbf{D}_{c}^{1/2}\right\Vert ^{2} \ \ s.t. \ \
 \mathbf{B}^{\sf T}\mathbf{D}_{c}\mathbf{B}=\mathbf{I}_{d}$$
+**
 
 where $\mathbf{\tilde{P}=D}_{r}^{-1/2}\left(\mathbf{P}-\mathbf{rc}^{\sf T}\right)\mathbf{D}_{c}^{-1/2}$ , $\mathbf{r=P1}_{q_c}$ , $\mathbf{c} =\mathbf{P}^{\sf T}\mathbf{1}_{q_r}$,
 $\mathbf{D}_{r}=diag(\mathbf{r})$, $\mathbf{D}_{c} = diag(\mathbf{c})$ 
@@ -199,8 +203,11 @@ MCA generalizes the application of CA to $p$ categorical variables, each with $q
 
 The (M)CA loss function is:
 
+**
 $$\min_{\mathbf{A,B}}\left\Vert \mathbf{\tilde{Z}} - \frac{1}{\sqrt{n}}\mathbf{AB}^{\sf T}\mathbf{D}_{s}^{1/2}\right\Vert ^{2} \ \ s.t. \ \
 \mathbf{B}^{\sf T}\mathbf{D}_{s}\mathbf{B}=\mathbf{I}_{d}$$
+**
+
 where $\mathbf{\tilde{Z}}=\sqrt{n}\left(\mathbf{Z}-\frac{1}{n}{\bf 1}_{n}{\bf 1}_{n}^{{\sf T}}{\bf Z}\right)\mathbf{D}_{s}^{-1/2}$
 
 ---
