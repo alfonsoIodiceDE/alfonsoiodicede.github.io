@@ -9,6 +9,8 @@
     <link href="biplots_in_dm_clust_IFCS22_files/animate.css/animate.xaringan.css" rel="stylesheet" />
     <link href="biplots_in_dm_clust_IFCS22_files/tile-view/tile-view.css" rel="stylesheet" />
     <script src="biplots_in_dm_clust_IFCS22_files/tile-view/tile-view.js"></script>
+    <script src="biplots_in_dm_clust_IFCS22_files/kePrint/kePrint.js"></script>
+    <link href="biplots_in_dm_clust_IFCS22_files/lightable/lightable.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -460,15 +462,59 @@ class: animated fadeIn inverse center middle
 ### cluster characterization
 
 ---
-class: animated fadeIn middle
-### The Palmer Penguins data set (not iris)
+class: animated fadeIn 
+### The Palmer Penguins data set (not iris) CITATION
 
+.pull-left[
+
+** 342 ** penguins from three species
+
+** 4 ** variables
+  - bill length and depth 
+  - body mass 
+  - flipper length
+
+]
+
+.pull-right[
+&lt;img src="./figures/penguin_bill.png" width="65%" style="display: block; margin: auto;" /&gt;
+]
+ 
+
+&amp;nbsp;
+
+.center[
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; species &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Adelie &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 151 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Chinstrap &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 68 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Gentoo &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 123 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
 
 ---
 class: animated fadeIn 
 ### The Palmer Penguins: tandem 
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-18-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-20-1.png" width="55%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn 
@@ -482,7 +528,33 @@ class: animated fadeIn
 ### The Palmer Penguins:  RKM
 
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-20-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-22-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### The Palmer Penguins:  cluster characterization
+
+
+
+---
+class: animated fadeIn 
+### The Palmer Penguins:  results
+
+.pull-left[
+
+** tandem **
+
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-23-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+** RKM **
+
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-24-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+]
 
 
 ---
@@ -505,7 +577,8 @@ class: animated fadeIn
 
 
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-23-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-27-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
 
 ---
 class: animated fadeIn
@@ -513,13 +586,20 @@ class: animated fadeIn
 
 &lt;img src="./figures/zoo_contr_anim.gif" width="45%" style="display: block; margin: auto;" /&gt;
 
+
 ---
 class: animated fadeIn
-### The zoo: asymmetric map to contribution biplot
+### The zoo: contribution biplot 
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-25-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-29-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
+---
+class: animated fadeIn
+### The zoo: species identification
 
+**Zoo species**
+
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn

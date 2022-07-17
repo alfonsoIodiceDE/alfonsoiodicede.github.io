@@ -55,6 +55,7 @@ library(palmerpenguins)
 library(fastDummies)
 library(mlbench)
 library(tidyverse)
+library(tidymodels)
 library(purrr)
 library(ca)
 library("magick")
@@ -695,9 +696,37 @@ class: animated fadeIn inverse center middle
 ### cluster characterization
 
 ---
-class: animated fadeIn middle
-### The Palmer Penguins data set (not iris)
+class: animated fadeIn 
+### The Palmer Penguins data set (not iris) CITATION
 
+.pull-left[
+
+** 342 ** penguins from three species
+
+** 4 ** variables
+  - bill length and depth 
+  - body mass 
+  - flipper length
+
+]
+
+.pull-right[
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="65%",cache=FALSE}
+knitr::include_graphics("./figures/penguin_bill.png")
+```
+]
+ 
+
+&nbsp;
+
+.center[
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="65%",cache=FALSE}
+pengs = penguins %>% select(species,ends_with("_mm"),ends_with("_g")) %>% na.omit
+table(pengs$species) %>% kbl(col.names = c("species","n")) 
+```
+
+]
 
 ---
 class: animated fadeIn 
@@ -705,7 +734,7 @@ class: animated fadeIn
 
 ```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
 set.seed(1234)
-pengs = penguins %>% select(species,ends_with("_mm"),ends_with("_g")) %>% na.omit
+
 pca_pengs = PCA(pengs %>% select(ends_with("_mm"),ends_with("_g")),graph=FALSE)
 kmeans_sol = kmeans(pca_pengs$ind$coord[,1:2],3,2,nstart=100)$cluster  
 
@@ -714,17 +743,24 @@ scores_pca = pca_pengs$ind$coord %>% as_tibble() %>% select(1,2) %>% rename(d1=D
          cluster=fct_recode(cluster,a="2",b="1",c="3"),
          mtd="tandem",what="obs", true_cluster = pengs %>% pull(species))
 
+# conf_mat_pca = table(scores_pca$cluster,scores_pca$true_cluster)
+# conf_mat_pca =  scores_pca %>% conf_mat(truth = cluster, true_cluster,)
 
 scores_rkm = read.csv("data/penguin_scores_RKM.csv",sep=";") %>% 
   mutate(cluster=factor(cluster),
   cluster=fct_recode(cluster,a="1",b="2",c="3"),
   mtd="rkm",what="obs",d2 = d2*-1, true_cluster = pengs %>% pull(species))
    
+# conf_mat_rkm = table(scores_rkm$cluster,scores_rkm$true_cluster)
+# conf_mat_rkm =  scores_rkm %>% conf_mat(truth = cluster, true_cluster)
+
 scores_fkm = read.csv("data/penguin_scores_FKM.csv",sep=";")%>% 
   mutate(cluster=factor(cluster),
          cluster=fct_recode(cluster,a="1",b="2",c="3"),
          mtd="fkm",what="obs",true_cluster = pengs %>% pull(species))
-                                                                             
+
+conf_mat_fkm = table(scores_fkm$cluster,scores_fkm$true_cluster)           
+# conf_mat_fkm =  scores_fkm %>% conf_mat(truth = cluster, true_cluster)
 
 vars_rkm = read.csv("data/vars_penguin_RKM.csv",sep=";") %>% mutate(mtd="rkm",what="vars",d2 = d2*-1)
 vars_fkm = read.csv("data/vars_penguin_FKM.csv",sep=";") %>% mutate(mtd="fkm",what="vars") %>% rename(varname=var_names)
@@ -801,6 +837,62 @@ rkm_map
 
 
 ---
+class: animated fadeIn 
+### The Palmer Penguins:  cluster characterization
+
+
+
+---
+class: animated fadeIn 
+### The Palmer Penguins:  results
+
+.pull-left[
+
+** tandem **
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="75%",cache=FALSE}
+# conf_mat_pca = table(scores_pca$cluster,scores_pca$true_cluster)
+# conf_mat_rkm = table(scores_rkm$cluster,scores_rkm$true_cluster)
+# conf_mat_fkm = table(scores_fkm$cluster,scores_fkm$true_cluster)
+
+mosaic_tandem = tibble(truth=scores_pca$true_cluster, estimate=scores_pca$cluster) %>% 
+  count(truth,estimate) %>% 
+  ggplot(aes(truth, estimate)) +
+  geom_tile(aes(fill = n)) +
+  geom_text(aes(label = n), color="yellow",size=10) +
+  scale_fill_gradient(low = "lightblue", high = "blue") +
+  theme_minimal()+
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16)
+        )+xlab("")+ylab("")
+
+mosaic_tandem
+```
+]
+
+.pull-right[
+
+** RKM **
+
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="75%",cache=FALSE}
+mosaic_rkm = tibble(truth=scores_rkm$true_cluster, estimate=scores_rkm$cluster) %>% 
+  count(truth,estimate) %>% 
+  ggplot(aes(truth, estimate)) +
+  geom_tile(aes(fill = n)) +
+  geom_text(aes(label = n), color="yellow",size=10) +
+  scale_fill_gradient(low = "lightblue", high = "blue") +
+  theme_minimal()+ 
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16)
+        )+xlab("")+ylab("")
+
+mosaic_rkm
+```
+
+]
+
+
+---
 class: animated fadeIn middle
 ### The zoo dataset
 This is a dataset from the UCI repo `r Citep(bib = ifcs_bib,"blake1998uci","Leisch_mlbench")` 
@@ -844,6 +936,7 @@ all_plots = plot_ca_da(zoo_ca,thresh = .5)
 all_plots$col_biplot
 ```
 
+
 ---
 class: animated fadeIn
 ### The zoo: asymmetric map to contribution biplot
@@ -854,15 +947,34 @@ class: animated fadeIn
 knitr::include_graphics("./figures/zoo_contr_anim.gif")
 ```
 
+
 ---
 class: animated fadeIn
-### The zoo: asymmetric map to contribution biplot
+### The zoo: contribution biplot 
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%"}
 all_plots$contribution_biplot
 ```
 
+---
+class: animated fadeIn
+### The zoo: species identification
 
+**Zoo species**
+
+```{r,fig.align='center',echo=FALSE,out.width="45%", message=FALSE}
+mosaic_zoo = tibble(truth=type, estimate=zoo_cca$cluster) %>% 
+  count(truth,estimate) %>% 
+  ggplot(aes(truth, estimate)) +
+  geom_tile(aes(fill = n)) +
+  geom_text(aes(label = n), color="yellow",size=10) +
+  scale_fill_gradient(low = "lightblue", high = "blue") +
+  theme_minimal()+
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16)
+        )+xlab("")+ylab("")
+mosaic_zoo
+```
 
 ---
 class: animated fadeIn
