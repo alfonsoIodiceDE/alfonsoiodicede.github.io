@@ -49,6 +49,7 @@ library(xaringanthemer)
 library(xaringanExtra)
 library(FactoMineR)
 library("gganimate")
+library(ggrepel)
 library(magick)
 library(palmerpenguins)
 library(fastDummies)
@@ -182,8 +183,8 @@ $\mathbf{A}^{\sf T}\mathbf{D}_{r}\mathbf{A={\bf D}_{\alpha}}^{2}$
 
 --
 
-Since ${\bf \tilde{U}}{\bf \tilde{D}_{\alpha}}{\bf \tilde{V}^{{\sf T}}}$ is the $d$-truncated SVD of $\bf{Y}$, then
-$\mathbf{D}_{r}^{1/2}\mathbf{AB}^{\sf T}\mathbf{D}_{c}^{1/2}$ is the best rank- $d$ approximation of $\bf{Y}$, in the least square sense.
+Since ${\bf \tilde{U}}{\bf \tilde{D}_{\alpha}}{\bf \tilde{V}^{{\sf T}}}$ is the $d$-truncated SVD of $\bf{\tilde{P} }$, then
+$\mathbf{D}_{r}^{1/2}\mathbf{AB}^{\sf T}\mathbf{D}_{c}^{1/2}$ is the best rank- $d$ approximation of $\bf{\tilde{P} }$, in the least square sense.
 
 
 
@@ -220,20 +221,49 @@ Upon an appropriate data pre-processing, dimension reduction is done via PCA.
 
 --
 
+.pull-left[
 Let $\bf X$ contain the continuous variables (centered and standardised);
+]
 
+.pull-right[
 Let the $\bf Z$ also be centered and standardized:
-
---
 
  - the centering operator is ${\bf M} = {\bf I}_{n} - n^{-1}{\bf 1}_{n}{\bf 1}^{{\sf T}}_{n}$ 
  - the scaling weights are in ${\bf D}_{z}=diag({\bf Z}^{\sf T}{\bf Z})$ 
+ ]
+ 
+--
  
 The PCA of ** ${\bf X^{\star}} = \left[{\bf X} \ {\bf D}_{z}^{-1/2}{\bf Z}{\bf M}\right]$ ** is the FAMD
 
 ---
 class: animated fadeIn
-### partitioning cluster analysis
+### partitioning cluster analysis: K-means
+
+Assuming to deal with continuous data, and Euclidean distances, the K-means loss function can be defined as:
+
+**
+$$\min_{ {\bf Z}_{K} } \left \Vert \mathbf{X}-{\bf Z}_{K} {\bf G} \right\Vert ^{2}$$
+**
+
+- ${\bf Z}_{K}$ is a $n\times K$ binary matrix, the dummy coding of the cluster allocation vector
+
+- ${\bf G} = \left({\bf Z}_{K}^{\sf T}{\bf Z}_{K}\right)^{-1}{\bf Z}^{\sf T}_{K}{\bf X}$ is the  $K\times p$  matrix of cluster means
+
+
+--
+
+- **non-continuous data**
+
+  - ad-hoc distances
+  - quantification
+
+--
+
+- **high dimensions**
+
+  - distance between any two points tend to converge to a same quantity: curse of dimensionality
+  
 
 ---
 class: animated fadeIn
@@ -289,11 +319,17 @@ class: animated fadeIn
 
 Practitioners often apply dimension reduction and then cluster the low-dimensional scores: this approach is referred to as ** tandem analysis ** `r Citep(bib=ifcs_bib,"arabie1996advances")`
 
-- mitigate the effects of the curse of dimensionality
+- mitigates the effects of the curse of dimensionality
+
+- may improve clustering
 
 - the graphical display of the dataset at hand may be of help for cluster characterization
 
-- 
+--
+
+**but...**
+
+- the dimension reduction step is independent from the clustering step
 
 
 ---
@@ -361,7 +397,7 @@ tandem_points %>%
 class: animated fadeIn
 ### cluster masking
 
-the toy example: adding 4 noise variables  $X_{j}\sim N(0,6), \ j=3,\ldots,6$. 
+the toy example: adding 4 noise variables  $X_{j}\sim N(0,\sigma^{2}_{j})$, $\sigma_{j}\in \left\{ 6, 9\right\}$,  $j=3,\ldots,6$ 
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%",eval=TRUE,cache=FALSE}
 set.seed(123)
@@ -395,7 +431,7 @@ toy_points_noise = toy_points %>% dplyr::select(d1,d2,true_cluster) %>%
 class: animated fadeIn
 ### cluster masking
 
-the toy example: adding 4 noise variables  $X_{j}\sim N(0,6), \ j=3,\ldots,6$. 
+the toy example: adding 4 noise variables  $X_{j}\sim N(0,\sigma^{2}_{j})$, $\sigma_{j}\in \left\{ 6, 9\right\}$,  $j=3,\ldots,6$
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%",eval=TRUE,cache=FALSE}
 
@@ -554,8 +590,8 @@ class: animated fadeIn
 
 **Methods for mixed data**
 
-- cluster and dimension reduciton for mixed data `r Citep(bib=ifcs_bib, "vichi2019clustering",before="CDR, ")`
-- **Groupals** `r Citep(bib=ifcs_bib, "van1989clust",before="CDR, ")`
+- **CDR** `r Citep(bib=ifcs_bib, "vichi2019clustering",before="cluster and dimension reduciton for mixed data, ")`
+- **Groupals** `r Citep(bib=ifcs_bib, "van1989clust")`
 
 
 --
@@ -567,17 +603,18 @@ class: animated fadeIn
 
 The general objective can be formulated as follows `r Citep(bib = ifcs_bib, "yamamoto2014general","vichi2019clustering")`:
  
+ **
  $$
  \min\phi\left(\mathbf{B},\mathbf{Z}_{K}\right)=
- \alpha\left\Vert\mathbf{X} - \mathbf{X}\mathbf{B}\mathbf{B}^{\prime}\right\Vert ^{2} +
+ \alpha\left\Vert\mathbf{X} - \mathbf{X}\mathbf{B}\mathbf{B}^{\sf T}\right\Vert ^{2} +
  (1-\alpha)\left\Vert\mathbf{XB} - \mathbf{P}\mathbf{X}\mathbf{B}\right\Vert ^{2} 
  $$
+ **
  
 
+$\mathbf{B}$ is the loadings matrix
 
-$\mathbf{P} = \mathbf{Z}_{K}\left(\mathbf{Z}_{K}^\prime\mathbf{Z}_{K}\right)^{-1}\mathbf{Z}_{K}^\prime$: a projection matrix
-
-${\bf G} = \mathbf{P}\mathbf{X}\mathbf{B}$: $K \times d$ cluster centroid matrix
+$\mathbf{P} = \mathbf{Z}_{K}\left(\mathbf{Z}_{K}^{\sf T}\mathbf{Z}_{K}\right)^{-1}\mathbf{Z}_{K}^{\sf T}$
 
 - $\alpha = 1/2$, **Reduced K-means**
 - $\alpha = 0$, **Factorial K-means**
@@ -588,11 +625,13 @@ Note that $\alpha = 1$ gives the PCA solution.
 class: animated fadeIn
 ### JDR: a unified framework
 
+**
 $$
 \min\phi\left(\mathbf{B},\mathbf{Z}_{K}\right)=
-\alpha\left\Vert\mathbf{X} - \mathbf{X}\mathbf{B}\mathbf{B}^{\prime}\right\Vert ^{2} +
-(1-\alpha)\left\Vert\mathbf{XB} - \mathbf{P}\mathbf{X}\mathbf{B}\right\Vert ^{2} \ \ \ (1)
+\alpha\left\Vert\mathbf{X} - \mathbf{X}\mathbf{B}\mathbf{B}^{\sf T}\right\Vert ^{2} +
+(1-\alpha)\left\Vert\mathbf{XB} - \mathbf{P}\mathbf{X}\mathbf{B}\right\Vert ^{2}
 $$
+**
 
 **Extensions to categorical data**
 
@@ -618,12 +657,13 @@ For given $\alpha$, the following ALS algorithm is used to minimize the loss fun
 
 - Generate an initial cluster allocation $\mathbf{Z}_{K}$ (e.g., by randomly assigning subjects to clusters).
 	
-- Find loadings $\mathbf{B}$ by taking the eigendecomposition of $\mathbf{X}^{\prime}\left((1-\alpha)\mathbf{P} - (1-2\alpha)\mathbf{I}\right)\mathbf{X}$
+- Find loadings $\mathbf{B}$ by taking the eigendecomposition of $\mathbf{X}^{\sf T}\left((1-\alpha)\mathbf{P} - (1-2\alpha)\mathbf{I}\right)\mathbf{X}$
 	
 - Update the cluster allocation $\mathbf{Z}_{K}$ by applying K-means to the reduced space subject coordinates $\mathbf{X}\mathbf{B}$
 	
-- Repeat the procedure (i.e. go back to step 2) using $\mathbf{Z}_{K}$ for the cluster allocation matrix, until convergence.\ That is, until
-	$\mathbf{Z}_{K}$ remains constant.
+- Repeat the procedure (i.e. go back to step 2) using $\mathbf{Z}_{K}$ for the cluster allocation matrix, until convergence (clusters stay the same). 
+
+
 
 
 
@@ -660,10 +700,10 @@ class: animated fadeIn middle
 
 
 ---
-class: animated fadeIn middle
+class: animated fadeIn 
 ### The Palmer Penguins: tandem 
 
-```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
 set.seed(1234)
 pengs = penguins %>% select(species,ends_with("_mm"),ends_with("_g")) %>% na.omit
 pca_pengs = PCA(pengs %>% select(ends_with("_mm"),ends_with("_g")),graph=FALSE)
@@ -701,7 +741,7 @@ selected_scores = all_scores %>% filter(mtd %in% c("tandem","rkm")) %>% mutate(m
 selected_vars = all_vars %>% filter(mtd %in% c("tandem","rkm")) %>% mutate(mtd=fct_drop(mtd))
 
 tandem_to_rkm = selected_scores   %>%
-  ggplot(aes(d1,d2,color=cluster, shape=true_cluster)) + geom_point()+
+  ggplot(aes(d1,d2,color=cluster, shape=true_cluster)) + geom_point(alpha=.5)+
   geom_segment(data=selected_vars,aes(x=0,xend=d1,y=0,yend=d2),
                  arrow=arrow(length = unit(.1,"inches")),
                color="dodgerblue",inherit.aes = FALSE) +
@@ -709,7 +749,7 @@ tandem_to_rkm = selected_scores   %>%
   geom_text(data=selected_vars,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
   transition_states(states = mtd,wrap = FALSE,transition_length = 1) +  view_follow()
 
- anim_save(filename="./figures/tandem_to_rkm_anim.gif", tandem_to_rkm)
+ # anim_save(filename="./figures/tandem_to_rkm_anim.gif", tandem_to_rkm)
 
 # all_scores
 
@@ -719,22 +759,22 @@ tandem_to_rkm = selected_scores   %>%
 # table(scores_pca$cluster,scores_rkm$cluster)
 
 
-fkm_map = scores_fkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster))+
+fkm_map = scores_fkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5)+
    geom_segment(data=vars_fkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
-  geom_label(data=vars_fkm,aes(x=d1,y=d2,label=varname)) +
+  geom_label_repel(data=vars_fkm,aes(x=d1,y=d2,label=varname)) +
   theme(legend.position = "none") + ggtitle("FKM")+theme_minimal()
 
 rkm_map = scores_rkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5) +
    geom_segment(data=vars_rkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
-  geom_label(data=vars_rkm,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+  geom_label_repel(data=vars_rkm,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
   theme(legend.position = "none") + ggtitle("RKM")+theme_minimal()
 
-pca_map = scores_pca %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster))+
+pca_map = scores_pca %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5)+
    geom_segment(data=vars_pca,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
-geom_label(data=vars_pca,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+geom_label_repel(data=vars_pca,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
   theme(legend.position = "none") + ggtitle("tandem")+theme_minimal()
 
 pca_map
@@ -746,7 +786,7 @@ class: animated fadeIn
 ### The Palmer Penguins: tandem to RKM
 
 
-```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
 knitr::include_graphics("./figures/tandem_to_rkm_anim.gif")         
 ```
 
@@ -755,7 +795,7 @@ class: animated fadeIn
 ### The Palmer Penguins:  RKM
 
 
-```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="45%",cache=FALSE}
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
 rkm_map
 ```
 
