@@ -69,7 +69,8 @@ class: animated fadeIn middle
 
 ---
 class: animated fadeIn
-### continuous data case: principal component analysis 
+### continuous data case: principal component analysis (PCA, Jolliffe, 2002)
+
 
 `\({\bf X}\)` is the `\(n \times p\)` standardized data matrix
 
@@ -97,7 +98,9 @@ Since `\({\bf \tilde{U}}{\bf \tilde{D}_{\alpha}}{\bf \tilde{V}^{{\sf T}}}\)` is 
 
 ---
 class: animated fadeIn
-### categorical data case:  correspondence analysis
+### categorical data case:  correspondence analysis (CA, Greenacre, 2007)
+
+
 
 `\({\bf P}\)` is a two-way table with relative frequencies, crossing two categorical variables, with  `\(q_{r}\)` and `\(q_{c}\)` categories
 
@@ -150,7 +153,7 @@ where `\(\mathbf{\tilde{Z}}=\sqrt{n}\left(\mathbf{Z}-\frac{1}{n}{\bf 1}_{n}{\bf 
 
 ---
 class: animated fadeIn
-### mixed data case: factor analysis of mixed data
+### mixed data case: factor analysis of mixed data (FAMD, Escofier, 1979)
 
 Real datasets have often both continuous and categorical variables.
 
@@ -175,9 +178,10 @@ The PCA of ** `\({\bf X^{\star}} = \left[{\bf X} \ {\bf D}_{z}^{-1/2}{\bf Z}{\bf
 
 ---
 class: animated fadeIn
-### partitioning cluster analysis: K-means
+### partitioning cluster analysis (K-means, MacQueen, 1967)
 
 Assuming to deal with continuous data, and Euclidean distances, the K-means loss function can be defined as:
+
 
 **
 `$$\min_{ {\bf Z}_{K} } \left \Vert \mathbf{X}-{\bf Z}_{K} {\bf G} \right\Vert ^{2}$$`
@@ -192,7 +196,7 @@ Assuming to deal with continuous data, and Euclidean distances, the K-means loss
 
 - **non-continuous data**
 
-  - ad-hoc distances
+  - ad-hoc dissimilarity/distances
   - quantification
 
 --
@@ -429,8 +433,7 @@ class: animated fadeIn
 ### JDR: a unified procedure
 
 
-For given `\(\alpha\)`, the following ALS algorithm is used to minimize the loss function  (van de
-Velden, Iodice D'Enza, and Markos, 2019):
+For given `\(\alpha\)`, the following ALS algorithm is used to minimize the loss function:
 
 
 - Generate an initial cluster allocation `\(\mathbf{Z}_{K}\)` (e.g., by randomly assigning subjects to clusters).
@@ -463,7 +466,7 @@ class: animated fadeIn inverse center middle
 
 ---
 class: animated fadeIn 
-### The Palmer Penguins data set (not iris) CITATION
+### The Palmer Penguins data set (not iris) (Horst, Hill, and Gorman, 2020)
 
 .pull-left[
 
@@ -535,6 +538,7 @@ class: animated fadeIn
 class: animated fadeIn 
 ### The Palmer Penguins:  cluster characterization
 
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-23-1.png" width="55%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -545,14 +549,14 @@ class: animated fadeIn
 
 ** tandem **
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-23-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-24-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 
 ** RKM **
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-24-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-25-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -577,21 +581,27 @@ class: animated fadeIn
 
 
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-27-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
 class: animated fadeIn
-### The zoo: asymmetric map to contribution biplot
+### The zoo: asymmetric map to contribution biplot (Greenacre, 2013)
 
 &lt;img src="./figures/zoo_contr_anim.gif" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
 class: animated fadeIn
-### The zoo: contribution biplot 
+### The zoo: contribution biplot for cluster characterization
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-29-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### The zoo: cluster characterization barplot
+
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-31-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
@@ -599,7 +609,26 @@ class: animated fadeIn
 
 **Zoo species**
 
-&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-32-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+--
+.center[  
+the two errors are **dolphin** and **porpoise**   
+]
+
+
+---
+class: animated fadeIn middle
+
+## Conclusion
+
+- several clustering evaluation measures exist (internal and external)
+
+- in unsupervised learning, to find the *best* method, or the best setting for a method, is no easy task
+
+- a clustering solution is good if the clusters are meaningful
+
+- biplots can be a suitable tool to seek for meaning in clusters
+
 
 ---
 class: animated fadeIn
@@ -614,8 +643,28 @@ De Soete, G. D. and J. D. Carroll (1994). "K-means clustering in a
 low-dimensional Euclidean space". In: _New approaches in classification
 and data analysis_. Springer, Berlin, Heidelberg, pp. 212-219.
 
+Escofier, B. (1979). "Traitement simultané de variables qualitatives et
+quantitatives en analyse factorielle". In: _Cahiers de l'Analyse des
+Données_ 4.2, pp. 137-146.
+
 Farcomeni, A. and L. Greco (2016). _Robust methods for data reduction_.
 CRC press.
+
+Greenacre, M. (2007). _Correspondence analysis in practice_. Chapman
+and Hall/CRC.
+
+Greenacre, M. (2013). "Contribution biplots". In: _Journal of
+Computational and Graphical Statistics_ 22.1, pp. 107-122.
+
+Horst, A. M., A. P. Hill, and K. B. Gorman (2020). _palmerpenguins:
+Palmer Archipelago (Antarctica) penguin data_. R package version 0.1.0.
+URL:
+[https://allisonhorst.github.io/palmerpenguins/](https://allisonhorst.github.io/palmerpenguins/).
+
+---
+class: animated fadeIn
+
+### References (2)
 
 Hwang, H., W. R. Dillon, and Y. Takane (2006). "An extension of
 multiple correspondence analysis for identifying heterogeneous
@@ -624,30 +673,34 @@ subgroups of respondents". In: _Psychometrika_ 71.1, pp. 161-171.
 Iodice D’Enza, A. and F. Palumbo (2013). "Iterative factor clustering
 of binary data". In: _Computational Statistics_ 28.2, pp. 789-807.
 
+Jolliffe, I. T. (2002). _Principal component analysis for special types
+of data_. Springer.
+
 Leisch, F. and E. Dimitriadou (2021). _mlbench: Machine Learning
 Benchmark Problems_. R package version 2.1-3.
+
+MacQueen, J. (1967). "Some methods for classification and analysis of
+multivariate observations". In: _Proceedings of the fifth Berkeley
+symposium on mathematical statistics and probability_. Vol. 1. 14.
+Oakland, CA, USA. , pp. 281-297.
 
 Markos, A., A. Iodice D'Enza, and M. van de Velden (2019). "Beyond
 Tandem Analysis: Joint Dimension Reduction and Clustering in R". In:
 _Journal of Statistical Software_ 91.10, pp. 1-24. DOI:
 [10.18637/jss.v091.i10](https://doi.org/10.18637%2Fjss.v091.i10).
 
----
-class: animated fadeIn
-
-### References (2)
-
 Newman, D., S. Hettich, C. Blake, et al. (1998). _UCI Repository of
 machine learning databases_. URL:
 [http://www.ics.uci.edu/~mlearn/MLRepository.html](http://www.ics.uci.edu/~mlearn/MLRepository.html).
 
+---
+class: animated fadeIn
+
+### References (3)
+
 Van Buuren, S. and W. J. Heiser (1989). "Clusteringn objects intok
 groups under optimal scaling of variables". In: _Psychometrika_ 54.4,
 pp. 699-706.
-
-Velden, M. van de, A. Iodice D'Enza, and A. Markos (2019).
-"Distance-based clustering of mixed data". In: _Wiley Interdisciplinary
-Reviews: Computational Statistics_ 11.3, p. e1456.
 
 Velden, M. van de, A. Iodice D’Enza, and F. Palumbo (2017). "Cluster
 correspondence analysis". In: _Psychometrika_ 82.1, pp. 158-185.
@@ -664,6 +717,34 @@ Yamamoto, M. and H. Hwang (2014). "A general formulation of cluster
 analysis with dimension reduction and subspace separation". In:
 _Behaviormetrika_ 41.1, pp. 115-129.
 
+---
+class: animated fadeIn center middle inverse
+# bonus example: the mixed data case 
+
+---
+class: animated fadeIn middle
+### The Diamond Stone Pricing dataset
+This is a dataset from .
+
+- Data on **308** diamond stones sold in Singapore.
+
+- **4** continuous variables: diamond size (**3** weighted binary variables) and price in $
+- **3** categorical variables (diamond colour, clarity, certification body)
+
+---
+class: animated fadeIn 
+### Diamond Stone Pricing: Mixed Reduced K-means
+
+
+
+
+.pull-left[
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-37-1.png" width="85%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="biplots_in_dm_clust_IFCS22_files/figure-html/unnamed-chunk-38-1.png" width="85%" style="display: block; margin: auto;" /&gt;
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

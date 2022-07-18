@@ -48,6 +48,7 @@ ifcs_bib <- ReadBib("ifcs22_references.bib", check = FALSE)
 library(xaringanthemer)
 library(xaringanExtra)
 library(FactoMineR)
+library(GGally)
 library("gganimate")
 library(ggrepel)
 library(magick)
@@ -68,6 +69,7 @@ library(janitor)
 library(patchwork)
 library(mvtnorm)
 source("R/plot_ca_da.r")
+source("R/out_of_independence.r")
 style_duo_accent(primary_color = "#F9B76C",
                  secondary_color = "#37499c",
                  title_slide_background_image = "./figures/ifcs_2022_logo.png",
@@ -133,7 +135,8 @@ class: animated fadeIn middle
 
 ---
 class: animated fadeIn
-### continuous data case: principal component analysis 
+### continuous data case: principal component analysis `r Citep(bib=ifcs_bib,"jolliffe2002principal",before="PCA, ")`
+
 
 ${\bf X}$ is the $n \times p$ standardized data matrix
 
@@ -161,7 +164,9 @@ $n^{1/2}\mathbf{AB}^{\sf T}p^{1/2}$ is the best rank- $d$ approximation of $\bf{
 
 ---
 class: animated fadeIn
-### categorical data case:  correspondence analysis
+### categorical data case:  correspondence analysis `r Citep(bib=ifcs_bib,"Gre07",before="CA, ")`
+
+
 
 ${\bf P}$ is a two-way table with relative frequencies, crossing two categorical variables, with  $q_{r}$ and $q_{c}$ categories
 
@@ -214,7 +219,7 @@ where $\mathbf{\tilde{Z}}=\sqrt{n}\left(\mathbf{Z}-\frac{1}{n}{\bf 1}_{n}{\bf 1}
 
 ---
 class: animated fadeIn
-### mixed data case: factor analysis of mixed data
+### mixed data case: factor analysis of mixed data `r Citep(bib=ifcs_bib,"escofier1979traitement",before="FAMD, ")`
 
 Real datasets have often both continuous and categorical variables.
 
@@ -239,9 +244,10 @@ The PCA of ** ${\bf X^{\star}} = \left[{\bf X} \ {\bf D}_{z}^{-1/2}{\bf Z}{\bf M
 
 ---
 class: animated fadeIn
-### partitioning cluster analysis: K-means
+### partitioning cluster analysis `r Citep(bib=ifcs_bib,"MacQueen",before="K-means, ")`
 
 Assuming to deal with continuous data, and Euclidean distances, the K-means loss function can be defined as:
+
 
 **
 $$\min_{ {\bf Z}_{K} } \left \Vert \mathbf{X}-{\bf Z}_{K} {\bf G} \right\Vert ^{2}$$
@@ -256,7 +262,7 @@ $$\min_{ {\bf Z}_{K} } \left \Vert \mathbf{X}-{\bf Z}_{K} {\bf G} \right\Vert ^{
 
 - **non-continuous data**
 
-  - ad-hoc distances
+  - ad-hoc dissimilarity/distances
   - quantification
 
 --
@@ -653,7 +659,7 @@ class: animated fadeIn
 ### JDR: a unified procedure
 
 
-For given $\alpha$, the following ALS algorithm is used to minimize the loss function  `r Citep(bib = ifcs_bib, "van_de_velden")`:
+For given $\alpha$, the following ALS algorithm is used to minimize the loss function:
 
 
 - Generate an initial cluster allocation $\mathbf{Z}_{K}$ (e.g., by randomly assigning subjects to clusters).
@@ -697,7 +703,7 @@ class: animated fadeIn inverse center middle
 
 ---
 class: animated fadeIn 
-### The Palmer Penguins data set (not iris) CITATION
+### The Palmer Penguins data set (not iris) `r Citep(bib=ifcs_bib,"pengs")`
 
 .pull-left[
 
@@ -795,19 +801,22 @@ tandem_to_rkm = selected_scores   %>%
 # table(scores_pca$cluster,scores_rkm$cluster)
 
 
-fkm_map = scores_fkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5)+
+fkm_map = scores_fkm %>% ggplot(aes(d1,d2))+
+  geom_point(aes(color=true_cluster, shape=true_cluster),alpha=.5)+
    geom_segment(data=vars_fkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
   geom_label_repel(data=vars_fkm,aes(x=d1,y=d2,label=varname)) +
   theme(legend.position = "none") + ggtitle("FKM")+theme_minimal()
 
-rkm_map = scores_rkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5) +
+rkm_map = scores_rkm %>% ggplot(aes(d1,d2))+
+  geom_point(aes(color=cluster, shape=true_cluster),alpha=.5) +
    geom_segment(data=vars_rkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
   geom_label_repel(data=vars_rkm,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
   theme(legend.position = "none") + ggtitle("RKM")+theme_minimal()
 
-pca_map = scores_pca %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5)+
+pca_map = scores_pca %>% ggplot(aes(d1,d2)) +
+  geom_point(aes(color=cluster, shape=true_cluster),alpha=.5)+
    geom_segment(data=vars_pca,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
                  arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
 geom_label_repel(data=vars_pca,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
@@ -840,6 +849,25 @@ rkm_map
 class: animated fadeIn 
 ### The Palmer Penguins:  cluster characterization
 
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
+
+pengs %>% dplyr::select(-species) %>% 
+  map_df(~scale(.x)) %>% 
+  mutate(cluster=scores_rkm$cluster) %>%
+  group_by(cluster) %>%
+  summarise(across(.cols=1:4,~mean(.x))) %>% 
+  ggparcoord(
+    columns = 2:5, groupColumn = 1,
+    mapping = aes(size=5),alphaLines=.5
+  ) + geom_hline(yintercept = 0,size=2,alpha=.5) + theme_minimal() + 
+  theme(legend.position = "none",
+        axis.text = element_text(size=14),
+        axis.text.x = element_text(angle = 90)
+        ) + xlab("") + ylab("")
+
+
+
+```
 
 
 ---
@@ -910,15 +938,22 @@ class: animated fadeIn
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%", include=FALSE}
 data(Zoo)
-Zoo = as_tibble(Zoo) %>% filter(type %in% c("mammal","bird","fish","insect")) %>% 
-  mutate(across(everything(),as_factor))
+animal_names=rownames(Zoo)
+Zoo = as_tibble(Zoo) %>% mutate(names=animal_names) %>%
+  filter(type %in% c("mammal","bird","fish","insect")) %>% 
+  mutate(across(everything(),as_factor),
+         names=as.character(names))
+
+animal_names=Zoo$names
 ```
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%", include=FALSE,cache=FALSE}
-animal_names=rownames(Zoo)
+
 type = Zoo %>% mutate(type= fct_drop(type)) %>% pull(type)
-Zoo = Zoo %>% select(-type)
+Zoo = Zoo %>% dplyr::select(-type,-names)
 zoo_cca = clusmca(Zoo,nclus=4,ndim = 3,nstart=100,gamma = TRUE)
+
+
 Zk = dummy_columns(zoo_cca$cluster,remove_selected_columns = TRUE) %>% data.matrix()
 colnames(Zk) = str_replace(colnames(Zk),pattern = ".data",replacement = "cluster" )
 Z_zoo = dummy_columns(Zoo,remove_selected_columns = TRUE) %>% data.matrix()
@@ -939,7 +974,7 @@ all_plots$col_biplot
 
 ---
 class: animated fadeIn
-### The zoo: asymmetric map to contribution biplot
+### The zoo: asymmetric map to contribution biplot `r Citep(bib=ifcs_bib,"greenacre2013contribution")`
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%"}
 # zoo_contr_anim = all_plots$ani_biplot
@@ -950,10 +985,21 @@ knitr::include_graphics("./figures/zoo_contr_anim.gif")
 
 ---
 class: animated fadeIn
-### The zoo: contribution biplot 
+### The zoo: contribution biplot for cluster characterization
 
 ```{r,fig.align='center',echo=FALSE,out.width="45%"}
 all_plots$contribution_biplot
+```
+
+---
+class: animated fadeIn
+### The zoo: cluster characterization barplot
+
+```{r,fig.align='center',echo=FALSE,out.width="65%"}
+barplot_indy = out_of_independence(data = zoo_cca$odata, Gvec = zoo_cca$cluster,labs = colnames(Z_zoo),textSize = 2)
+
+  (barplot_indy$G[[1]] + theme_minimal() + ggtitle("cluster 1") | barplot_indy$G[[2]] + theme_minimal() + ggtitle("cluster 2"))/
+  (barplot_indy$G[[3]] + theme_minimal() + ggtitle("cluster 3") | barplot_indy$G[[4]] + theme_minimal() + ggtitle("cluster 4"))
 ```
 
 ---
@@ -974,7 +1020,28 @@ mosaic_zoo = tibble(truth=type, estimate=zoo_cca$cluster) %>%
         axis.text.y = element_text(size = 16)
         )+xlab("")+ylab("")
 mosaic_zoo
+
+
 ```
+--
+.center[  
+the two errors are **dolphin** and **porpoise**   
+]
+
+
+---
+class: animated fadeIn middle
+
+## Conclusion
+
+- several clustering evaluation measures exist (internal and external)
+
+- in unsupervised learning, to find the *best* method, or the best setting for a method, is no easy task
+
+- a clustering solution is good if the clusters are meaningful
+
+- biplots can be a suitable tool to seek for meaning in clusters
+
 
 ---
 class: animated fadeIn
@@ -991,6 +1058,101 @@ class: animated fadeIn
 ### References (2)
 
 ```{r ,echo=FALSE, results='asis'}
-PrintBibliography(ifcs_bib, start = 8)
+PrintBibliography(ifcs_bib, start = 8, end=14)
 ```
 
+---
+class: animated fadeIn
+
+### References (3)
+
+```{r ,echo=FALSE, results='asis'}
+PrintBibliography(ifcs_bib, start = 15)
+```
+
+---
+class: animated fadeIn center middle inverse
+# bonus example: the mixed data case 
+
+---
+class: animated fadeIn middle
+### The Diamond Stone Pricing dataset
+This is a dataset from `r Citep(bib = ifcs_bib,"chu2001pricing")`.
+
+- Data on **308** diamond stones sold in Singapore.
+
+- **4** continuous variables: diamond size (**3** weighted binary variables) and price in $
+- **3** categorical variables (diamond colour, clarity, certification body)
+
+---
+class: animated fadeIn 
+### Diamond Stone Pricing: Mixed Reduced K-means
+
+```{r, echo=FALSE,include=FALSE,fig.align='center',message=FALSE,out.width="55%",cache=FALSE}
+set.seed(1234)
+
+data(diamond)
+resMRKM <- cluspcamix(diamond, 3, 2)
+scores_mrkm <- cbind(resMRKM$cluster,resMRKM$obscoord)
+colnames(scores_mrkm) = c("cluster","d1","d2")
+colnames(resMRKM$attcoord) = c("d1","d2")
+scores_mrkm =data.frame(scores_mrkm)
+
+vars_mrkm = data.frame(resMRKM$attcoord) %>% mutate(mtd="mrkm",what="vars",d2 = d2*-1)
+
+vars_mrkm = cbind(rownames(vars_mrkm),vars_mrkm)
+colnames(vars_mrkm)[1] = "varname"
+
+scores_mrkm  %>% 
+  mutate(cluster=factor(cluster),
+  mtd="mrkm",what="obs",d2 = d2*-1)
+
+scores_mrkm$cluster = as.factor(scores_mrkm$cluster)
+  
+mixedrkm_cont_map = scores_mrkm %>% ggplot(aes(d1,d2))+geom_point(aes(color=cluster, shape=cluster),alpha=.5) +
+   geom_segment(data=vars_mrkm,aes(x=0,xend=d1,y=0,yend=d2,group = 1L),
+                 arrow=arrow(length = unit(.1,"inches")),color="dodgerblue",inherit.aes = FALSE)+
+  geom_label_repel(data=vars_mrkm,aes(x=d1,y=d2,label=varname),inherit.aes = FALSE)+
+  theme(legend.position = "none") + ggtitle("MRKM")+theme_minimal()
+
+set.seed(1234)
+
+data(diamond)
+resMRKM <- cluspcamix(diamond, 3, 2)
+scores_mrkm <- cbind(resMRKM$cluster,resMRKM$obscoord)
+colnames(scores_mrkm) = c("cluster","d1","d2")
+colnames(resMRKM$attcatcoord) = c("d1","d2")
+scores_mrkm = data.frame(scores_mrkm)
+row_coords = cbind(resMRKM$attcatcoord,rownames(resMRKM$attcatcoord),c(rep("pr_co",nrow(resMRKM$attcatcoord))))
+
+colnames(row_coords) = c("dim1", "dim2","label","what")
+row_coords = data.frame(row_coords)
+row_coords[,1] = as.numeric(row_coords[,1])
+row_coords[,2] = as.numeric(row_coords[,2])
+
+col_coords = cbind(resMRKM$centroid,c("Cluster 1","Cluster 2","Cluster 3"),c(rep("st_co",nrow(resMRKM$centroid))))
+colnames(col_coords) = c("dim1", "dim2","label","what")
+col_coords = data.frame(col_coords)
+col_coords[,1] = as.numeric(col_coords[,1])
+col_coords[,2] = as.numeric(col_coords[,2])
+
+ mixedrkm_cat_map = ggplot(data = col_coords %>% filter(what=="st_co"),aes(x=dim1,y=dim2)) +
+    theme_minimal()+
+    geom_text(aes(label=label),color="red") +
+    geom_label_repel(data=row_coords %>% filter(what=="pr_co"),
+              aes(x=dim1, y=dim2, label = label),color="dodgerblue",inherit.aes = "FALSE")
+
+```
+
+
+.pull-left[
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="85%",cache=FALSE}
+mixedrkm_cont_map
+```
+]
+
+.pull-right[
+```{r, echo=FALSE, fig.align='center',message=FALSE,out.width="85%",cache=FALSE}
+mixedrkm_cat_map
+```
+]
