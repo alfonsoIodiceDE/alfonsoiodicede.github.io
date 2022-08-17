@@ -1,0 +1,907 @@
+---
+title: "Regularised PCA for incremental single imputation of missings"
+author: "Alfonso Iodice D'Enza, Angelos Markos and Francesco Palumbo"
+# subtitle: "IFCS 2022"  
+date: "24 August 2022"
+output:
+  xaringan::moon_reader:
+    css: [xaringan-themer.css, "hygge"]
+    nature:
+      navigation:
+        scroll: false
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+xaringanExtra::use_animate_css()
+# xaringanExtra::use_scribble()
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, fig.retina=5,
+  out.width = "75%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+
+
+```
+
+```{r, load_refs, include=FALSE, cache=FALSE}
+# remotes::install_github("ROpenSci/bibtex")
+library(RefManageR)
+BibOptions(check.entries = FALSE,
+       bib.style = "authoryear",
+       cite.style = "authoryear",
+       style = "markdown",
+       hyperlink = FALSE,
+       dashed = FALSE)
+compstat22_bib <- ReadBib("CW_RPCA_references.bib", check = FALSE)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(xaringanExtra)
+library(xfun)
+library(FactoMineR)
+library(GGally)
+library("gganimate")
+library(ggrepel)
+library(magick)
+library(palmerpenguins)
+library(fastDummies)
+library(mlbench)
+library(tidyverse)
+library(tidymodels)
+library(purrr)
+library(ca)
+library("magick")
+library(tidymodels)
+library(discrim)
+library(clustrd)
+library(flipbookr)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+library(mvtnorm)
+
+style_duo_accent(primary_color = "#17A589",
+                 secondary_color = "#37499c",
+                 title_slide_background_image = "./figures/compstat22_logo.png",
+                 title_slide_background_position = "top",
+                 title_slide_background_size= "100%",
+                 title_slide_text_color = "#FDFEFE",
+                 code_font_size  = "0.7rem",
+                 code_highlight_color="#E4F6EF",
+                 header_color = "#37499c"
+                 )
+                 
+style_extra_css(css = list(
+  ".my-pull-left"= list(float= "left",
+                         width = "10%"),
+  ".my-pull-right"= list(float= "right",
+                          width = "89%"),
+  ".my-pull-right + *" = list(clear = "both")
+  ),
+  outfile = "xaringan-themer.css",
+  append = TRUE)
+
+
+xaringanExtra::use_tile_view()
+```
+
+<!-- class: animated fadeIn  -->
+
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+<!-- -- -->
+
+<!-- .pull-left[ -->
+
+
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+<!-- ] -->
+
+<!-- -- -->
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_1.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- class: animated fadeIn  -->
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+
+<!-- .pull-left[ -->
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_2.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- class: animated fadeIn  -->
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+
+<!-- .pull-left[ -->
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+
+<!-- **what if there are missings?** -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_3.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- class: animated fadeIn  -->
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+
+<!-- .pull-left[ -->
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+
+<!-- **what if there are missings?** -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_4.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- class: animated fadeIn  -->
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+
+<!-- .pull-left[ -->
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+
+<!-- **what if there are missings?** -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_5.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+<!-- class: animated fadeIn  -->
+<!-- ### Principal component analysis on data chunks -->
+<!-- ** why data chunks? ** -->
+
+<!-- .pull-left[ -->
+
+<!-- **convenience**: large data to handle as a whole -->
+
+
+<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+
+<!-- **what if there are missings?** -->
+<!-- ] -->
+
+
+<!-- .pull-right[ -->
+<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
+<!-- magick::image_read_pdf("./figures/d_chunk_6.pdf", pages = 1)  -->
+<!-- ``` -->
+<!-- ] -->
+
+<!-- --- -->
+class: animated fadeIn middle
+### Aim
+
+Provide a procedure for incremental PCA-based single imputation of missing data
+
+--
+- evaluate it on some missing data mechanisms, both completely and not completely at random
+
+
+---
+class: animated fadeIn middle
+
+.my-pull-left[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+**Outline**
+]
+
+.my-pull-right[
+>### PCA on incomplete (missing) data
+>
+>&nbsp;
+>
+>### PCA on data-chunks (incremental update)
+>
+>&nbsp;
+>
+>### PCA on incomplete data-chunks
+>
+>&nbsp;
+>
+>### Experiments
+]
+
+---
+class: animated fadeIn middle center inverse
+## PCA on incomplete (missing) data
+
+---
+class: animated fadeIn
+### data structures
+
+- ** ${\bf X}$ ** is $n\times Q$ data matrix, $n$ observations of $Q$ unit variance-scaled attributes 
+
+
+- ** ${\bf W}_{n\times Q}$ ** is the $0/1$ shadow matrix: it indicates whether the elements of  $\bf{X}$ are missing or observed
+
+- ** ${\bf x}_{i}=\left[{\bf x}^{o}_{i};{\bf x}^{m}_{i}\right]$ **, the $i^{th}$ row of $\bf{X}$ that contains an observed and an unobserved (missing) part
+
+--
+
+### missing data mechanisms
+
+- missing completely at random mechanism (** MCAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{i})$
+
+- missing at random mechanism (** MAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{i}\mid{\bf x}^{o}_{i})$
+
+- missing not at random mechanism (** MNAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) \neq P({\bf w}_{i}\mid{\bf x}^{o}_{i})$
+
+
+---
+class: animated fadeIn
+
+### Principal component analysis, PCA `r Citep(bib = compstat22_bib, "Jol02")`
+
+The objective function of PCA is to minimise 
+
+$$
+\mid\mid{\bf  X} -  {\bf  M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\mid\mid^{2}
+$$
+
+
+where ${\bf M}=n^{-1} {\bf 1}{\bf 1}^{\sf T}{\bf X}$ is the centring operator
+
+- the object scores  ${\bf \hat{F}}= n^{1/2}{\bf \hat{U}}{ \hat{\Sigma}}$ and the loadings ${\bf \hat{G}}=Q^{1/2}{\bf{\hat V}}$ are obtained by means of the rank- $d$ weighted singular value decomposition of
+
+$$
+{\bf S}=n^{-1/2}\left({\bf X}- {\bf M}\right) Q^{-1/2} = {\bf{\hat U}} { {\hat \Sigma}}{\bf {\hat V}}^{\sf T}
+$$
+
+
+
+--
+
+the product ** ${\bf \hat{F}}{\bf \hat{G}}^{\sf T}$ ** is the $d$ -rank approximantion of the centerd matrix ** ${\bf  X}-{\bf  M}$ **
+
+$$
+{\bf \hat{F}}{\bf \hat{G}}^{\sf T} =  n^{1/2}{\bf \hat{U}}{ \hat{\Sigma}}{\bf{\hat V}}^{\sf T}Q^{1/2} = n^{1/2}{\bf \hat S}Q^{1/2} = {\bf \hat X}- {\bf  M} \rightarrow 
+{\bf \hat X} =  {\bf  M} + {\bf \hat{F}}{\bf \hat{G}}^{\sf T}
+$$
+
+
+---
+class: animated fadeIn
+
+### Missing values and the PCA
+
+
+Different approaches aim to handle missing values in PCA
+
+- `r Citet(bib = compstat22_bib, "DraJos15")` review methods for :  *i)* imputation prior to PCA, *ii)* PCA skipping missing entries, *iii)* PCA taking into account the missing entries
+
+--
+
+- `r Citet(bib = compstat22_bib, "LoiTak18")` compare the performances of methods for PCA of incomplete data on different missing data mechanisms
+
+--
+
+- `r Citet(bib = compstat22_bib, "GerFar18")` and `r Citet(bib = compstat22_bib, "Spo18")`: probabilistic PCA-based procedures to impute missing not at random (MNAR) values
+
+---
+class: animated fadeIn
+### RPCA: iterative regularized PCA
+
+In both `r Citet(bib = compstat22_bib, "DraJos15")` and 
+`r Citet(bib = compstat22_bib, "LoiTak18")`  iPCA (a.k.a iterative PCA, \cite{Kie97})  and its regularized version (RPCA) proved to outperform other PCA-based approaches.
+
+--
+
+** RPCA: the criterion **
+
+$$
+\mid\mid {\bf W}\ast \left({\bf X}- {\bf M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\right)\mid\mid^{2}
+\label{EMPCAloss}
+$$
+
+
+Since no explicit solution exists that minimises the RPCA criterion, an iterative procedure is needed
+
+---
+class: animated fadeIn
+### RPCA: the procedure
+
+- **step 1** : set the  counter $c=0$, and set the dimensionality $d^{\star}$. Replace each missing entry $ij$ in $\bf X$  with some initialization values to obtain ${\bf X}^{ c}$, and compute ${\bf \hat{M}}^{c}$}
+
+--
+
+- **step 2** : obtain ${\bf \hat{X}}^{ c}$ via the PCA on ${\bf X}^{ c}$ using  ${\bf \hat{F}}^{ c}$ and ${\bf \hat{G}}^{ c}$ for the reconstruction formula 
+$$\hat{x}^{c}_{ij}= \hat{m}_{j}+\sum_{d =1}^{d^{\star}}{f_{id}^{ c} g^{ c}_{jd}} = \sqrt{\hat{\lambda}^{c}_{d}}\hat{v}^{c}_{id}\hat{u}^{c}_{jd}  \ \ \ \forall i,j$$
+modified to be shrunk, replacing $\sqrt{\hat{\lambda}^{c}_{d}}$ by $\left(  \sqrt{\hat{\lambda}^{c}_{d}} - \frac{(\hat{\sigma}^2)^{c}}{\sqrt{\hat{c}^{\ell}_{d}}}    \right)$, where $(\hat{\sigma}^2)^{c} = \frac{1}{p-d^{*}}\sum_{d=d^{*}+1}^{p}\hat{\lambda}_{d}$
+
+
+--
+
+- **step 3** :  ${\bf X}^{ c}={\bf W}\ast{\bf X}+(1-{\bf W})\ast{\bf \hat{X}}^{ c}$
+
+
+
+Repeat steps 2 and 3 until convergence
+
+
+
+
+---
+class: animated fadeIn middle center inverse
+## PCA on data-chunks (incremental update)
+
+---
+class: animated fadeIn
+### Incremental PCA
+
+Incremental decomposition methods can be roughly classified into
+
+
+- **perturbation methods** `r Citep(bib = compstat22_bib, "Heg06")`
+
+
+- **stochastic optimization** and related methods `r Citep(bib = compstat22_bib, c("San89", "Oja92", "Wen03", "Mit13"))`
+
+
+
+- **randomized algorithms** `r Citep(bib = compstat22_bib, "War08")`
+
+
+
+- **secular equations** `r Citep(bib = compstat22_bib, "Gu94")`
+
+
+
+- **heuristic techniques** for incremental EVD/SVD `r Citep(bib = compstat22_bib, c("LevLin00", "Hal02", "Ros08", "Bak12"))`
+
+--
+
+.content-box-green[
+.center[
+heuristic techniques proved to be accurate and  share desirable characteristic that ease their embedding in PCA `r Citep(bib = compstat22_bib, c("CarDeg18","MarIod18_sa"))`
+]
+]
+
+
+---
+class: animated fadeIn
+### incremental decomposition 
+
+To keep it simple, consider two chunks 
+
+$${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$
+and ** ${\bf\Omega}_{{\bf X}_1}=\{{\bf U}_{{\bf X}_1},{\Sigma}_{{\bf X}_1},{\bf V}_{{\bf X}_1},\mu_{{\bf X}_1},I_{{\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
+
+--
+
+.content-box-red[
+want:
+** ${\bf\Omega}_{{\bf X}}$ ** without decomposing $\bf X$ from scratch
+]
+
+
+---
+class: animated fadeIn
+### incremental decomposition
+
+
+.content-box-red[
+want:
+** ${\bf\Omega}_{{\bf X}}$ ** without decomposing $\bf X$ from scratch
+]
+
+- option 1: compute ** ${\bf\Omega}_{{\bf X}_2}$ ** and merge the eigenspaces
+** ${\bf\Omega}_{{\bf X}} = {\bf\Omega}_{{\bf X}_1}\oplus {\bf\Omega}_{{\bf X}_2}$ **
+`r Citep(bib = compstat22_bib,  "Hal02",before="eigenspace arithmetics, ")`
+
+--
+
+- option 2: update ** ${\bf\Omega}_{{\bf X}_1}$ ** using the information in ${\bf X}_{2}$ and obtain
+** ${\bf\Omega}_{{\bf X}}$ ** `r Citep(bib = compstat22_bib,  "Ros08",before="incremental SVD, ")`
+
+
+
+---
+class: animated fadeIn middle center 
+
+<h1 style="color : red" >warning!</h1>
+
+## a couple of clunky slides ahead
+
+---
+class: animated fadeIn
+### eigenspace arithmetics
+
+** ${\bf\Omega}_{3}$ ** $= {\bf\Omega}_{1}\oplus {\bf\Omega}_{2}$, that is, compute ** ${\bf U}_{3}$ ** , ** ${\bf \Sigma}_{3}$ ** , ** ${\bf V}_{3}$ ** and ** $\mu_{3}$ **
+
+--
+
+Compute the vector
+
+$$
+{\bf v}=orth\left( \psi \left[{\bf H},{\bf h} \right]\right)
+$$
+with 
+
+$${\bf H}={\bf V}_{2} - {\bf V}_{1} {\bf V}_{1}^{\sf T}{\bf V}_{2} \text{ and }
+{\bf h}=\left(\mu_{1}-\mu_{2}\right)-{\bf V}_{1}{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{2}\right)$$
+
+--
+
+The wanted singular vectors and value are obtained doing the SVD of 
+
+
+$$\begin{split}
+&\begin{bmatrix}
+{\bf \Sigma}_{1} 	{\bf U}_{1}^{\sf T} & {\bf V}_{1}^{\sf T}{\bf V}_{2} {\bf \Sigma}_{2}{\bf U}_{2}^{\sf T}\\
+0 & {\bf v}^{\sf T}{\bf V}_{2}{\bf \Sigma}_{2}{\bf U}_{2}^{\sf T}
+\end{bmatrix} +\begin{bmatrix}
+{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{3}\right) {\bf 1}_{n_{1}} & {\bf V}_{1}^{\sf T} \left( \mu_{2}-\mu_{3}\right) {\bf 1}_{n_{2}} \\
+{\bf v}^{\sf T} \left( \mu_{1}-\mu_{3}\right) {\bf 1}_{n_{1}}  & {\bf v}^{\sf T} \left( \mu_{2}-\mu_{3}\right) {\bf 1}_{n_{2}} 
+\end{bmatrix}={\bf R}{\bf \Sigma}{\bf U}^{\sf T},
+\end{split}$$
+
+--
+
+.content-box-green[
+and the wanted quanties are 
+.center[
+** ${\bf U}_{3}={\bf U}$  ** , ** ${\bf \Sigma}_{3}={\bf \Sigma}$  ** , 
+** ${\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}$  ** and ** $\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
+]
+]
+---
+class: animated fadeIn
+### incremental SVD
+
+With ** ${\bf\Omega}_{1}$ ** available, the following holds
+
+$$\begin{bmatrix} {\bf X}_1\\
+  {\bf X}_2
+ \end{bmatrix}  = \begin{bmatrix}{\bf U}_{1} & {\bf 0} \\
+ {\bf 0} & {\bf I}
+  \end{bmatrix} \begin{bmatrix}{\bf \Sigma}_{1} & {\bf 0} \\
+ {\bf L} & {\bf \Gamma}{\bf Q}^{\sf T}
+\end{bmatrix} \begin{bmatrix}{\bf V}_{1}  \\ {\bf Q}
+  \end{bmatrix}$$
+${\bf L} = {\bf X}_2{\bf V}_{1}^{\sf T}$, ${\bf Q}$ results from the QR decomposition of $\bf{\Gamma}={\bf X}_2 - {\bf L}{\bf V}_{1}$ and ${\bf I}$ is the identity matrix,
+the mean $\mu_{3}$ is computed as before and added as an extra row to ${\bf X}_{2}$
+
+
+--
+The updated eigenspace ** ${\bf\Omega}_{3}$ ** quantities depend on the SVD of 
+
+$$\begin{bmatrix}{\bf \Sigma}_{1} & {\bf 0}  \\
+{\bf L} & {\bf \Gamma}{\bf Q^{\sf T}}
+ \end{bmatrix}={\bf U}_{m}{\bf \Sigma}_{m}{\bf V}^{\sf T}_{m}$$
+
+--
+
+.content-box-green[
+and the wanted quanties are 
+.center[
+** ${\bf U}_{3} = \begin{bmatrix}{\bf U}_{1} & {\bf 0} \\ {\bf 0} & {\bf I}\end{bmatrix} {\bf U}_{m}$ ** ,
+** ${\bf     \Sigma}_{3}={\bf \Sigma}_{m}$  ** , 
+** ${\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}$  ** and ** $\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
+]
+]
+
+---
+class: animated fadeIn middle center inverse
+## PCA on incomplete data-chunks
+
+---
+class: animated fadeIn
+### Naive CW-RPCA
+
+Multiple chunks with missings, a straightforward solution is two-step
+
+- apply RPCA on each chunk separately and impute the missing entries
+
+- merge the RPCA solution in to the general one using **eigenspace arithmetics**
+
+--
+
+.content-box-green[
+Pros:
+- easy to parallelize: chunks are imputed independent from each other
+- the RPCA (which is iterative) never runs over the full set of observations
+]
+
+--
+
+.content-box-red[
+Cons:
+- the missings are imputed according to local structures (chunk-based)
+- this may lead to inaccuracies, depending on the scenario 
+
+]
+
+---
+class: animated fadeIn
+### CW-RPCA
+
+Multiple chunks  coming in sequence, with missings 
+
+CW-RPCA is an embedding of the **incremental SVD** and of a modified version of RPCA
+
+Standard RPCA is applied to the first chunk, ${\bf X}_{1}$. The CW-RPCA procedure, for the general chunk ${\bf X}_{i}$ and $i > 1$, can be summarised as follows:
+  
+- **step 1** apply a modified version of the RPCA algorithm,  based on incremental SVD on ${\bf X}_{i}$ to obtain ${\bf \tilde{X}}_{i}$
+
+- **step 2**  update the current eigenspace ${\bf \Omega}$ according to the obtained  ${\bf \tilde{X}}_{i}$
+
+recall that ${\bf \tilde{X}}_{i}$ is the imputed version of the  $i^{th}$ chunk.
+
+
+---
+class: animated fadeIn
+### CW-RPCA
+
+CW-RPCA of a chunk ${\bf {X}}_{i}$ is equivalent to the application of RPCA on $\left[{\bf \tilde{X}}_{1};{\bf \tilde{X}}_{2}, \ldots, {\bf X}_{i}\right]$
+--
+
+.content-box-green[
+Pros:
+- the CW-RPCA iterates over the chunk ${\bf X}_{i}$ only and not over $\left[{\bf \tilde{X}}_{1};{\bf \tilde{X}}_{2}; \ldots; {\bf X}_{i}\right]$
+
+- the CW-RPCA-based imputation of ${\bf X}_{i}$ takes into account the correlation structure characterising chunks  ${\bf \tilde{X}}_{1}$ to ${\bf \tilde{X}}_{i-1}$
+]
+
+--
+
+.content-box-red[
+Cons:
+- once imputed, the chunks are not processed again
+- the imputation of the first few chunks may not be based on the general correlation structure
+]
+
+
+
+---
+class: animated fadeIn middle center inverse
+## Experiments
+
+---
+class: animated fadeIn
+### Performance evaluation
+
+**what**
+
+- CW-RPCA procedures vs ordinary RPCA
+
+
+- CW-RPCA vs *naive* CW-RPCA
+
+--
+
+**how**
+
+- **imputation error** mean absolute discrepancy between true and imputed values
+
+- **RV coefficient** $$RV\left({\bf F},{\bf F}^{\star}\right) = \frac{tr\left(  {\bf F}^{\sf T}{\bf F} \ {\bf F}^{\star\sf T}{\bf F^{\star}}\right)}{tr\left({\bf F}^{\sf T}{\bf F}  \right)^{2}
+tr\left({\bf F}^{\star\sf T}{\bf F^{\star}}  \right)^{2}}
+$$
+
+  where ${\bf F}$ and ${\bf F}^{\star}$ are the PCA scores on the dataset with and without missings
+
+---
+class: animated fadeIn
+### structures and mechanisms
+
+**data**
+
+- synthetic dataset with (correlation) structure
+
+- benchmark sensor data set (Tennessee Eastman Problem)
+
+**missing data mechanisms**  
+
+- MCAR: random entries in each chunk are rendered missing
+
+- MNCAR: the entries of a **target** variable depend on one or more **agent** variables
+
+  - logistic regression-based
+  
+  - correlation-based
+
+---
+class: animated fadeIn
+### data structure
+
+.pull-left[
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+- simulation setup (almost) as in `r Citep(bib = compstat22_bib, "DraJos15")`
+- number of row-chunks: 5 to 25 (Each of size $500\times 9$)
+- 10 replicates for each scenario
+
+
+]
+
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig01a.pdf", pages = 1)  
+```
+]
+
+
+
+---
+class: animated fadeIn
+### MCAR scenario 
+
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="45%"}
+ magick::image_read_pdf("./figures/fig02.pdf", pages = 1)  
+```
+
+.center[*naive*-CW-RPCA and RPCA provide similar results (as expected)]
+
+
+---
+class: animated fadeIn
+### MNCAR logistic regression-based scenario 1  
+
+.pull-left[
+-  the response $Y$ dictates whether the entries of $X$ are rendered missing
+** $$P(Y=1\mid X_{i}) = \frac{exp(\hat{\beta}_{0}+\hat{\beta}_{1}X_{i})}{1+exp(\hat{\beta}_{0}+\hat{\beta}_{1}X_{i})}$$ **  
+
+- grid search of plausible values for $\hat{\beta}_{0}$ and $\hat{\beta}_{1}$,  pick up  values that lead to $10\%$ missing entries 
+
+- **note**: the first two chunks are **MCAR** (preserve correlation)
+]
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig04a.pdf", pages = 1)  
+```
+]
+
+---
+class: animated fadeIn
+### MNCAR logistic regression-based scenario 2  
+
+.pull-left[
+-  the response $Y$ dictates whether the entries of $X_{j}$ are rendered missing
+** $$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{{\beta}})}{1+exp({\bf X}_{-j}\hat{{\beta}})}$$ **  
+- ${\bf X}_{-j}$ is the predictors matrix; predictors come from the correlation block of ${\bf X}_{j}$  
+- grid search of plausible values for $\hat{\beta}$,  pick up  values that lead to $10\%$ missing entries 
+
+- **note**: the first two chunks are **MCAR** (preserve correlation)
+]
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig04b.pdf", pages = 1)  
+```
+]
+
+
+---
+class: animated fadeIn
+### MNCAR correlation-based 
+
+.pull-left[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig01a.pdf", pages = 1)  
+```
+.center[MCAR chunk correlation]
+]
+
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig01b.pdf", pages = 1)  
+```
+.center[MNCAR chunk correlation]
+]
+
+---
+class: animated fadeIn
+### MNCAR correlation-based scenario
+
+.pull-left[
+.center[**scenario 1**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig03a.pdf", pages = 1)  
+```
+.center[MCAR chunks randomly positioned]
+]
+
+.pull-right[
+.center[**scenario 2**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig03b.pdf", pages = 1)  
+```
+.center[MCAR chunks processed first]
+]
+
+
+---
+class: animated fadeIn
+### MNCAR correlation-based scenario results
+
+.pull-left[
+.center[**scenario 1**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig05a.pdf", pages = 1)  
+```
+]
+
+.pull-right[
+.center[**scenario 2**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig05b.pdf", pages = 1)  
+```
+]
+
+---
+class: animated fadeIn
+### TEP
+The Tennessee Eastman Problem (TEP) data is a sensor data benchmark simulating an industrial chemical process `r Citep(bib = compstat22_bib, "SevMol17",before="see, e.g., ")`
+
+--
+
+&nbsp;
+
+> PCA on process data: a tool for multivariate process control
+>
+&nbsp;
+>
+> Missing values in process control data are common  (e.g. due to sensor failures)
+
+
+---
+class: animated fadeIn
+### TEP with missings
+
+.pull-left[
+.center[**complete data structure**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig06a.pdf", pages = 1)  
+```
+]
+
+.pull-right[
+.center[**rendered missing data structure**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig06b.pdf", pages = 1)  
+```
+]
+
+---
+class: animated fadeIn
+### TEP results: imputation error
+500 observations per chunk. Up to 25 chunks analysed
+
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="40%"}
+ magick::image_read_pdf("./figures/fig08a.pdf", pages = 1)  
+```
+
+---
+class: animated fadeIn
+### TEP results: RV index
+
+.pull-left[
+.center[**RV on object scores**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig08b.pdf", pages = 1)  
+```
+]
+
+.pull-right[
+.center[**RV on attribute scores**]
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="90%"}
+ magick::image_read_pdf("./figures/fig08c.pdf", pages = 1)  
+```
+]
+
+---
+class: animated fadeIn
+### conclusion
+
+
+** CW-RPCA ** proved to be suitable when 
+- the data underlying correlation structure is steady
+- the MNCAR mechanism hides away the underlying stucture
+
+
+**process data** may present both the above characteristics
+
+--
+### future work
+- compare to other imputation methods such as **BLUP** (best linear unbiased prediction)
+- extension to the categorical data case (multiple correspondence analysis)
+- deal with the non unit variances case (.red[that's a difficult one])
+---
+class: animated fadeIn
+### References
+
+```{r ,echo=FALSE, results='asis'}
+PrintBibliography(compstat22_bib, start = 1, end = 6)
+```
+
+---
+class: animated fadeIn
+
+### References
+
+```{r ,echo=FALSE, results='asis'}
+PrintBibliography(compstat22_bib, start = 7, end = 13)
+```
+
+---
+class: animated fadeIn
+
+### References
+
+```{r ,echo=FALSE, results='asis'}
+PrintBibliography(compstat22_bib, start = 14, end = 20)
+```
+
