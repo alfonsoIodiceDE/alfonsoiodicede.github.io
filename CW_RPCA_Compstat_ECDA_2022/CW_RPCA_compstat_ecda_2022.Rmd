@@ -434,13 +434,13 @@ class: animated fadeIn
 To keep it simple, consider two chunks 
 
 $${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$
-and ** ${\bf\Omega}_{{\bf X}_1}=\{{\bf U}_{{\bf X}_1},{\Sigma}_{{\bf X}_1},{\bf V}_{{\bf X}_1},\mu_{{\bf X}_1},I_{{\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
+and ** ${\bf\Omega}_{ {\bf X}_1}=\{{\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},I_{ {\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
 
 --
 
 .content-box-red[
 want:
-** ${\bf\Omega}_{{\bf X}}$ ** without decomposing $\bf X$ from scratch
+** ${\bf\Omega}_{ {\bf X}}$ ** without decomposing $\bf X$ from scratch
 ]
 
 
@@ -451,17 +451,17 @@ class: animated fadeIn
 
 .content-box-red[
 want:
-** ${\bf\Omega}_{{\bf X}}$ ** without decomposing $\bf X$ from scratch
+** ${\bf\Omega}_{ {\bf X}}$ ** without decomposing $\bf X$ from scratch
 ]
 
-- option 1: compute ** ${\bf\Omega}_{{\bf X}_2}$ ** and merge the eigenspaces
-** ${\bf\Omega}_{{\bf X}} = {\bf\Omega}_{{\bf X}_1}\oplus {\bf\Omega}_{{\bf X}_2}$ **
+- option 1: compute ** ${\bf\Omega}_{ {\bf X}_2}$ ** and merge the eigenspaces
+** ${\bf\Omega}_{ {\bf X}} = {\bf\Omega}_{ {\bf X}_1}\oplus {\bf\Omega}_{ {\bf X}_2}$ **
 `r Citep(bib = compstat22_bib,  "Hal02",before="eigenspace arithmetics, ")`
 
 --
 
-- option 2: update ** ${\bf\Omega}_{{\bf X}_1}$ ** using the information in ${\bf X}_{2}$ and obtain
-** ${\bf\Omega}_{{\bf X}}$ ** `r Citep(bib = compstat22_bib,  "Ros08",before="incremental SVD, ")`
+- option 2: update ** ${\bf\Omega}_{ {\bf X}_1}$ ** using the information in ${\bf X}_{2}$ and obtain
+** ${\bf\Omega}_{ {\bf X}}$ ** `r Citep(bib = compstat22_bib,  "Ros08",before="incremental SVD, ")`
 
 
 
