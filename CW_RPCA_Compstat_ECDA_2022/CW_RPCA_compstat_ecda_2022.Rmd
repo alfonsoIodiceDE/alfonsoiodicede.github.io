@@ -95,139 +95,139 @@ style_extra_css(css = list(
 xaringanExtra::use_tile_view()
 ```
 
-<!-- class: animated fadeIn  -->
+class: animated fadeIn
 
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-<!-- -- -->
+### Principal component analysis on data chunks
+** why data chunks? **
+--
 
-<!-- .pull-left[ -->
-
-
-
-<!-- **convenience**: large data to handle as a whole -->
+.pull-left[
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
-<!-- ] -->
 
-<!-- -- -->
-
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_1.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
-
-<!-- --- -->
-<!-- class: animated fadeIn  -->
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-
-<!-- .pull-left[ -->
-
-<!-- **convenience**: large data to handle as a whole -->
+**convenience**: large data to handle as a whole
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
-<!-- ] -->
+**necessity**: data not fully available when the analysis starts (data flow)
+]
+
+--
+
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_1.pdf", pages = 1)
+```
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
 
 
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_2.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
-
-<!-- --- -->
-<!-- class: animated fadeIn  -->
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-
-<!-- .pull-left[ -->
-
-<!-- **convenience**: large data to handle as a whole -->
+**necessity**: data not fully available when the analysis starts (data flow)
+]
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_2.pdf", pages = 1)
+```
+]
 
-<!-- **what if there are missings?** -->
-<!-- ] -->
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
 
+.pull-left[
 
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_3.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
-
-<!-- --- -->
-<!-- class: animated fadeIn  -->
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-
-<!-- .pull-left[ -->
-
-<!-- **convenience**: large data to handle as a whole -->
+**convenience**: large data to handle as a whole
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+**necessity**: data not fully available when the analysis starts (data flow)
 
-<!-- **what if there are missings?** -->
-<!-- ] -->
-
-
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_4.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
-
-<!-- --- -->
-<!-- class: animated fadeIn  -->
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-
-<!-- .pull-left[ -->
-
-<!-- **convenience**: large data to handle as a whole -->
+**what if there are missings?**
+]
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_3.pdf", pages = 1)
+```
+]
 
-<!-- **what if there are missings?** -->
-<!-- ] -->
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
 
+.pull-left[
 
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_5.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
-
-<!-- --- -->
-<!-- class: animated fadeIn  -->
-<!-- ### Principal component analysis on data chunks -->
-<!-- ** why data chunks? ** -->
-
-<!-- .pull-left[ -->
-
-<!-- **convenience**: large data to handle as a whole -->
+**convenience**: large data to handle as a whole
 
 
-<!-- **necessity**: data not fully available when the analysis starts (data flow) -->
+**necessity**: data not fully available when the analysis starts (data flow)
 
-<!-- **what if there are missings?** -->
-<!-- ] -->
+**what if there are missings?**
+]
 
 
-<!-- .pull-right[ -->
-<!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} -->
-<!-- magick::image_read_pdf("./figures/d_chunk_6.pdf", pages = 1)  -->
-<!-- ``` -->
-<!-- ] -->
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_4.pdf", pages = 1)
+```
+]
 
-<!-- --- -->
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_5.pdf", pages = 1)
+```
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/d_chunk_6.pdf", pages = 1)
+```
+]
+
+---
 class: animated fadeIn middle
 ### Aim
 

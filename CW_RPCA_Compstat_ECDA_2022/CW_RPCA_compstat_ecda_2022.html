@@ -28,139 +28,127 @@ class: center, middle, inverse, title-slide
 
 
 
-&lt;!-- class: animated fadeIn  --&gt;
+class: animated fadeIn
 
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-&lt;!-- -- --&gt;
+### Principal component analysis on data chunks
+** why data chunks? **
+--
 
-&lt;!-- .pull-left[ --&gt;
-
-
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+.pull-left[
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
-&lt;!-- ] --&gt;
 
-&lt;!-- -- --&gt;
-
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_1.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
-
-&lt;!-- --- --&gt;
-&lt;!-- class: animated fadeIn  --&gt;
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-
-&lt;!-- .pull-left[ --&gt;
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+**convenience**: large data to handle as a whole
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
-&lt;!-- ] --&gt;
+**necessity**: data not fully available when the analysis starts (data flow)
+]
+
+--
+
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-1-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
 
 
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_2.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
-
-&lt;!-- --- --&gt;
-&lt;!-- class: animated fadeIn  --&gt;
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-
-&lt;!-- .pull-left[ --&gt;
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+**necessity**: data not fully available when the analysis starts (data flow)
+]
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
 
-&lt;!-- **what if there are missings?** --&gt;
-&lt;!-- ] --&gt;
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
 
+.pull-left[
 
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_3.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
-
-&lt;!-- --- --&gt;
-&lt;!-- class: animated fadeIn  --&gt;
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-
-&lt;!-- .pull-left[ --&gt;
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+**convenience**: large data to handle as a whole
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
+**necessity**: data not fully available when the analysis starts (data flow)
 
-&lt;!-- **what if there are missings?** --&gt;
-&lt;!-- ] --&gt;
-
-
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_4.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
-
-&lt;!-- --- --&gt;
-&lt;!-- class: animated fadeIn  --&gt;
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-
-&lt;!-- .pull-left[ --&gt;
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+**what if there are missings?**
+]
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
 
-&lt;!-- **what if there are missings?** --&gt;
-&lt;!-- ] --&gt;
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
 
+.pull-left[
 
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_5.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
-
-&lt;!-- --- --&gt;
-&lt;!-- class: animated fadeIn  --&gt;
-&lt;!-- ### Principal component analysis on data chunks --&gt;
-&lt;!-- ** why data chunks? ** --&gt;
-
-&lt;!-- .pull-left[ --&gt;
-
-&lt;!-- **convenience**: large data to handle as a whole --&gt;
+**convenience**: large data to handle as a whole
 
 
-&lt;!-- **necessity**: data not fully available when the analysis starts (data flow) --&gt;
+**necessity**: data not fully available when the analysis starts (data flow)
 
-&lt;!-- **what if there are missings?** --&gt;
-&lt;!-- ] --&gt;
+**what if there are missings?**
+]
 
 
-&lt;!-- .pull-right[ --&gt;
-&lt;!-- ```{r  echo = FALSE, message=FALSE, fig.align='center',out.width="60%"} --&gt;
-&lt;!-- magick::image_read_pdf("./figures/d_chunk_6.pdf", pages = 1)  --&gt;
-&lt;!-- ``` --&gt;
-&lt;!-- ] --&gt;
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
 
-&lt;!-- --- --&gt;
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-6-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
 class: animated fadeIn middle
 ### Aim
 
@@ -367,13 +355,13 @@ class: animated fadeIn
 To keep it simple, consider two chunks 
 
 `$${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$`
-and ** `\({\bf\Omega}_{{\bf X}_1}=\{{\bf U}_{{\bf X}_1},{\Sigma}_{{\bf X}_1},{\bf V}_{{\bf X}_1},\mu_{{\bf X}_1},I_{{\bf X}_1}\}\)` **, the eigenspace of `\({\bf X}_{1}\)` 
+and ** `\({\bf\Omega}_{ {\bf X}_1}=\{ {\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},I_{ {\bf X}_1}\}\)` **, the eigenspace of `\({\bf X}_{1}\)` 
 
 --
 
 .content-box-red[
 want:
-** `\({\bf\Omega}_{{\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
+** `\({\bf\Omega}_{ {\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
 ]
 
 
@@ -384,17 +372,17 @@ class: animated fadeIn
 
 .content-box-red[
 want:
-** `\({\bf\Omega}_{{\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
+** `\({\bf\Omega}_{ {\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
 ]
 
-- option 1: compute ** `\({\bf\Omega}_{{\bf X}_2}\)` ** and merge the eigenspaces
-** `\({\bf\Omega}_{{\bf X}} = {\bf\Omega}_{{\bf X}_1}\oplus {\bf\Omega}_{{\bf X}_2}\)` **
+- option 1: compute ** `\({\bf\Omega}_{ {\bf X}_2}\)` ** and merge the eigenspaces
+** `\({\bf\Omega}_{ {\bf X}} = {\bf\Omega}_{ {\bf X}_1}\oplus {\bf\Omega}_{ {\bf X}_2}\)` **
 (eigenspace arithmetics, Hall, Marshall, and Martin, 2002)
 
 --
 
-- option 2: update ** `\({\bf\Omega}_{{\bf X}_1}\)` ** using the information in `\({\bf X}_{2}\)` and obtain
-** `\({\bf\Omega}_{{\bf X}}\)` ** (incremental SVD, Ross, Lim, Lin, et al., 2008)
+- option 2: update ** `\({\bf\Omega}_{ {\bf X}_1}\)` ** using the information in `\({\bf X}_{2}\)` and obtain
+** `\({\bf\Omega}_{ {\bf X}}\)` ** (incremental SVD, Ross, Lim, Lin, et al., 2008)
 
 
 
@@ -444,7 +432,7 @@ The wanted singular vectors and value are obtained doing the SVD of
 and the wanted quanties are 
 .center[
 ** `\({\bf U}_{3}={\bf U}\)`  ** , ** `\({\bf \Sigma}_{3}={\bf \Sigma}\)`  ** , 
-** `\({\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}\)`  ** and ** `\(\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
+** `\({\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}\)`  ** and ** `\(\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
 ]
 ]
 ---
@@ -479,7 +467,7 @@ and the wanted quanties are
 .center[
 ** `\({\bf U}_{3} = \begin{bmatrix}{\bf U}_{1} &amp; {\bf 0} \\ {\bf 0} &amp; {\bf I}\end{bmatrix} {\bf U}_{m}\)` ** ,
 ** `\({\bf     \Sigma}_{3}={\bf \Sigma}_{m}\)`  ** , 
-** `\({\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}\)`  ** and ** `\(\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
+** `\({\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}\)`  ** and ** `\(\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
 ]
 ]
 
@@ -622,7 +610,7 @@ class: animated fadeIn
 ]
 
 .pull-right[
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-1-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -631,7 +619,7 @@ class: animated fadeIn
 class: animated fadeIn
 ### MCAR scenario 
 
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-2-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-8-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 .center[*naive*-CW-RPCA and RPCA provide similar results (as expected)]
 
@@ -649,7 +637,7 @@ class: animated fadeIn
 - **note**: the first two chunks are **MCAR** (preserve correlation)
 ]
 .pull-right[
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-9-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -658,14 +646,14 @@ class: animated fadeIn
 
 .pull-left[
 -  the response `\(Y\)` dictates whether the entries of `\(X_{j}\)` are rendered missing
-** `$$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{{\beta}})}{1+exp({\bf X}_{-j}\hat{{\beta}})}$$` **  
+** `$$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{ {\beta}})}{1+exp({\bf X}_{-j}\hat{ {\beta}})}$$` **  
 - `\({\bf X}_{-j}\)` is the predictors matrix; predictors come from the correlation block of `\({\bf X}_{j}\)`  
 - grid search of plausible values for `\(\hat{\beta}\)`,  pick up  values that lead to `\(10\%\)` missing entries 
 
 - **note**: the first two chunks are **MCAR** (preserve correlation)
 ]
 .pull-right[
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 
@@ -674,12 +662,12 @@ class: animated fadeIn
 ### MNCAR correlation-based 
 
 .pull-left[
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 .center[MCAR chunk correlation]
 ]
 
 .pull-right[
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-6-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 .center[MNCAR chunk correlation]
 ]
 
@@ -689,13 +677,13 @@ class: animated fadeIn
 
 .pull-left[
 .center[**scenario 1**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-13-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 .center[MCAR chunks randomly positioned]
 ]
 
 .pull-right[
 .center[**scenario 2**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-14-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 .center[MCAR chunks processed first]
 ]
 
@@ -706,12 +694,12 @@ class: animated fadeIn
 
 .pull-left[
 .center[**scenario 1**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-9-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 .center[**scenario 2**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-16-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -736,12 +724,12 @@ class: animated fadeIn
 
 .pull-left[
 .center[**complete data structure**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-17-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 .center[**rendered missing data structure**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-18-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -749,7 +737,7 @@ class: animated fadeIn
 ### TEP results: imputation error
 500 observations per chunk. Up to 25 chunks analysed
 
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-13-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-19-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
@@ -757,12 +745,12 @@ class: animated fadeIn
 
 .pull-left[
 .center[**RV on object scores**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-14-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-20-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 .center[**RV on attribute scores**]
-&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="CW_RPCA_compstat_ecda_2022_files/figure-html/unnamed-chunk-21-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
