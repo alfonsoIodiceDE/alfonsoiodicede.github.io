@@ -434,7 +434,7 @@ class: animated fadeIn
 To keep it simple, consider two chunks 
 
 $${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$
-and ** ${\bf\Omega}_{ {\bf X}_1}=\{{\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},I_{ {\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
+and ** ${\bf\Omega}_{ {\bf X}_1}=\{ {\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},I_{ {\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
 
 --
 
@@ -511,7 +511,7 @@ $$\begin{split}
 and the wanted quanties are 
 .center[
 ** ${\bf U}_{3}={\bf U}$  ** , ** ${\bf \Sigma}_{3}={\bf \Sigma}$  ** , 
-** ${\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}$  ** and ** $\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
+** ${\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}$  ** and ** $\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
 ]
 ]
 ---
@@ -546,7 +546,7 @@ and the wanted quanties are
 .center[
 ** ${\bf U}_{3} = \begin{bmatrix}{\bf U}_{1} & {\bf 0} \\ {\bf 0} & {\bf I}\end{bmatrix} {\bf U}_{m}$ ** ,
 ** ${\bf     \Sigma}_{3}={\bf \Sigma}_{m}$  ** , 
-** ${\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}$  ** and ** $\mu_{3} = \frac{1}{{ n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
+** ${\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}$  ** and ** $\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)$ **
 ]
 ]
 
@@ -731,7 +731,7 @@ class: animated fadeIn
 
 .pull-left[
 -  the response $Y$ dictates whether the entries of $X_{j}$ are rendered missing
-** $$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{{\beta}})}{1+exp({\bf X}_{-j}\hat{{\beta}})}$$ **  
+** $$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{ {\beta}})}{1+exp({\bf X}_{-j}\hat{ {\beta}})}$$ **  
 - ${\bf X}_{-j}$ is the predictors matrix; predictors come from the correlation block of ${\bf X}_{j}$  
 - grid search of plausible values for $\hat{\beta}$,  pick up  values that lead to $10\%$ missing entries 
 
