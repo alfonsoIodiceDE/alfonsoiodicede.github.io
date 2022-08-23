@@ -352,7 +352,7 @@ class: animated fadeIn
 ### RPCA: iterative regularized PCA
 
 In both `r Citet(bib = compstat22_bib, "DraJos15")` and 
-`r Citet(bib = compstat22_bib, "LoiTak18")`  iPCA (a.k.a iterative PCA, \cite{Kie97})  and its regularized version (RPCA) proved to outperform other PCA-based approaches.
+`r Citet(bib = compstat22_bib, "LoiTak18")`  iPCA `r Citep(bib = compstat22_bib, "Kie97", before="a.k.a iterative PCA, ")`  and its regularized version (RPCA) proved to outperform other PCA-based approaches.
 
 --
 
