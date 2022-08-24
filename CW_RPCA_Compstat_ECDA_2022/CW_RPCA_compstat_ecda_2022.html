@@ -291,13 +291,13 @@ Since no explicit solution exists that minimises the RPCA criterion, an iterativ
 class: animated fadeIn
 ### RPCA: the procedure
 
-- **step 1** : set the  counter `\(c=0\)`, and set the dimensionality `\(d^{\star}\)`. Replace each missing entry `\(ij\)` in `\(\bf X\)`  with some initialization values to obtain `\({\bf X}^{ c}\)`, and compute `\({\bf \hat{M}}^{c}\)`}
+- **step 1** : set the  counter `\(c=0\)`, and set the dimensionality `\(d^{\star}\)`. Replace each missing entry `\(ij\)` in `\(\bf X\)`  with some initialization values to obtain `\({\bf X}^{ c}\)`, and compute `\({\bf \hat{M}}^{c}\)`
 
 --
 
 - **step 2** : obtain `\({\bf \hat{X}}^{ c}\)` via the PCA on `\({\bf X}^{ c}\)` using  `\({\bf \hat{F}}^{ c}\)` and `\({\bf \hat{G}}^{ c}\)` for the reconstruction formula 
 `$$\hat{x}^{c}_{ij}= \hat{m}_{j}+\sum_{d =1}^{d^{\star}}{f_{id}^{ c} g^{ c}_{jd}} = \sqrt{\hat{\lambda}^{c}_{d}}\hat{v}^{c}_{id}\hat{u}^{c}_{jd}  \ \ \ \forall i,j$$`
-modified to be shrunk, replacing `\(\sqrt{\hat{\lambda}^{c}_{d}}\)` by `\(\left(  \sqrt{\hat{\lambda}^{c}_{d}} - \frac{(\hat{\sigma}^2)^{c}}{\sqrt{\hat{c}^{\ell}_{d}}}    \right)\)`, where `\((\hat{\sigma}^2)^{c} = \frac{1}{p-d^{*}}\sum_{d=d^{*}+1}^{p}\hat{\lambda}_{d}\)`
+modified to be shrunk, replacing `\(\sqrt{\hat{\lambda}^{c}_{d}}\)` by `\(\left(  \sqrt{\hat{\lambda}^{c}_{d}} - \frac{(\hat{\sigma}^2)^{c}}{\sqrt{\hat{\lambda}^{c}_{d}}}    \right)\)`, where `\((\hat{\sigma}^2)^{c} = \frac{1}{p-d^{*}}\sum_{d=d^{*}+1}^{p}\hat{\lambda}_{d}\)`
 
 
 --

@@ -141,9 +141,6 @@ a, a > code {
 }
 .title-slide {
   background-color: var(--title-slide-background-color);
-  background-image: url("./figures/ifcs_2022_logo.png");
-  background-size: 40%;
-  background-position: bottom;
 }
 .title-slide .remark-slide-number {
   display: none;
