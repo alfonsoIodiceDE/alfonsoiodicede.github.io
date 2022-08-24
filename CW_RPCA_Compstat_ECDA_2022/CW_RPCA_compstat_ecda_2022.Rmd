@@ -229,13 +229,20 @@ magick::image_read_pdf("./figures/d_chunk_6.pdf", pages = 1)
 
 ---
 class: animated fadeIn middle
+.my-pull-left[
+
 ### Aim
+]
 
-Provide a procedure for incremental PCA-based single imputation of missing data
+.my-pull-right[
 
---
-- evaluate it on some missing data mechanisms, both completely and not completely at random
 
+
+> - provide a procedure for incremental PCA-based single imputation of missing data
+>
+> - evaluate it on some missing data mechanisms, both completely and not completely at random
+
+]
 
 ---
 class: animated fadeIn middle
@@ -290,11 +297,11 @@ class: animated fadeIn
 
 ### missing data mechanisms
 
-- missing completely at random mechanism (** MCAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{i})$
+- missing completely at random mechanism (** MCAR **): $P({\bf w}_{ij}=1\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{ij}=1)$
 
-- missing at random mechanism (** MAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{i}\mid{\bf x}^{o}_{i})$
+- missing at random mechanism (** MAR **): $P({\bf w}_{ij}=1\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{ij}=1\mid{\bf x}^{o}_{i})$
 
-- missing not at random mechanism (** MNAR **): $P({\bf w}_{i}\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) \neq P({\bf w}_{i}\mid{\bf x}^{o}_{i})$
+- missing not at random mechanism (** MNAR **): $P({\bf w}_{ij}=1\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) \neq P({\bf w}_{ij}=1\mid{\bf x}^{o}_{i})$
 
 
 ---
@@ -305,7 +312,7 @@ class: animated fadeIn
 The objective function of PCA is to minimise 
 
 $$
-\mid\mid{\bf  X} -  {\bf  M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\mid\mid^{2}
+\min_{ {\bf \hat{F} },{\bf \hat{G} } } \mid\mid{\bf  X} -  {\bf  M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\mid\mid^{2}
 $$
 
 
@@ -359,8 +366,7 @@ In both `r Citet(bib = compstat22_bib, "DraJos15")` and
 ** RPCA: the criterion **
 
 $$
-\mid\mid {\bf W}\ast \left({\bf X}- {\bf M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\right)\mid\mid^{2}
-\label{EMPCAloss}
+\min_{ {\bf \hat{F} },{\bf \hat{G} } } \mid\mid {\bf W}\ast \left({\bf X}- {\bf M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\right)\mid\mid^{2}
 $$
 
 
@@ -434,7 +440,7 @@ class: animated fadeIn
 To keep it simple, consider two chunks 
 
 $${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$
-and ** ${\bf\Omega}_{ {\bf X}_1}=\{ {\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},I_{ {\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
+and ** ${\bf\Omega}_{ {\bf X}_1}=\{ {\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},n_{ {\bf X}_1}\}$ **, the eigenspace of ${\bf X}_{1}$ 
 
 --
 
@@ -480,18 +486,6 @@ class: animated fadeIn
 
 --
 
-Compute the vector
-
-$$
-{\bf v}=orth\left( \psi \left[{\bf H},{\bf h} \right]\right)
-$$
-with 
-
-$${\bf H}={\bf V}_{2} - {\bf V}_{1} {\bf V}_{1}^{\sf T}{\bf V}_{2} \text{ and }
-{\bf h}=\left(\mu_{1}-\mu_{2}\right)-{\bf V}_{1}{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{2}\right)$$
-
---
-
 The wanted singular vectors and value are obtained doing the SVD of 
 
 
@@ -504,6 +498,10 @@ $$\begin{split}
 {\bf v}^{\sf T} \left( \mu_{1}-\mu_{3}\right) {\bf 1}_{n_{1}}  & {\bf v}^{\sf T} \left( \mu_{2}-\mu_{3}\right) {\bf 1}_{n_{2}} 
 \end{bmatrix}={\bf R}{\bf \Sigma}{\bf U}^{\sf T},
 \end{split}$$
+
+where ${\bf v}=orth\left( \psi \left[{\bf H},{\bf h} \right]\right)$ ,
+ ${\bf H}={\bf V}_{2} - {\bf V}_{1} {\bf V}_{1}^{\sf T}{\bf V}_{2}$  and 
+${\bf h}=\left(\mu_{1}-\mu_{2}\right)-{\bf V}_{1}{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{2}\right)$
 
 --
 
