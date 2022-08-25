@@ -97,7 +97,7 @@ xaringanExtra::use_tile_view()
 
 class: animated fadeIn 
 
-### dimension reduction (stacked DR)
+### dimension reduction 
 - <h4 style = "color:#37499c">  variables and samples reduction</h4>
 
 - <h4 style = "color:#37499c"> the tandem approach the cluster masking problem </h4>
