@@ -97,10 +97,10 @@ xaringanExtra::use_tile_view()
 
 class: animated fadeIn 
 
-### stacked data reduction (stacked DR)
-- <h4 style = "color:#37499c"> variables and sample reduction </h4>
+### dimension reduction (stacked DR)
+- <h4 style = "color:#37499c">  variables and samples reduction</h4>
 
-- <h4 style = "color:#37499c"> the tandem approach and  cluster masking problem </h4>
+- <h4 style = "color:#37499c"> the tandem approach the cluster masking problem </h4>
 
 --
 
@@ -115,16 +115,9 @@ class: animated fadeIn
 
 
 ---
-class: animated fadeIn inverse center middle
-
-## stacked DR
-### also known as 
-###  the tandem approach
-
----
 class: animated fadeIn middle
 
-### data reduction paradigm
+### dimension reduction
 
  **summarising** a two-way data matrix by **aggregating measurements** 
 `r Citep(bib = ifcs_bib, "farcomeni2016robust")`
@@ -135,7 +128,7 @@ class: animated fadeIn middle
 
 ---
 class: animated fadeIn
-### continuous data case: principal component analysis `r Citep(bib=ifcs_bib,"jolliffe2002principal",before="PCA, ")`
+### continuous data case: principal component analysis (PCA)
 
 
 ${\bf X}$ is the $n \times p$ standardized data matrix
@@ -164,7 +157,7 @@ $n^{1/2}\mathbf{AB}^{\sf T}p^{1/2}$ is the best rank- $d$ approximation of $\bf{
 
 ---
 class: animated fadeIn
-### categorical data case:  correspondence analysis `r Citep(bib=ifcs_bib,"Gre07",before="CA, ")`
+### categorical data case: correspondence analysis (CA)
 
 
 
@@ -272,57 +265,10 @@ $$\min_{ {\bf Z}_{K} } \left \Vert \mathbf{X}-{\bf Z}_{K} {\bf G} \right\Vert ^{
   - distance between any two points tend to converge to a same quantity: curse of dimensionality
   
 
----
-class: animated fadeIn
-### curse of dimensionality?
-
-```{r, echo=FALSE,fig.align='center',out.width="40%"}
-magick::image_read_pdf("./figures/neighbours0_av.pdf",
-                       pages = 1)
-```
 
 ---
 class: animated fadeIn
-### curse of dimensionality?
-
-```{r, echo=FALSE,fig.align='center',out.width="40%"}
-magick::image_read_pdf("./figures/neighbours01_av.pdf",
-                       pages = 1)
-```
-
-
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-```{r, echo=FALSE,fig.align='center',out.width="40%"}
-magick::image_read_pdf("./figures/neighbours1_av.pdf",
-                       pages = 1)
-```
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-```{r, echo=FALSE,fig.align='center',out.width="40%"}
-magick::image_read_pdf("./figures/neighbours02_av.pdf",
-                       pages = 1)
-```
-
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-```{r, echo=FALSE,fig.align='center',out.width="40%"}
-magick::image_read_pdf("./figures/neighbours2_av.pdf",
-                       pages = 1)
-```
-
----
-class: animated fadeIn
-### stacking variables and samples reduction
+### Column and row-wise dimension reduction
 
 Practitioners often apply dimension reduction and then cluster the low-dimensional scores: this approach is referred to as ** tandem analysis ** `r Citep(bib=ifcs_bib,"arabie1996advances")`
 
@@ -570,11 +516,6 @@ tandem_points %>% mutate(od1=toy_points_noise$d1,
   theme(legend.position="none")+ggtitle("Kmeans results on 6 pc's")
 ```
 
-
----
-class: animated fadeIn inverse center middle
-
-## joint data reduction (JDR)
 
 
 ---
@@ -1038,9 +979,9 @@ class: animated fadeIn middle
 
 - in unsupervised learning, to find the *best* method, or the best setting for a method, is no easy task
 
-- a clustering solution is good if the clusters are meaningful
+- interpretability of a cluster solution is important
 
-- biplots can be a suitable tool to seek for meaning in clusters
+- biplots can be a useful tool to interpret clusters in a joint dimension reduction and cluster analysis setting
 
 
 ---

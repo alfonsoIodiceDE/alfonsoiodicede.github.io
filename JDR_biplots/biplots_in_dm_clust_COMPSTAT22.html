@@ -31,10 +31,10 @@ class: center, middle, inverse, title-slide
 
 class: animated fadeIn 
 
-### stacked data reduction (stacked DR)
-- &lt;h4 style = "color:#37499c"&gt; variables and sample reduction &lt;/h4&gt;
+### dimension reduction (stacked DR)
+- &lt;h4 style = "color:#37499c"&gt;  variables and samples reduction&lt;/h4&gt;
 
-- &lt;h4 style = "color:#37499c"&gt; the tandem approach and  cluster masking problem &lt;/h4&gt;
+- &lt;h4 style = "color:#37499c"&gt; the tandem approach the cluster masking problem &lt;/h4&gt;
 
 --
 
@@ -49,16 +49,9 @@ class: animated fadeIn
 
 
 ---
-class: animated fadeIn inverse center middle
-
-## stacked DR
-### also known as 
-###  the tandem approach
-
----
 class: animated fadeIn middle
 
-### data reduction paradigm
+### dimension reduction
 
  **summarising** a two-way data matrix by **aggregating measurements** 
 (Farcomeni and Greco, 2016)
@@ -69,7 +62,7 @@ class: animated fadeIn middle
 
 ---
 class: animated fadeIn
-### continuous data case: principal component analysis (PCA, Jolliffe, 2002)
+### continuous data case: principal component analysis (PCA)
 
 
 `\({\bf X}\)` is the `\(n \times p\)` standardized data matrix
@@ -98,7 +91,7 @@ Since `\({\bf \tilde{U}}{\bf \tilde{D}_{\alpha}}{\bf \tilde{V}^{{\sf T}}}\)` is 
 
 ---
 class: animated fadeIn
-### categorical data case:  correspondence analysis (CA, Greenacre, 2007)
+### categorical data case: correspondence analysis (CA)
 
 
 
@@ -206,42 +199,10 @@ Assuming to deal with continuous data, and Euclidean distances, the K-means loss
   - distance between any two points tend to converge to a same quantity: curse of dimensionality
   
 
----
-class: animated fadeIn
-### curse of dimensionality?
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
-### curse of dimensionality?
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-2-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
-
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-3-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-4-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
-
----
-class: animated fadeIn
-### curse of dimensionality?
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-5-1.png" width="40%" style="display: block; margin: auto;" /&gt;
-
----
-class: animated fadeIn
-### stacking variables and samples reduction
+### Column and row-wise dimension reduction
 
 Practitioners often apply dimension reduction and then cluster the low-dimensional scores: this approach is referred to as ** tandem analysis ** (Arabie and Hubert, 1996)
 
@@ -277,7 +238,7 @@ class: animated fadeIn
 
 the PCA scores are easily clustered via, e.g., Kmeans
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-8-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-3-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
@@ -292,7 +253,7 @@ class: animated fadeIn
 
 the toy example: adding 4 noise variables  `\(X_{j}\sim N(0,\sigma^{2}_{j})\)`, `\(\sigma_{j}\in \left\{ 6, 9\right\}\)`,  `\(j=3,\ldots,6\)`
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-10-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-5-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
@@ -308,31 +269,14 @@ class: animated fadeIn
 
 The tandem approach will fail: the 2-d PC map does not display clustered observations
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-12-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-7-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 ---
 class: animated fadeIn
 ### cluster masking
 
 The tandem approach will fail: K-means considering an increasing number of PCs
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-13-1.png" width="45%" style="display: block; margin: auto;" /&gt;
-
-
----
-class: animated fadeIn
-### cluster masking
-
-The tandem approach will fail: K-means considering an increasing number of PCs
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-14-1.png" width="45%" style="display: block; margin: auto;" /&gt;
-
----
-class: animated fadeIn
-### cluster masking
-
-The tandem approach will fail: K-means considering an increasing number of PCs
-
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-15-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-8-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -341,13 +285,25 @@ class: animated fadeIn
 
 The tandem approach will fail: K-means considering an increasing number of PCs
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-16-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-9-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### cluster masking
+
+The tandem approach will fail: K-means considering an increasing number of PCs
+
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-10-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
-class: animated fadeIn inverse center middle
+class: animated fadeIn
+### cluster masking
 
-## joint data reduction (JDR)
+The tandem approach will fail: K-means considering an increasing number of PCs
+
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-11-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
 
 
 ---
@@ -454,7 +410,7 @@ class: animated fadeIn
 
 ### JDR on the toy data set: no more cluster masking
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-17-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-12-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -517,7 +473,7 @@ class: animated fadeIn
 class: animated fadeIn 
 ### The Palmer Penguins: tandem 
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-20-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-15-1.png" width="55%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn 
@@ -531,14 +487,14 @@ class: animated fadeIn
 ### The Palmer Penguins:  RKM
 
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-22-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-17-1.png" width="55%" style="display: block; margin: auto;" /&gt;
 
 
 ---
 class: animated fadeIn 
 ### The Palmer Penguins:  cluster characterization
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-23-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-18-1.png" width="55%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -549,14 +505,14 @@ class: animated fadeIn
 
 ** tandem **
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-24-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-19-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
 
 ** RKM **
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-25-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-20-1.png" width="75%" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -581,7 +537,7 @@ class: animated fadeIn
 
 
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-28-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-23-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -595,13 +551,13 @@ class: animated fadeIn
 class: animated fadeIn
 ### The zoo: contribution biplot for cluster characterization
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-30-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-25-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
 ### The zoo: cluster characterization barplot
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-31-1.png" width="65%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-26-1.png" width="65%" style="display: block; margin: auto;" /&gt;
 
 ---
 class: animated fadeIn
@@ -609,7 +565,7 @@ class: animated fadeIn
 
 **Zoo species**
 
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-32-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-27-1.png" width="45%" style="display: block; margin: auto;" /&gt;
 --
 .center[  
 the two errors are **dolphin** and **porpoise**   
@@ -625,9 +581,9 @@ class: animated fadeIn middle
 
 - in unsupervised learning, to find the *best* method, or the best setting for a method, is no easy task
 
-- a clustering solution is good if the clusters are meaningful
+- interpretability of a cluster solution is important
 
-- biplots can be a suitable tool to seek for meaning in clusters
+- biplots can be a useful tool to interpret clusters in a joint dimension reduction and cluster analysis setting
 
 
 ---
@@ -650,9 +606,6 @@ Données_ 4.2, pp. 137-146.
 Farcomeni, A. and L. Greco (2016). _Robust methods for data reduction_.
 CRC press.
 
-Greenacre, M. (2007). _Correspondence analysis in practice_. Chapman
-and Hall/CRC.
-
 Greenacre, M. (2013). "Contribution biplots". In: _Journal of
 Computational and Graphical Statistics_ 22.1, pp. 107-122.
 
@@ -661,20 +614,17 @@ Palmer Archipelago (Antarctica) penguin data_. R package version 0.1.0.
 URL:
 [https://allisonhorst.github.io/palmerpenguins/](https://allisonhorst.github.io/palmerpenguins/).
 
+Hwang, H., W. R. Dillon, and Y. Takane (2006). "An extension of
+multiple correspondence analysis for identifying heterogeneous
+subgroups of respondents". In: _Psychometrika_ 71.1, pp. 161-171.
+
 ---
 class: animated fadeIn
 
 ### References (2)
 
-Hwang, H., W. R. Dillon, and Y. Takane (2006). "An extension of
-multiple correspondence analysis for identifying heterogeneous
-subgroups of respondents". In: _Psychometrika_ 71.1, pp. 161-171.
-
 Iodice D’Enza, A. and F. Palumbo (2013). "Iterative factor clustering
 of binary data". In: _Computational Statistics_ 28.2, pp. 789-807.
-
-Jolliffe, I. T. (2002). _Principal component analysis for special types
-of data_. Springer.
 
 Leisch, F. and E. Dimitriadou (2021). _mlbench: Machine Learning
 Benchmark Problems_. R package version 2.1-3.
@@ -693,17 +643,17 @@ Newman, D., S. Hettich, C. Blake, et al. (1998). _UCI Repository of
 machine learning databases_. URL:
 [http://www.ics.uci.edu/~mlearn/MLRepository.html](http://www.ics.uci.edu/~mlearn/MLRepository.html).
 
----
-class: animated fadeIn
-
-### References (3)
-
 Van Buuren, S. and W. J. Heiser (1989). "Clusteringn objects intok
 groups under optimal scaling of variables". In: _Psychometrika_ 54.4,
 pp. 699-706.
 
 Velden, M. van de, A. Iodice D’Enza, and F. Palumbo (2017). "Cluster
 correspondence analysis". In: _Psychometrika_ 82.1, pp. 158-185.
+
+---
+class: animated fadeIn
+
+### References (3)
 
 Vichi, M. and H. A. Kiers (2001). "Factorial k-means analysis for
 two-way data". In: _Computational Statistics &amp; Data Analysis_ 37.1, pp.
@@ -739,11 +689,11 @@ class: animated fadeIn
 
 
 .pull-left[
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-37-1.png" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-32-1.png" width="85%" style="display: block; margin: auto;" /&gt;
 ]
 
 .pull-right[
-&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-38-1.png" width="85%" style="display: block; margin: auto;" /&gt;
+&lt;img src="biplots_in_dm_clust_COMPSTAT22_files/figure-html/unnamed-chunk-33-1.png" width="85%" style="display: block; margin: auto;" /&gt;
 ]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
