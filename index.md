@@ -1,7 +1,4 @@
-
-.pull-left[
-prova
-]
+<div style="text-align: right"> your-text-here </div>
   
 ### talks
 
