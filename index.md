@@ -1,4 +1,13 @@
 
+<section>
+  <nav>
+    <ul>
+      <li><a href="#">London</a></li>
+      <li><a href="#">Paris</a></li>
+      <li><a href="#">Tokyo</a></li>
+    </ul>
+  </nav>
+</section>
 
 ### talks
 [IFCS22: Biplots in dimension reduction and clustering](JDR_biplots/biplots_in_dm_clust_IFCS22.html)
