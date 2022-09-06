@@ -1,4 +1,4 @@
-<div style="text-align: right"> your-text-here </div>
+<h3 style="text-align: left"> your-text-here </h3>
   
 ### talks
 
