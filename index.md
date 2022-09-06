@@ -9,7 +9,9 @@
   </nav>
 
 <article>
-
+blablabla
+</section>
+  
   
 ### talks
 
@@ -21,4 +23,4 @@
 
   </article>
   
-</section>
+
