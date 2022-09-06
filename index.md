@@ -8,7 +8,7 @@
     </ul>
   </nav>
 
-
+<article>
 
   
 ### talks
@@ -19,5 +19,6 @@
 
   [SDS22: Biplots in dimension reduction and clustering](JDR_biplots/biplots_in_dm_clust_COMPSTAT22.html)
 
+  </article>
   
 </section>
