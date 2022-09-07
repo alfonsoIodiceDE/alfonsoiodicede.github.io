@@ -1,6 +1,6 @@
 title: Redundant
 description: personal webpage
 
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: artemsheludko/flexible-jekyll
 plugins:
 - jekyll-remote-theme 
