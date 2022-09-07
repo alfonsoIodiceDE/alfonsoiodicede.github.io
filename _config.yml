@@ -1,4 +1,4 @@
-theme: jekyll-theme-cayman
+remote_theme: chrisrhymes/bulma-clean-theme
 title: Redundant
 description: my personal page
 show_downloads: true
