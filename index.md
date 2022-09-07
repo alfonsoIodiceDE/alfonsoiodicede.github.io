@@ -1,5 +1,3 @@
-<h3 style="text-align: left"> your-text-here </h3>
-  
 ### talks
 
   [IFCS22: Biplots in dimension reduction and clustering](JDR_biplots/biplots_in_dm_clust_IFCS22.html)
