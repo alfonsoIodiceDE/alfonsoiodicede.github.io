@@ -1,3 +1,11 @@
+<nav class="menu">
+  <ul>
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</nav>
+
 ### talks
 
   [IFCS22: Biplots in dimension reduction and clustering](JDR_biplots/biplots_in_dm_clust_IFCS22.html)
