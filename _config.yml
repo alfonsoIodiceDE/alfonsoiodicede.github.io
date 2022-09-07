@@ -1,12 +1,2 @@
-baseurl: https://alfonsoiodicede.github.io/alfonso_blog/
-publishdir: ../myblog
 title: Redundant
 description: my personal page
-
-menu:
-  main:
-    - name: About
-      url: /about/
-    - name: GitHub
-      url: https://github.com/alfonsoIodiceDE/
-      
