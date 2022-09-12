@@ -141,9 +141,9 @@ a, a > code {
 }
 .title-slide {
   background-color: var(--title-slide-background-color);
-  background-image: url("./figures/compstat22_logo.png");
-  background-size: 100%;
-  background-position: top;
+  background-image: url("./figures/logo_ecda_2022.png");
+  background-size: 10%;
+  background-position: bottom;
 }
 .title-slide .remark-slide-number {
   display: none;

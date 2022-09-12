@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Chunk-wise regularised PCA-based imputation of missing data</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alfonso Iodice D’Enza, Angelos Markos and Francesco Palumbo" />
+    <meta name="date" content="2022-09-16" />
+    <script src="CW_RPCA_ecda_2022_files/header-attrs/header-attrs.js"></script>
+    <link href="CW_RPCA_ecda_2022_files/remark-css/hygge.css" rel="stylesheet" />
+    <link href="CW_RPCA_ecda_2022_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <link href="CW_RPCA_ecda_2022_files/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="CW_RPCA_ecda_2022_files/tile-view/tile-view.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Chunk-wise regularised PCA-based imputation of missing data
+### Alfonso Iodice D’Enza, Angelos Markos and Francesco Palumbo
+### 16 September 2022
+
+---
+
+
+
+
+
+
+
+class: animated fadeIn
+
+### Principal component analysis on data chunks
+** why data chunks? **
+--
+
+.pull-left[
+
+
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+]
+
+--
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-1-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-2-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-3-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-4-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Principal component analysis on data chunks
+** why data chunks? **
+
+.pull-left[
+
+**convenience**: large data to handle as a whole
+
+
+**necessity**: data not fully available when the analysis starts (data flow)
+
+**what if there are missings?**
+]
+
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-6-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn middle
+.my-pull-left[
+
+### Aim
+]
+
+.my-pull-right[
+
+
+
+&gt; - provide a procedure for incremental PCA-based single imputation of missing data
+&gt;
+&gt; - evaluate it on some missing data mechanisms, both completely and not completely at random
+
+]
+
+---
+class: animated fadeIn middle
+
+.my-pull-left[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+**Outline**
+]
+
+.my-pull-right[
+&gt;### PCA on incomplete (missing) data
+&gt;
+&gt;&amp;nbsp;
+&gt;
+&gt;### PCA on data-chunks (incremental update)
+&gt;
+&gt;&amp;nbsp;
+&gt;
+&gt;### PCA on incomplete data-chunks
+&gt;
+&gt;&amp;nbsp;
+&gt;
+&gt;### Experiments
+]
+
+---
+class: animated fadeIn middle center inverse
+## PCA on incomplete (missing) data
+
+---
+class: animated fadeIn
+### data structures
+
+- ** `\({\bf X}\)` ** is `\(n\times Q\)` data matrix, `\(n\)` observations of `\(Q\)` unit variance-scaled attributes 
+
+
+- ** `\({\bf W}_{n\times Q}\)` ** is the `\(0/1\)` shadow matrix: it indicates whether the elements of  `\(\bf{X}\)` are missing or observed
+
+- ** `\({\bf x}_{i}=\left[{\bf x}^{o}_{i};{\bf x}^{m}_{i}\right]\)` **, the `\(i^{th}\)` row of `\(\bf{X}\)` that contains an observed and an unobserved (missing) part
+
+--
+
+### missing data mechanisms
+
+- missing completely at random mechanism (** MCAR **): `\(P({\bf w}_{ij}=0\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{ij}=0)\)`
+
+- missing at random mechanism (** MAR **): `\(P({\bf w}_{ij}=0\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) = P({\bf w}_{ij}=0\mid{\bf x}^{o}_{i})\)`
+
+- missing not at random mechanism (** MNAR **): `\(P({\bf w}_{ij}=0\mid {\bf x}^{m}_{i},{\bf x}^{o}_{i}) \neq P({\bf w}_{ij}=0\mid{\bf x}^{o}_{i})\)`
+
+
+---
+class: animated fadeIn
+
+### Principal component analysis, PCA (Jolliffe, 2002)
+
+The objective function of PCA is to minimise 
+
+$$
+\min_{ {\bf \hat{F} },{\bf \hat{G} } } \mid\mid{\bf  X} -  {\bf  M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\mid\mid^{2}
+$$
+
+
+where `\({\bf M}=n^{-1} {\bf 1}{\bf 1}^{\sf T}{\bf X}\)` is the centring operator
+
+- the object scores  `\({\bf \hat{F}}= n^{1/2}{\bf \hat{U}}{ \hat{\Sigma}}\)` and the loadings `\({\bf \hat{G}}=Q^{1/2}{\bf{\hat V}}\)` are obtained by means of the rank- `\(d\)` weighted singular value decomposition of
+
+$$
+{\bf S}=n^{-1/2}\left({\bf X}- {\bf M}\right) Q^{-1/2} = {\bf{\hat U}} { {\hat \Sigma}}{\bf {\hat V}}^{\sf T}
+$$
+
+
+
+--
+
+the product ** `\({\bf \hat{F}}{\bf \hat{G}}^{\sf T}\)` ** is the `\(d\)` -rank approximantion of the centerd matrix ** `\({\bf  X}-{\bf  M}\)` **
+
+$$
+{\bf \hat{F}}{\bf \hat{G}}^{\sf T} =  n^{1/2}{\bf \hat{U}}{ \hat{\Sigma}}{\bf{\hat V}}^{\sf T}Q^{1/2} = n^{1/2}{\bf \hat S}Q^{1/2} = {\bf \hat X}- {\bf  M} \rightarrow 
+{\bf \hat X} =  {\bf  M} + {\bf \hat{F}}{\bf \hat{G}}^{\sf T}
+$$
+
+
+---
+class: animated fadeIn
+
+### Missing values and the PCA
+
+
+Different approaches aim to handle missing values in PCA
+
+- Dray and Josse (2015) review methods for :  *i)* imputation prior to PCA, *ii)* PCA skipping missing entries, *iii)* PCA taking into account the missing entries
+
+--
+
+- Loisel and Takane (2018) compare the performances of methods for PCA of incomplete data on different missing data mechanisms
+
+--
+
+- Geraci and Farcomeni (2018) and Sportisse, Boyer, and Josse (2018): probabilistic PCA-based procedures to impute missing not at random (MNAR) values
+
+---
+class: animated fadeIn
+### RPCA: iterative regularized PCA
+
+In both Dray and Josse (2015) and 
+Loisel and Takane (2018)  iPCA (a.k.a iterative PCA, Kiers, 1997)  and its regularized version (RPCA) proved to outperform other PCA-based approaches.
+
+--
+
+** RPCA: the criterion **
+
+$$
+\min_{ {\bf \hat{F} },{\bf \hat{G} } } \mid\mid {\bf W}\ast \left({\bf X}- {\bf M} - {\bf \hat{F}}{\bf \hat{G}}^{\sf T}\right)\mid\mid^{2}
+$$
+
+
+Since no explicit solution exists that minimises the RPCA criterion, an iterative procedure is needed
+
+---
+class: animated fadeIn
+### RPCA: the procedure
+
+- **step 1** : set the  counter `\(c=0\)`, and set the dimensionality `\(d^{\star}\)`. Replace each missing entry `\(ij\)` in `\(\bf X\)`  with some initialization values to obtain `\({\bf X}^{ c}\)`, and compute `\({\bf \hat{M}}^{c}\)`
+
+--
+
+- **step 2** : obtain `\({\bf \hat{X}}^{ c}\)` via the PCA on `\({\bf X}^{ c}\)` using  `\({\bf \hat{F}}^{ c}\)` and `\({\bf \hat{G}}^{ c}\)` for the reconstruction formula 
+`$$\hat{x}^{c}_{ij}= \hat{m}_{j}+\sum_{d =1}^{d^{\star}}{f_{id}^{ c} g^{ c}_{jd}} = \sqrt{\hat{\lambda}^{c}_{d}}\hat{v}^{c}_{id}\hat{u}^{c}_{jd}  \ \ \ \forall i,j$$`
+modified to be shrunk, replacing `\(\sqrt{\hat{\lambda}^{c}_{d}}\)` by `\(\left(  \sqrt{\hat{\lambda}^{c}_{d}} - \frac{(\hat{\sigma}^2)^{c}}{\sqrt{\hat{\lambda}^{c}_{d}}}    \right)\)`, where `\((\hat{\sigma}^2)^{c} = \frac{1}{p-d^{*}}\sum_{d=d^{*}+1}^{p}\hat{\lambda}_{d}\)`
+
+
+--
+
+- **step 3** :  `\({\bf X}^{ c}={\bf W}\ast{\bf X}+(1-{\bf W})\ast{\bf \hat{X}}^{ c}\)`
+
+
+
+Repeat steps 2 and 3 until convergence
+
+
+
+
+---
+class: animated fadeIn middle center inverse
+## PCA on data-chunks (incremental update)
+
+---
+class: animated fadeIn
+### Incremental PCA
+
+Incremental decomposition methods can be roughly classified into
+
+
+- **perturbation methods** (Hegde, Principe, Erdogmus, Ozertem, Rao, and Peddaneni, 2006)
+
+
+- **stochastic optimization** and related methods (Sanger, 1989; Oja, 1992; Weng, Zhang, and Hwang, 2003; Mitliagkas, Caramanis, and Jain, 2013)
+
+
+
+- **randomized algorithms** (Warmuth and Kuzmin, 2008)
+
+
+
+- **secular equations** (Gu and Eisenstat, 1994)
+
+
+
+- **heuristic techniques** for incremental EVD/SVD (Levey and Lindenbaum, 2000; Hall, Marshall, and Martin, 2002; Ross, Lim, Lin, and Yang, 2008; Baker, Gallivan, and Van Dooren, 2012)
+
+--
+
+.content-box-green[
+.center[
+heuristic techniques proved to be accurate and  share desirable characteristic that ease their embedding in PCA (Cardot and Degras, 2018; Markos and Iodice D'Enza, 2018)
+]
+]
+
+
+---
+class: animated fadeIn
+### incremental decomposition 
+
+To keep it simple, consider two chunks 
+
+`$${\bf X}=\begin{bmatrix}{\bf X}_{1}\\ {\bf X}_{2}\end{bmatrix}$$`
+and ** `\({\bf\Omega}_{ {\bf X}_1}=\{ {\bf U}_{ {\bf X}_1},{\Sigma}_{ {\bf X}_1},{\bf V}_{ {\bf X}_1},\mu_{ {\bf X}_1},n_{ {\bf X}_1}\}\)` **, the eigenspace of `\({\bf X}_{1}\)` 
+
+--
+
+.content-box-red[
+want:
+** `\({\bf\Omega}_{ {\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
+]
+
+
+---
+class: animated fadeIn
+### incremental decomposition
+
+
+.content-box-red[
+want:
+** `\({\bf\Omega}_{ {\bf X}}\)` ** without decomposing `\(\bf X\)` from scratch
+]
+
+- option 1: compute ** `\({\bf\Omega}_{ {\bf X}_2}\)` ** and merge the eigenspaces
+** `\({\bf\Omega}_{ {\bf X}} = {\bf\Omega}_{ {\bf X}_1}\oplus {\bf\Omega}_{ {\bf X}_2}\)` **
+(eigenspace arithmetics, Hall, Marshall, and Martin, 2002)
+
+--
+
+- option 2: update ** `\({\bf\Omega}_{ {\bf X}_1}\)` ** using the information in `\({\bf X}_{2}\)` and obtain
+** `\({\bf\Omega}_{ {\bf X}}\)` ** (incremental SVD, Ross, Lim, Lin, et al., 2008)
+
+
+
+---
+class: animated fadeIn middle center 
+
+&lt;h1 style="color : red" &gt;warning!&lt;/h1&gt;
+
+## a couple of clunky slides ahead
+
+---
+class: animated fadeIn
+### eigenspace arithmetics
+
+** `\({\bf\Omega}_{3}\)` ** `\(= {\bf\Omega}_{1}\oplus {\bf\Omega}_{2}\)`, that is, compute ** `\({\bf U}_{3}\)` ** , ** `\({\bf \Sigma}_{3}\)` ** , ** `\({\bf V}_{3}\)` ** and ** `\(\mu_{3}\)` **
+
+--
+
+The wanted singular vectors and value are obtained doing the SVD of 
+
+
+`$$\begin{split}
+&amp;\begin{bmatrix}
+{\bf \Sigma}_{1} 	{\bf U}_{1}^{\sf T} &amp; {\bf V}_{1}^{\sf T}{\bf V}_{2} {\bf \Sigma}_{2}{\bf U}_{2}^{\sf T}\\
+0 &amp; {\bf v}^{\sf T}{\bf V}_{2}{\bf \Sigma}_{2}{\bf U}_{2}^{\sf T}
+\end{bmatrix} +\begin{bmatrix}
+{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{3}\right) {\bf 1}_{n_{1}} &amp; {\bf V}_{1}^{\sf T} \left( \mu_{2}-\mu_{3}\right) {\bf 1}_{n_{2}} \\
+{\bf v}^{\sf T} \left( \mu_{1}-\mu_{3}\right) {\bf 1}_{n_{1}}  &amp; {\bf v}^{\sf T} \left( \mu_{2}-\mu_{3}\right) {\bf 1}_{n_{2}} 
+\end{bmatrix}={\bf R}{\bf \Sigma}{\bf U}^{\sf T},
+\end{split}$$`
+
+where `\({\bf v}=orth\left( \psi \left[{\bf H},{\bf h} \right]\right)\)` ,
+ `\({\bf H}={\bf V}_{2} - {\bf V}_{1} {\bf V}_{1}^{\sf T}{\bf V}_{2}\)`  and 
+`\({\bf h}=\left(\mu_{1}-\mu_{2}\right)-{\bf V}_{1}{\bf V}_{1}^{\sf T} \left( \mu_{1}-\mu_{2}\right)\)`
+
+--
+
+.content-box-green[
+and the wanted quanties are 
+.center[
+** `\({\bf U}_{3}={\bf U}\)`  ** , ** `\({\bf \Sigma}_{3}={\bf \Sigma}\)`  ** , 
+** `\({\bf V}_{3}=\left[{\bf V}_{1},\bf{v}  \right]{\bf R}\)`  ** and ** `\(\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
+]
+]
+---
+class: animated fadeIn
+### incremental SVD
+
+With ** `\({\bf\Omega}_{1}\)` ** available, the following holds
+
+`$$\begin{bmatrix} {\bf X}_1\\
+  {\bf X}_2
+ \end{bmatrix}  = \begin{bmatrix}{\bf U}_{1} &amp; {\bf 0} \\
+ {\bf 0} &amp; {\bf I}
+  \end{bmatrix} \begin{bmatrix}{\bf \Sigma}_{1} &amp; {\bf 0} \\
+ {\bf L} &amp; {\bf \Gamma}{\bf Q}^{\sf T}
+\end{bmatrix} \begin{bmatrix}{\bf V}_{1}  \\ {\bf Q}
+  \end{bmatrix}$$`
+`\({\bf L} = {\bf X}_2{\bf V}_{1}^{\sf T}\)`, `\({\bf Q}\)` results from the QR decomposition of `\(\bf{\Gamma}={\bf X}_2 - {\bf L}{\bf V}_{1}\)` and `\({\bf I}\)` is the identity matrix,
+the mean `\(\mu_{3}\)` is computed as before and added as an extra row to `\({\bf X}_{2}\)`
+
+
+--
+The updated eigenspace ** `\({\bf\Omega}_{3}\)` ** quantities depend on the SVD of 
+
+`$$\begin{bmatrix}{\bf \Sigma}_{1} &amp; {\bf 0}  \\
+{\bf L} &amp; {\bf \Gamma}{\bf Q^{\sf T}}
+ \end{bmatrix}={\bf U}_{m}{\bf \Sigma}_{m}{\bf V}^{\sf T}_{m}$$`
+
+--
+
+.content-box-green[
+and the wanted quanties are 
+.center[
+** `\({\bf U}_{3} = \begin{bmatrix}{\bf U}_{1} &amp; {\bf 0} \\ {\bf 0} &amp; {\bf I}\end{bmatrix} {\bf U}_{m}\)` ** ,
+** `\({\bf     \Sigma}_{3}={\bf \Sigma}_{m}\)`  ** , 
+** `\({\bf V}_{3} =  {\bf V}_m\begin{bmatrix}{\bf V}_{1} \\ {\bf Q}\end{bmatrix}\)`  ** and ** `\(\mu_{3} = \frac{1}{ { n}_{1}+{n}_{2}}\left(\mu_{1}{n}_{1} + \mu_{2}{n}_{2} \right)\)` **
+]
+]
+
+---
+class: animated fadeIn middle center inverse
+## PCA on incomplete data-chunks
+
+---
+class: animated fadeIn
+### Naive CW-RPCA
+
+Multiple chunks with missings, a straightforward solution is two-step
+
+- apply RPCA on each chunk separately and impute the missing entries
+
+- merge the RPCA solution in to the general one using **eigenspace arithmetics**
+
+--
+
+.content-box-green[
+Pros:
+- easy to parallelize: chunks are imputed independent from each other
+- the RPCA (which is iterative) never runs over the full set of observations
+]
+
+--
+
+.content-box-red[
+Cons:
+- the missings are imputed according to local structures (chunk-based)
+- this may lead to inaccuracies, depending on the scenario 
+
+]
+
+---
+class: animated fadeIn
+### CW-RPCA
+
+Multiple chunks  coming in sequence, with missings 
+
+CW-RPCA is an embedding of the **incremental SVD** and of a modified version of RPCA
+
+Standard RPCA is applied to the first chunk, `\({\bf X}_{1}\)`. The CW-RPCA procedure, for the general chunk `\({\bf X}_{i}\)` and `\(i &gt; 1\)`, can be summarised as follows:
+  
+- **step 1** apply a modified version of the RPCA algorithm,  based on incremental SVD on `\({\bf X}_{i}\)` to obtain `\({\bf \tilde{X}}_{i}\)`
+
+- **step 2**  update the current eigenspace `\({\bf \Omega}\)` according to the obtained  `\({\bf \tilde{X}}_{i}\)`
+
+recall that `\({\bf \tilde{X}}_{i}\)` is the imputed version of the  `\(i^{th}\)` chunk.
+
+
+---
+class: animated fadeIn
+### CW-RPCA
+
+CW-RPCA of a chunk `\({\bf {X}}_{i}\)` is equivalent to the application of RPCA on `\(\left[{\bf \tilde{X}}_{1};{\bf \tilde{X}}_{2}, \ldots, {\bf X}_{i}\right]\)`
+--
+
+.content-box-green[
+Pros:
+- the CW-RPCA iterates over the chunk `\({\bf X}_{i}\)` only and not over `\(\left[{\bf \tilde{X}}_{1};{\bf \tilde{X}}_{2}; \ldots; {\bf X}_{i}\right]\)`
+
+- the CW-RPCA-based imputation of `\({\bf X}_{i}\)` takes into account the correlation structure characterising chunks  `\({\bf \tilde{X}}_{1}\)` to `\({\bf \tilde{X}}_{i-1}\)`
+]
+
+--
+
+.content-box-red[
+Cons:
+- once imputed, the chunks are not processed again
+- the imputation of the first few chunks may not be based on the general correlation structure
+]
+
+
+
+---
+class: animated fadeIn middle center inverse
+## Experiments
+
+---
+class: animated fadeIn
+### Performance evaluation
+
+**what**
+
+- CW-RPCA procedures vs ordinary RPCA
+
+
+- CW-RPCA vs *naive* CW-RPCA
+
+--
+
+**how**
+
+- **imputation error** mean absolute discrepancy between true and imputed values
+
+- **RV coefficient** $$RV\left({\bf F},{\bf F}^{\star}\right) = \frac{tr\left(  {\bf F}^{\sf T}{\bf F} \ {\bf F}^{\star\sf T}{\bf F^{\star}}\right)}{tr\left({\bf F}^{\sf T}{\bf F}  \right)^{2}
+tr\left({\bf F}^{\star\sf T}{\bf F^{\star}}  \right)^{2}}
+$$
+
+  where `\({\bf F}\)` and `\({\bf F}^{\star}\)` are the PCA scores on the dataset with and without missings
+
+---
+class: animated fadeIn
+### structures and mechanisms
+
+**data**
+
+- synthetic dataset with (correlation) structure
+
+- benchmark sensor data set (Tennessee Eastman Problem)
+
+**missing data mechanisms**  
+
+- MCAR: random entries in each chunk are rendered missing
+
+- MNCAR: the entries of a **target** variable depend on one or more **agent** variables
+
+  - logistic regression-based
+  
+  - correlation-based
+
+---
+class: animated fadeIn
+### data structure
+
+.pull-left[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+- simulation setup (almost) as in (Dray and Josse, 2015)
+- number of row-chunks: 5 to 25 (Each of size `\(500\times 9\)`)
+- 10 replicates for each scenario
+
+
+]
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+
+
+---
+class: animated fadeIn
+### MCAR scenario 
+
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-8-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+.center[*naive*-CW-RPCA and RPCA provide similar results (as expected)]
+
+
+---
+class: animated fadeIn
+### MNCAR logistic regression-based scenario 1  
+
+.pull-left[
+-  the response `\(Y\)` dictates whether the entries of `\(X\)` are rendered missing
+** `$$P(Y=1\mid X_{i}) = \frac{exp(\hat{\beta}_{0}+\hat{\beta}_{1}X_{i})}{1+exp(\hat{\beta}_{0}+\hat{\beta}_{1}X_{i})}$$` **  
+
+- grid search of plausible values for `\(\hat{\beta}_{0}\)` and `\(\hat{\beta}_{1}\)`,  pick up  values that lead to `\(10\%\)` missing entries 
+
+- **note**: the first two chunks are **MCAR** (preserve correlation)
+]
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-9-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### MNCAR logistic regression-based scenario 2  
+
+.pull-left[
+-  the response `\(Y\)` dictates whether the entries of `\(X_{j}\)` are rendered missing
+** `$$P(Y=1\mid {\bf X}_{-j}) = \frac{exp({\bf X}_{-j}\hat{ {\beta}})}{1+exp({\bf X}_{-j}\hat{ {\beta}})}$$` **  
+- `\({\bf X}_{-j}\)` is the predictors matrix; predictors come from the correlation block of `\({\bf X}_{j}\)`  
+- grid search of plausible values for `\(\hat{\beta}\)`,  pick up  values that lead to `\(10\%\)` missing entries 
+
+- **note**: the first two chunks are **MCAR** (preserve correlation)
+]
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+class: animated fadeIn
+### MNCAR correlation-based 
+
+.pull-left[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+.center[MCAR chunk correlation]
+]
+
+.pull-right[
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+.center[MNCAR chunk correlation]
+]
+
+---
+class: animated fadeIn
+### MNCAR correlation-based scenario
+
+.pull-left[
+.center[**scenario 1**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-13-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+.center[MCAR chunks randomly positioned]
+]
+
+.pull-right[
+.center[**scenario 2**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-14-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+.center[MCAR chunks processed first]
+]
+
+
+---
+class: animated fadeIn
+### MNCAR correlation-based scenario results
+
+.pull-left[
+.center[**scenario 1**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+.center[**scenario 2**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-16-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### TEP
+The Tennessee Eastman Problem (TEP) data is a sensor data benchmark simulating an industrial chemical process (see, e.g., Severson, Molaro, and Braatz, 2017)
+
+--
+
+&amp;nbsp;
+
+&gt; PCA on process data: a tool for multivariate process control
+&gt;
+&amp;nbsp;
+&gt;
+&gt; Missing values in process control data are common  (e.g. due to sensor failures)
+
+
+---
+class: animated fadeIn
+### TEP with missings
+
+.pull-left[
+.center[**complete data structure**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-17-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+.center[**rendered missing data structure**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-18-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### TEP results: imputation error
+500 observations per chunk. Up to 25 chunks analysed
+
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-19-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### TEP results: RV index
+
+.pull-left[
+.center[**RV on object scores**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-20-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+.center[**RV on attribute scores**]
+&lt;img src="CW_RPCA_ecda_2022_files/figure-html/unnamed-chunk-21-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### conclusion
+
+
+** CW-RPCA ** proved to be suitable when 
+- the data underlying correlation structure is steady
+- the MNCAR mechanism hides away the underlying stucture
+
+
+**process data** may present both the above characteristics
+
+--
+### future work
+- compare to other imputation methods such as **BLUP** (best linear unbiased prediction)
+- extension to the categorical data case (multiple correspondence analysis)
+- deal with the non unit variances case (.red[that's a difficult one])
+---
+class: animated fadeIn
+### References
+
+Baker, C. G., K. A. Gallivan, and P. Van Dooren (2012). "Low-rank
+incremental methods for computing dominant singular subspaces". In:
+_Linear Algebra and its Applications_ 436.8, pp. 2866-2888.
+
+Cardot, H. and D. Degras (2018). "Online Principal Component Analysis
+in High Dimension: Which Algorithm to Choose?" In: _International
+Statistical Review_ 86.1, pp. 29-50.
+
+Dray, S. and J. Josse (2015). "Principal component analysis with
+missing values: a comparative survey of methods". In: _Plant Ecology_
+216.5, pp. 657-667.
+
+Geraci, M. and A. Farcomeni (2018). "Principal Component Analysis in
+the Presence of Missing Data". In: _Advances in Principal Component
+Analysis_. Springer, pp. 47-70.
+
+Gu, M. and S. C. Eisenstat (1994). "A stable and efficient algorithm
+for the rank-one modification of the symmetric eigenproblem". In: _SIAM
+journal on Matrix Analysis and Applications_ 15.4, pp. 1266-1276.
+
+Hall, P., D. Marshall, and R. Martin (2002). "Adding and subtracting
+eigenspaces with eigenvalue decomposition and singular value
+decomposition". In: _Image and Vision Computing_ 20.13-14, pp.
+1009-1016.
+
+---
+class: animated fadeIn
+
+### References
+
+Hegde, A., J. C. Principe, D. Erdogmus, et al. (2006).
+"Perturbation-based eigenvector updates for on-line principal
+components analysis and canonical correlation analysis". In: _Journal
+of VLSI signal processing systems for signal, image and video
+technology_ 45.1-2, pp. 85-95.
+
+Jolliffe, I. T. (2002). _Principal Component Analysis, Second Edition_.
+Springer-Verlag.
+
+Kiers, H. A. (1997). "Weighted least squares fitting using ordinary
+least squares algorithms". In: _Psychometrika_ 62.2, pp. 251-266.
+
+Levey, A. and M. Lindenbaum (2000). "Sequential Karhunen-Loeve basis
+extraction and its application to images". In: _IEEE Transactions on
+Image processing_ 9.8, pp. 1371-1374.
+
+Loisel, S. and Y. Takane (2018). "Comparisons among several methods for
+handling missing data in principal component analysis (PCA)". In:
+_Advances in Data Analysis and Classification_, pp. 1-24.
+
+Markos, A. and A. Iodice D'Enza (2018). "A FRAMEWORK FOR THE
+INCREMENTAL UPDATE OF THE MCA SOLUTION". In: _Italian Journal of
+Applied Statistics_ 29.
+
+Mitliagkas, I., C. Caramanis, and P. Jain (2013). "Memory limited,
+streaming PCA". In: _Advances in Neural Information Processing
+Systems_. , pp. 2886-2894.
+
+---
+class: animated fadeIn
+
+### References
+
+Oja, E. (1992). "Principal components, minor components, and linear
+neural networks". In: _Neural networks_ 5.6, pp. 927-935.
+
+Ross, D. A., J. Lim, R. Lin, et al. (2008). "Incremental learning for
+robust visual tracking". In: _International journal of computer vision_
+77.1-3, pp. 125-141.
+
+Sanger, T. D. (1989). "Optimal unsupervised learning in a single-layer
+linear feedforward neural network". In: _Neural networks_ 2.6, pp.
+459-473.
+
+Severson, K. A., M. C. Molaro, and R. D. Braatz (2017). "Principal
+component analysis of process datasets with missing values". In:
+_Processes_ 5.3, p. 38.
+
+Sportisse, A., C. Boyer, and J. Josse (2018). "Imputation and low-rank
+estimation with Missing Non At Random data". In: _arXiv preprint
+arXiv:1812.11409_.
+
+Warmuth, M. K. and D. Kuzmin (2008). "Randomized online PCA algorithms
+with regret bounds that are logarithmic in the dimension". In: _Journal
+of Machine Learning Research_ 9.Oct, pp. 2287-2320.
+
+Weng, J., Y. Zhang, and W. Hwang (2003). "Candid covariance-free
+incremental principal component analysis". In: _IEEE Transactions on
+Pattern Analysis and Machine Intelligence_ 25.8, pp. 1034-1040.
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
