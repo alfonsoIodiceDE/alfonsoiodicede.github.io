@@ -4,6 +4,6 @@ layout: default
 
 ## Classes
 
-_yay_
+[Linear regression](teaching_related/Linear_regression/Linear-Regression-part_1.html)
 
 [back](./)
