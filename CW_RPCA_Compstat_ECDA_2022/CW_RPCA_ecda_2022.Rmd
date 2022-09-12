@@ -70,7 +70,7 @@ library(janitor)
 library(patchwork)
 library(mvtnorm)
 
-style_duo_accent(primary_color = "#17A589",
+style_duo_accent(primary_color = "#7890c7",
                  secondary_color = "#37499c",
                  title_slide_background_image = "./figures/logo_ecda_2022.png",
                  title_slide_background_position = "bottom",

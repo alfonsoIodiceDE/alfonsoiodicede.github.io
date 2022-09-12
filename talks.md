@@ -10,4 +10,6 @@ layout: default
 
   [SDS22: Biplots in dimension reduction and clustering](JDR_biplots/biplots_in_dm_clust_COMPSTAT22.html)
 
+  [ECDA22: Chunk-wise regularised PCA-based imputation of missing data](CW_RPCA_Compstat_ECDA_2022/CW_RPCA_ecda_2022.html)
+
 [back](./)
