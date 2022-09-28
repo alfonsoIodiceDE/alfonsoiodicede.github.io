@@ -2,6 +2,9 @@
 layout: default
 ---
 
+
+---
+
 #### Categorical distance framework
 
 Sep 28, 2022
@@ -10,5 +13,6 @@ Use different distances/dissimilarities for categorical data on different datase
 
 [KNN and PAM experiments](blogposts_archive/distances_experiment_superv_unsuperv.html)
 
+---
 
 [back](./)
