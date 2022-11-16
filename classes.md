@@ -27,6 +27,5 @@ Using synthetic data to explicitely compute the bias, the variance, the expected
 
 The output of the function for linear discriminant analysis is based on Fisher's Discriminant Analysis, and this differs from the computations described in the book An Introduction to Statistical Learning.
 
-[pres uniexpo](teaching_related/pres_stat.pdf)
 
 [back](./)
