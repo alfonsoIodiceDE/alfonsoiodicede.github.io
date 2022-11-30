@@ -15,4 +15,15 @@ Use of different distances/dissimilarities for categorical data on different dat
 
 ---------------------
 
+
+#### Spectral clustering of mixed data
+
+Nov 30, 2022
+
+Comparison of spectral clustering solutions using matching and total variance distance for categorical data, Euclidean for continuous.
+
+[Spectral clustering experiment](blogposts_archive/spectral_clust_mixed.html)
+
+---------------------
+
 [back](./)
