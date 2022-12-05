@@ -7,7 +7,7 @@ layout: default
 
 #### Spectral clustering of mixed data
 
-Nov 30, 2022
+Dec 5, 2022
 
 Comparison of spectral clustering solutions using matching and total variance distance for categorical data, Euclidean for continuous.
 
