@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Mixed-type data spectral clustering with variable specific distances</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alfonso Iodice D’Enza, Cristina Tortora and Francesco Palumbo" />
+    <script src="spectral_mix_ercim22_files/header-attrs/header-attrs.js"></script>
+    <link href="spectral_mix_ercim22_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <link href="spectral_mix_ercim22_files/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="spectral_mix_ercim22_files/tile-view/tile-view.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Mixed-type data spectral clustering with variable specific distances
+]
+.author[
+### Alfonso Iodice D’Enza, Cristina Tortora and Francesco Palumbo
+]
+
+---
+
+
+
+
+
+
+class: animated fadeIn middle
+
+.my-pull-left[
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+&amp;nbsp;
+
+#### outline
+
+
+]
+
+.my-pull-right[
+&gt;### spectral clustering
+&gt;
+&gt;### association-based distances for mixed-type data
+&gt;
+&gt;### experiments
+&gt;
+&gt;### conclusion
+]
+
+
+---
+class: animated fadeIn 
+
+### cluster analysis 
+- &lt;h4 style = "color:#37499c"&gt; the general aim is to find homogeneous groups of observations &lt;/h4&gt;
+  
+--
+
+&gt;    observations from the same group are similar to each other    
+&gt;
+&gt;    observations from different groups are not similar to each other
+
+
+
+
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-1-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+class: animated fadeIn
+
+### clustering approaches
+&gt; If a cluster structure does underlie the observations at hand
+
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-2-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; partitioning
+&gt;
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-3-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+.footnote[(K-means, MacQueen, 1967)]
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; agglomerative
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-4-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+.footnote[(see, e.g., Kaufman and Rousseeuw, 2009)]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; model-based
+
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-5-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+.footnote[(GMM, McLachlan and Basford, 1988)]
+
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; density-based
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-6-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+.footnote[(DBSCAN, Ester, Kriegel, Sander, Xu, and others, 1996)]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; spectral
+&gt; 
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-7-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+.footnote[(NJW, Ng, Jordan, and Weiss, 2001)]
+
+---
+class: animated fadeIn
+### clustering approaches
+&gt;If a cluster structure does underlie the observations at hand, any approach will work
+
+
+
+
+--
+
+.my-pull-left[
+## or not?
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-9-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+--
+.center[## not really]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; partitioning
+&gt; (Kmeans)
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-10-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; agglomerative
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-11-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; model-based
+&gt; (GMM)
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-12-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; density-based
+&gt; (dbscan)
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-13-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### clustering approaches
+
+.my-pull-left[
+&gt; spectral
+
+]
+
+.my-pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-14-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+class: animated fadeIn inverse center middle
+
+&lt;h1 style = "color:#37499c"&gt; spectral clustering &lt;/h1&gt;
+
+
+
+---
+class: animated fadeIn
+### Spectral clustering?
+
+
+create a weighted undirected graph &lt;span style = "color:#EA655E"&gt; `\(G(V,E)\)` &lt;/span&gt;
+   out of the `\(\bf X\)` matrix
+
+
+
+&lt;img src="./figures/graph_adj.png" width="55%" style="display: block; margin: auto;" /&gt;
+
+-  the observations are mapped on the &lt;span style = "color:#EA655E"&gt; vertices &lt;/span&gt; of the graph
+
+- each &lt;span style = "color:#EA655E"&gt; edge &lt;/span&gt; is weighted according to the &lt;span style = "color:#EA655E"&gt; similarity &lt;/span&gt; between the linked vertices/observations 
+
+- pairwise similarities are stored in the so-called &lt;span style = "color:#EA655E"&gt; affinity matrix `\(\bf A\)` &lt;/span&gt;
+
+.footnote[www.kaggle.com/code/vipulgandhi/spectral-clustering-detailed-explanation]
+
+---
+class: animated fadeIn
+### Spectral clustering
+
+#### Defining the affinity matrix `\({\bf A}\)`
+- the affinity matrix is &lt;span style = "color:#EA655E"&gt; `\({\bf A}=exp(-{\bf D}^{2}(2\sigma^{2})^{-1})\)` &lt;/span&gt;
+
+-  &lt;span style = "color:#EA655E"&gt; `\(\bf D\)` &lt;/span&gt; be the `\(n\times n\)` matrix of pairwise Euclidean distances
+
+
+- the &lt;span style = "color:#EA655E"&gt; `\(\sigma\)` &lt;/span&gt; parameter dictates the number of neighbors each observation is linked to
+  - the smaller  `\(\sigma\)`, the lower the number observations linked to each other 
+
+- diagonal terms of `\(\bf A\)` are set to zero: &lt;span style = "color:#EA655E"&gt; `\(a_{ii}=0\)` &lt;/span&gt;, `\(i=1,\ldots,n\)`
+ 
+
+---
+class: animated fadeIn
+### Spectral clustering: cutting the graph
+
+.pull-left[
+#### the aim is then to partition (cut) &lt;span style = "color:#EA655E"&gt; `\(G(V,E)\)` &lt;/span&gt;  into K groups (clusters)
+
+]
+
+.pull-right[
+- edges linking vertices from different groups have a low weight
+
+- edges linking vertices from the same group have an high weight
+
+]
+
+
+--
+
+&gt; Finding an optimal partition of the graph is not easy:
+&gt;
+&gt; - intuitively, one could pick the partition that minimizes the sum of the weights within each group
+&gt; - but that would lead to isolated nodes
+
+---
+class: animated fadeIn
+### Spectral clustering: cutting the graph
+
+An approximated solution to the graph partitioning problem boils down to the &lt;span style = "color:#EA655E"&gt; spectral decomposition &lt;/span&gt; of
+&lt;span style = "color:#EA655E"&gt; `$${\bf L} ={\bf Q}{\Lambda}{\bf Q}^{\sf T}$$` &lt;/span&gt;
+
+where the columns of &lt;span style = "color:#EA655E"&gt; `\({\bf Q}\)` &lt;/span&gt; are the eigenvectors of `\({\bf L}\)`  and &lt;span style = "color:#EA655E"&gt; `\({\Lambda}\)` &lt;/span&gt; is the diagonal matrix of the corresponding eigenvalues (sorted in descending order)
+--
+
+&amp;nbsp;
+
+&lt;span style = "color:#EA655E"&gt; `\(\bf L\)` &lt;/span&gt; is referred to as  the &lt;span style = "color:#EA655E"&gt; graph Laplacian matrix &lt;/span&gt; (symmetrically normalized), given by
+
+&lt;span style = "color:#EA655E"&gt;
+`$$\bf{L} = {\bf D}_{r}^{-1/2}{\bf A}{\bf D}_{r}^{-1/2}$$`
+&lt;/span&gt;
+
+where &lt;span style = "color:#EA655E"&gt; `\({\bf D}_{r}=diag({\bf r})\)` &lt;/span&gt;,
+&lt;span style = "color:#EA655E"&gt; `\({\bf r}={\bf A}{\bf 1}\)` &lt;/span&gt; and
+&lt;span style = "color:#EA655E"&gt; `\({\bf 1}\)` &lt;/span&gt; is an `\(n\)`-dimensional vector of 1's 
+
+
+&amp;nbsp;
+
+--
+the spectral clustering of the `\(n\)` original objects is a &lt;span style = "color:#EA655E"&gt; `\(K\)`-means&lt;/span&gt; applied on the rows of the matrix &lt;span style = "color:#EA655E"&gt; `\({\bf{\tilde Q}}\)`&lt;/span&gt;, containing the first `\(K\)` columns of `\(\bf Q\)`
+
+---
+class: animated fadeIn
+### Spectral clustering: solution
+
+
+
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-16-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Spectral clustering: solution
+
+.pull-left[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-17-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-18-1.png" width="85%" style="display: block; margin: auto;" /&gt;
+]
+
+
+
+---
+class: animated fadeIn
+### Spectral clustering review: the NJW  procedure
+
+&gt; - step 1: compute the pairwise distances matrix `\(\bf D\)`
+&gt;
+&gt; - step 2: switch to the affinity matrix `\(\bf A\)`
+&gt;
+&gt; - step 3: normalize the affinity matrix to obtain the Laplacian matrix `\(\bf L\)`
+&gt;
+&gt; - step 4: decompose `\(\bf L\)` and obtain `\({\bf {\tilde Q}}\)`
+&gt;
+&gt; - step 5: apply the `\(K\)`-means on `\({\bf {\tilde Q}}\)` to obtain the cluster allocation vector
+
+
+--
+
+###  performance
+
+Recent benchmarking studies (e.g., Murugesan, Cho, and Tortora, 2021) outlined that
+
+- spectral clustering is not the best there is
+- but is often among the best performing clustering approaches
+- it works well on non-convex and overlapping clusters
+
+---
+class: animated fadeIn
+### Spectral clustering generalization to non-continuos data
+
+Spectral clustering procedures have been proposed in the literature to deal with 
+
+- categorical datasets (David and Averbuch, 2012)
+
+- mixed-type datasets (Mbuga and Tortora, 2021): propose a convex combination of Hamming and Euclidean distances to deal with categorical and continuous variables, respectively
+
+In general the definition of pairwise distances matrix `\(\bf D\)` is key to extend the NJW procedure to mixed data
+
+- along this line, using the Gower dissimilarity is also an option
+
+
+--
+
+.my-pull-left[
+### aim
+]
+
+
+.my-pull-right[
+&gt; propose a spectral clustering implementation based, as in (Mbuga and Tortora, 2021), on a convex combination of distances
+&gt; - use of the so-called &lt;span style = "color:#EA655E"&gt; total variation distance &lt;/span&gt; to take into account the variables association when computing pairwise distances between objects
+]
+
+---
+class: animated fadeIn inverse center middle
+
+&lt;h1 style = "color:#37499c"&gt; association-based distances &lt;/h1&gt;
+&lt;h2 style = "color:#37499c"&gt; for categorical variables &lt;/h2&gt;
+
+
+---
+class: animated fadeIn
+### Association-based distances
+
+When computing distances between multivariate observations, an implicit assumption is the pairwise &lt;span style = "color:#EA655E"&gt;independence&lt;/span&gt; among the considered variables
+
+- by-variable distances are computed, and then added together
+--
+
+  - Euclidean or Manhattan distances for the continuous case
+  - Hamming (matching) distance for the categorical case
+
+--
+
+&amp;nbsp;
+
+-----
+
+&amp;nbsp;
+
+&gt; As pointed out in (e.g., van de Velden, Iodice D'Enza, Markos, and Cavicchia, 2023)  several recent proposals to compute distances for multivariate categorical observations are &lt;span style = "color:#EA655E"&gt;association-based&lt;/span&gt;
+
+- for numerical variables, the relation between variables can be accounted for using the
+Mahalanobis distance
+
+- for categorical variables, the choice is less obvious and not trivial
+
+---
+class: animated fadeIn
+### Total variation distance (TVD)
+
+#### basic structures
+&gt; - `\({\bf X}_{cat}\)` is an `\(n\times q\)` matrix of categorical variables, each with `\(q_{j}\)` categories, `\(j=1,\ldots,q\)`
+&gt; - `\({\bf Z}_{j}\)` is the one-hot encoded version of the `\(j^{th}\)` variables and `\({\bf Z}=\left[Z_{1},Z_{2},\ldots,Z_{q}\right]\)`
+&gt; - `\({\bf P}=\frac{1}{n}{\bf Z}^{\sf}{\bf Z}\)` is the matrix co-occurrence proportions
+
+--
+
+#### block matrix of conditional distributions
+&gt; given the block matrix `\({\bf R} = {\bf P}_{d}^{-1}\left({\bf P}-{\bf P}_{d}\right)\)`, with `\({\bf P}_{d}=diag({\bf P})\)` 
+&gt;    - the general off-diagonal block is `\({\bf R}_{ij}\)` ( `\(q_{i}\times q_{j}\)` )
+&gt;    - the `\(a^{th}\)` row of `\({\bf R}_{ij}\)`, `\({\bf r}^{ij}_{a}\)`, is the  conditional distribution of the `\(j^{th}\)` variable, given the `\(a^{th}\)` category of the `\(i^{th}\)` variable  
+
+---
+class: animated fadeIn
+### Total variation distance (TVD)
+
+#### pair-wise dissimilarity between categories
+&gt; consider any pair of categories `\(a\)` and `\(b\)` from the `\(i^{th}\)` categorical variable,
+&gt; their overall dissimilarity is `\(\delta^{i}(a,b)\)`, that is
+`$$\delta^{i}(a,b)=\sum_{i\neq j}^{q}w_{ij}\Phi^{ij}({\bf r}^{ij}_{a},{\bf r}^{ij}_{b})$$`
+&gt; upon defining  `$$\Phi^{ij}({\bf r}^{ij}_{a},{\bf r}^{ij}_{b})=\frac{1}{2}\sum_{\ell=1}^{q_{j}}|{\bf r}^{ij}_{\ell a}-{\bf r}^{ij}_{\ell b}|$$` 
+then `\(\Phi^{ij}()\)` corresponds the total variation distance between two discrete probability distributions
+
+---
+class: animated fadeIn
+### pairwise object distances (TVD-based)
+
+- For the `\(i^{th}\)` categorical variable, compute `\(\delta^{i}(a,b)\)` for all the possible categories pairs, and store them in the `\(q_{i}\times q_{i}\)` matrix `\({\bf \Delta}_{i}\)`
+
+- define the block-diagonal matrix
+
+`$${\bf \Delta}=\begin{bmatrix}
+{\bf \Delta}_{1}&amp;             &amp; &amp; &amp; \\
+                &amp;{\bf \Delta}_{2} &amp; &amp; &amp; \\
+                &amp;                 &amp; \ddots &amp; &amp;  \\
+          &amp;                 &amp; &amp; &amp; {\bf \Delta}_{q}\\
+\end{bmatrix}$$`
+- the pairwise object distances matrix is
+`$${\bf D}_{cat} = {\bf Z}{\bf \Delta}{\bf Z}^{\sf T}$$`
+---
+class: animated fadeIn
+###Spectral clustering of mixed data
+
+For a mixed-type data table `\({\bf X}={\left[{\bf X}_{con},{\bf X}_{cat}\right]}\)` 
+
+Define the distance matrix for each block of variables (continuous and categorical)
+-  `\({\bf \hat{D}}_{con}\)` as the Euclidean distances matrix, re-scaled on the [0,1] range
+-  `\({\bf \hat{D}}_{cat}\)` as the TVD-based distances matrix, re-scaled on the [0,1] range
+
+
+
+--
+Compute the general distance matrix as
+
+`$${\bf D}=\alpha{\bf \hat{D}}_{con}+(1-\alpha){\bf \hat{D}}_{cat}$$`
+--
+
+Apply the NWJ procedure on `\({\bf D}\)`
+
+- the `\(\alpha\)` parameter can be tuned, its default is `\(\alpha=.5\)`
+
+ 
+---
+class: animated fadeIn
+
+### Simulation setup
+- the categorical variables are generated as in (van de
+Velden, Iodice D’Enza, and Palumbo, 2017)
+- the continuous variables are generated as in (Mbuga and Tortora, 2021)
+
+.my-pull-left[
+
+&amp;nbsp;
+
+#### factors
+
+]
+
+.my-pull-right[
+&gt; 1000 observations
+&gt;
+&gt; 8 and 16 observations ( `\(50\%\)` active, `\(50\%\)` noise)
+&gt;
+&gt; balanced and unbalanced clusters
+&gt;
+&gt;
+]
+
+---
+class: animated fadeIn
+
+### Results: balanced clusters
+
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-19-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Results: unbalanced clusters
+
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-20-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+
+### References
+
+David, G. and A. Averbuch (2012). "SpectralCAT: categorical spectral
+clustering of numerical and nominal data". In: _Pattern Recognition_
+45.1, pp. 416-433.
+
+Ester, M., H. Kriegel, J. Sander, et al. (1996). "A density-based
+algorithm for discovering clusters in large spatial databases with
+noise." In: _kdd_. Vol. 96. 34. , pp. 226-231.
+
+Kaufman, L. and P. J. Rousseeuw (2009). _Finding groups in data: an
+introduction to cluster analysis_. John Wiley &amp; Sons.
+
+MacQueen, J. (1967). "Some methods for classification and analysis of
+multivariate observations". In: _Proceedings of the fifth Berkeley
+symposium on mathematical statistics and probability_. Vol. 1. 14.
+Oakland, CA, USA. , pp. 281-297.
+
+Mbuga, F. and C. Tortora (2021). "Spectral Clustering of Mixed-Type
+Data". In: _Stats_ 5.1, pp. 1-11.
+
+McLachlan, G. J. and K. E. Basford (1988). _Mixture models: Inference
+and applications to clustering_. Vol. 38. M. Dekker New York.
+
+Murugesan, N., I. Cho, and C. Tortora (2021). "Benchmarking in cluster
+analysis: a study on spectral clustering, DBSCAN, and K-Means". In:
+_Conference of the International Federation of Classification
+Societies_. Springer. , pp. 175-185.
+
+---
+class: animated fadeIn
+
+### References (2)
+
+Ng, A., M. Jordan, and Y. Weiss (2001). "On spectral clustering:
+analysis and an algorithm, Advances in Neural Information Processing
+Systems". In: _volume 14,_ 849.
+
+van de Velden, M., A. Iodice D'Enza, A. Markos, et al. (2023). "A
+general framework for implementing distances for categorical
+variables". In: _submitted to Journal of Classification_, pp. 1-21.
+
+Velden, M. van de, A. Iodice D’Enza, and F. Palumbo (2017). "Cluster
+correspondence analysis". In: _Psychometrika_ 82.1, pp. 158-185.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
