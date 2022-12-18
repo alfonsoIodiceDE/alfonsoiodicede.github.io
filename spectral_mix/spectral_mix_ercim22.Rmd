@@ -119,11 +119,11 @@ class: animated fadeIn middle
 .my-pull-right[
 >### spectral clustering
 >
->### association-based distances for mixed-type data
+>### association-based distances for non-continuous data
 >
 >### experiments
 >
->### conclusion
+>### perspectives
 ]
 
 
@@ -133,16 +133,16 @@ class: animated fadeIn
 ### cluster analysis 
 - <h4 style = "color:#37499c"> the general aim is to find homogeneous groups of observations </h4>
   
---
+
 
 >    observations from the same group are similar to each other    
 >
 >    observations from different groups are not similar to each other
 
 
+--
 
-
-```{r,fig.align='center'}
+```{r,fig.align='center', out.width="40%"}
 set.seed(1)
 
 cl1 = rmvnorm(100,c(3,4),sigma= matrix(c(.05,0,0,.05),nrow=2)) %>% as_tibble() %>% mutate(true_clust="a")
@@ -698,10 +698,7 @@ When computing distances between multivariate observations, an implicit assumpti
 
 > As pointed out in `r Citep(bib=ercim_bib,"vdv_joc", before="e.g., ")`  several recent proposals to compute distances for multivariate categorical observations are <span style = "color:#EA655E">association-based</span>
 
-- for numerical variables, the relation between variables can be accounted for using the
-Mahalanobis distance
-
-- for categorical variables, the choice is less obvious and not trivial
+- for categorical variables, the choice is not obvious nor trivial
 
 ---
 class: animated fadeIn
@@ -710,7 +707,7 @@ class: animated fadeIn
 #### basic structures
 > - ${\bf X}_{cat}$ is an $n\times q$ matrix of categorical variables, each with $q_{j}$ categories, $j=1,\ldots,q$
 > - ${\bf Z}_{j}$ is the one-hot encoded version of the $j^{th}$ variables and ${\bf Z}=\left[Z_{1},Z_{2},\ldots,Z_{q}\right]$
-> - ${\bf P}=\frac{1}{n}{\bf Z}^{\sf}{\bf Z}$ is the matrix co-occurrence proportions
+> - ${\bf P}=\frac{1}{n}{\bf Z}^{\sf T}{\bf Z}$ is the matrix co-occurrence proportions
 
 --
 
@@ -791,8 +788,16 @@ class: animated fadeIn
 >
 > balanced and unbalanced clusters
 >
+> mild and high cluster structure
 >
+> 10 replicates
 ]
+
+NWJ implementation based on are compare with the *true* cluster membership via ARI
+
+- Gower distance
+- matching + Euclidean  `r Citep(bib=ercim_bib,"mbuga21")`
+- TVD-based 
 
 ---
 class: animated fadeIn
@@ -823,12 +828,27 @@ sel_scenario_analysis_mix %>%
 ```
 
 ---
+class: animated fadeIn middle
+
+### future work
+
+
+> - adopt variable-specific distances 
+>
+> - distance as an hyperparameter
+>
+> - discuss metrics other than CH
+>
+> - compare spectral clustering performance with other approaches for mixed-type data
+>
+
+---
 class: animated fadeIn
 
 ### References
 
-```{r ,echo=FALSE, results='asis'}
-PrintBibliography(ercim_bib, start = 1, end = 7)
+```{r ,echo=FALSE, results='asis', size='tiny'}
+PrintBibliography(ercim_bib, start = 1, end = 7 )
 ```
 
 ---
@@ -839,3 +859,8 @@ class: animated fadeIn
 ```{r ,echo=FALSE, results='asis'}
 PrintBibliography(ercim_bib, start = 8, end = 14)
 ```
+
+---
+class: animated fadeIn right bottom inverse
+
+### https://alfonsoiodicede.github.io

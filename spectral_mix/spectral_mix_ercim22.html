@@ -46,11 +46,11 @@ class: animated fadeIn middle
 .my-pull-right[
 &gt;### spectral clustering
 &gt;
-&gt;### association-based distances for mixed-type data
+&gt;### association-based distances for non-continuous data
 &gt;
 &gt;### experiments
 &gt;
-&gt;### conclusion
+&gt;### perspectives
 ]
 
 
@@ -60,16 +60,16 @@ class: animated fadeIn
 ### cluster analysis 
 - &lt;h4 style = "color:#37499c"&gt; the general aim is to find homogeneous groups of observations &lt;/h4&gt;
   
---
+
 
 &gt;    observations from the same group are similar to each other    
 &gt;
 &gt;    observations from different groups are not similar to each other
 
 
+--
 
-
-&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-1-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
 
 
 
@@ -441,10 +441,7 @@ When computing distances between multivariate observations, an implicit assumpti
 
 &gt; As pointed out in (e.g., van de Velden, Iodice D'Enza, Markos, and Cavicchia, 2023)  several recent proposals to compute distances for multivariate categorical observations are &lt;span style = "color:#EA655E"&gt;association-based&lt;/span&gt;
 
-- for numerical variables, the relation between variables can be accounted for using the
-Mahalanobis distance
-
-- for categorical variables, the choice is less obvious and not trivial
+- for categorical variables, the choice is not obvious nor trivial
 
 ---
 class: animated fadeIn
@@ -453,7 +450,7 @@ class: animated fadeIn
 #### basic structures
 &gt; - `\({\bf X}_{cat}\)` is an `\(n\times q\)` matrix of categorical variables, each with `\(q_{j}\)` categories, `\(j=1,\ldots,q\)`
 &gt; - `\({\bf Z}_{j}\)` is the one-hot encoded version of the `\(j^{th}\)` variables and `\({\bf Z}=\left[Z_{1},Z_{2},\ldots,Z_{q}\right]\)`
-&gt; - `\({\bf P}=\frac{1}{n}{\bf Z}^{\sf}{\bf Z}\)` is the matrix co-occurrence proportions
+&gt; - `\({\bf P}=\frac{1}{n}{\bf Z}^{\sf T}{\bf Z}\)` is the matrix co-occurrence proportions
 
 --
 
@@ -535,8 +532,16 @@ Velden, Iodice D’Enza, and Palumbo, 2017)
 &gt;
 &gt; balanced and unbalanced clusters
 &gt;
+&gt; mild and high cluster structure
 &gt;
+&gt; 10 replicates
 ]
+
+NWJ implementation based on are compare with the *true* cluster membership via ARI
+
+- Gower distance
+- matching + Euclidean  (Mbuga and Tortora, 2021)
+- TVD-based 
 
 ---
 class: animated fadeIn
@@ -550,6 +555,21 @@ class: animated fadeIn
 ### Results: unbalanced clusters
 
 &lt;img src="spectral_mix_ercim22_files/figure-html/unnamed-chunk-20-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn middle
+
+### future work
+
+
+&gt; - adopt variable-specific distances 
+&gt;
+&gt; - distance as an hyperparameter
+&gt;
+&gt; - discuss metrics other than CH
+&gt;
+&gt; - compare spectral clustering performance with other approaches for mixed-type data
+&gt;
 
 ---
 class: animated fadeIn
@@ -598,6 +618,11 @@ variables". In: _submitted to Journal of Classification_, pp. 1-21.
 
 Velden, M. van de, A. Iodice D’Enza, and F. Palumbo (2017). "Cluster
 correspondence analysis". In: _Psychometrika_ 82.1, pp. 158-185.
+
+---
+class: animated fadeIn right bottom inverse
+
+### https://alfonsoiodicede.github.io
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
