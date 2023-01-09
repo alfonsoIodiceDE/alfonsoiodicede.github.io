@@ -226,14 +226,15 @@ plst_genre = tibble(start=start,stop=stop) %>%
 
 ## Wordcloud of genres
 
-```{r, echo=TRUE, fig.align='center'}
+```{r, echo=TRUE}
 plst_genre[str_which(plst_genre,pattern =  "indie$")] = ifelse(
   plst_genre[str_which(plst_genre,pattern =  "indie$")]=="lo-fi indie",
   "lo-fi indie","indie")
 
 plst_genre = plst_genre %>% as.factor()
+
 tibble(word=levels(plst_genre), freq=plst_genre %>% table() ) %>%
-  wordcloud2()
+wordcloud2(size=.5)
 
 ```
 
@@ -269,6 +270,7 @@ plst_tracks_feat %>%
 ```
 
 ## unsupervised learning
+
 ```{r, echo=TRUE}
 pca_sol = plst_tracks_feat %>% select(v1:v2) %>%
   PCA(graph=FALSE) 
