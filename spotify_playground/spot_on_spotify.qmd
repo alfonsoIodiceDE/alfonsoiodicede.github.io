@@ -365,4 +365,12 @@ plst_tracks_dr_analysis %>%
 ::::
 
 
-# using the code above, create a function that, given the playlist id, create the artist/track/feature dataset, and the genres vector
+# your turn 
+
+---
+
+### create a function that
+- takes the  playlist id as input
+- returns: 
+    - the artist/track/features dataset
+    - the genres vector
