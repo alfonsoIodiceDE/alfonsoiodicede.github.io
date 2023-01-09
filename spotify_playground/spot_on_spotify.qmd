@@ -5,7 +5,7 @@ author: (my playlist analysis)
 footer: Alfonso Iodice D'Enza
 title-slide-attributes:
   data-background-position: top  
-  data-background-image: /images/spotylogo.png
+  data-background-image: images/spotylogo.png
   data-background-size: contain
   data-background-opacity: "0.25"
 format: 
@@ -69,13 +69,13 @@ a wrapper for the spotify web API
 
 create an app
 
-![](/images/dash_1.png)
+![](images/dash_1.png)
 
 ---
 
 edit settings
 
-![](/images/dash_2.png)
+![](images/dash_2.png)
 
 ---
 
@@ -87,7 +87,7 @@ edit the settings
 
 copy the client id (already visible)  the client secret    
 
-![](/images/dash_4.png)
+![](images/dash_4.png)
 
 
 # time to run R
