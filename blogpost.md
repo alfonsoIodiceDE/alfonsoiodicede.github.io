@@ -5,6 +5,14 @@ layout: default
 
 ---------------------
 
+#### Association-based distances for mixed data
+
+Jan 31, 2023
+
+[Association-based distances for mixed data](blogposts_archive/computing_delta_for_mixed_data.html)
+
+---------------------
+
 #### Spectral clustering of mixed data
 
 Dec 5, 2022

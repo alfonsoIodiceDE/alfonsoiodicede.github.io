@@ -16,6 +16,7 @@ format:
     transition: fade
 ---
 
+
 # get access to data
 
 ##  {auto-animate="true"}
@@ -91,6 +92,7 @@ copy the client id (already visible) the client secret
 
 load the libraries
 
+
 ```{r, echo=TRUE, message=FALSE,warning=FALSE}
 #| code-line-numbers: 1-2|3-13
 # remotes::install_github("ricardo-bion/ggradar")
@@ -108,11 +110,13 @@ library(kableExtra)
 library(gganimate)
 ```
 
+
 ##  {.incremental}
 
 get the token to access spotify from within R
 
 -   set your id and secret you copied from the dashboard
+
 
 ```{r, echo=FALSE}
 id <- "da84145148934bce881c50ec3915eb82"
@@ -124,7 +128,9 @@ id <- "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 secret <- "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
+
 -   and get the token
+
 
 ```{r, echo=TRUE}
 Sys.setenv(SPOTIFY_CLIENT_ID = id)
@@ -132,18 +138,22 @@ Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
 access_token <- get_spotify_access_token()
 ```
 
+
 ------------------------------------------------------------------------
 
 You can easily access to all of your playlists
+
 
 ```{r, echo=TRUE}
 get_my_playlists() %>% select(name,id) %>% slice(1:15) %>% kbl() %>%
   kable_styling(font_size = 16)
 ```
 
+
 ------------------------------------------------------------------------
 
 For a given playlist, one has to retrive its id
+
 
 ```{r, echo=TRUE}
 commute_id = get_my_playlists() %>% filter(name=="commuter") %>% pull(id)
@@ -152,9 +162,11 @@ lofi_id = get_my_playlists() %>% filter(name=="lofi beats") %>% pull(id)
 jtro_id = get_my_playlists() %>% filter(name=="Jazztronica") %>% pull(id)
 ```
 
+
 ------------------------------------------------------------------------
 
 That is the information, to access the artists name and id, it takes a little bit more coding
+
 
 ```{r, echo=TRUE}
 plst_id = commute_id
@@ -164,11 +176,13 @@ plst_tracks = get_playlist_tracks(playlist_id = plst_id) %>%
 plst_tracks %>% glimpse()
 ```
 
+
 ------------------------------------------------------------------------
 
 Some tracks have more than one artist, to create a single match
 
 (the first artist only is select)
+
 
 ```{r, echo=TRUE}
 plst_tracks = plst_tracks %>% 
@@ -180,9 +194,11 @@ plst_tracks = plst_tracks %>%
 plst_tracks %>% select(artist.name, track.name,added_at)%>% slice(1:5)
 ```
 
+
 ------------------------------------------------------------------------
 
 Extract the audio features for each track in the playlist
+
 
 ```{r, echo=TRUE}
 plst_tr_id = plst_tracks %>% distinct(track.id) %>% pull(track.id)
@@ -191,16 +207,20 @@ audio_features = get_track_audio_features(ids = plst_tr_id)
 audio_features %>% slice(1:5)
 ```
 
+
 ------------------------------------------------------------------------
 
 match the audio features with the track and artist names
+
 
 ```{r, echo=TRUE}
 plst_tracks_feat = plst_tracks %>%
   left_join(audio_features, by=c('track.id' = 'id')) %>% select(-(type:analysis_url),-mode,-key)
 ```
 
+
 find the genre associated with each artist in the playlist. (note: 50 artist per request, so some coding is needed)
+
 
 ```{r, echo=TRUE}
 #| code-line-numbers: 1-4|5-8
@@ -215,9 +235,11 @@ plst_genre = tibble(start=start,stop=stop) %>%
 
 ```
 
+
 # visualization
 
 ## Wordcloud of genres
+
 
 ```{r, echo=TRUE}
 plst_genre[str_which(plst_genre,pattern =  "indie$")] = ifelse(
@@ -231,7 +253,9 @@ wordcloud2(size=.5)
 
 ```
 
+
 ## spiderplot/radar plot
+
 
 ```{r, echo=TRUE}
 plst_tracks_feat %>% 
@@ -246,7 +270,9 @@ plst_tracks_feat %>%
 
 ```
 
+
 ## parallel coordinates
+
 
 ```{r, echo=TRUE}
 v1=which(plst_tracks_feat %>% names =="danceability")
@@ -259,7 +285,9 @@ plst_tracks_feat %>%
   theme(axis.text.x = element_text(angle=90))
 ```
 
+
 ## unsupervised learning
+
 
 ```{r, echo=TRUE}
 pca_sol = plst_tracks_feat %>% select(v1:v2) %>%
@@ -270,7 +298,9 @@ colnames(pca_coords)=paste0("d_",1:ncol(pca_coords))
 kmeans_clu = kmeans(pca_coords,centers = 4,nstart = 50)$cluster %>% as_factor()
 ```
 
+
 ## put the pca and kmeans results together
+
 
 ```{r, echo=TRUE}
 plst_tracks_dr_analysis = cbind(plst_tracks_feat,pca_coords) %>% 
@@ -279,7 +309,9 @@ plst_tracks_dr_analysis = cbind(plst_tracks_feat,pca_coords) %>%
          top_ten_perc = ifelse(importance>quantile(importance, probs = .9),paste0(track.name,"_",artist.name), ""))
 ```
 
+
 ## PCA map
+
 
 ```{r, echo=TRUE}
 pca_map = plst_tracks_dr_analysis %>% 
@@ -288,13 +320,17 @@ pca_map = plst_tracks_dr_analysis %>%
   ggrepel::geom_text_repel(aes(label=top_ten_perc))
 ```
 
+
 ## PCA map
+
 
 ```{r, echo=TRUE}
 pca_map
 ```
 
+
 ## cluster results via parallel coordinates plot
+
 
 ```{r, echo=TRUE}
 v1 = which(plst_tracks_dr_analysis %>% names =="danceability")
@@ -312,11 +348,14 @@ pca_par_map=plst_tracks_dr_analysis %>%
 
 ```
 
+
 ## cluster results via parallel coordinates
+
 
 ```{r, echo=TRUE}
 pca_par_map
 ```
+
 
 ## Animation by date
 
@@ -325,30 +364,36 @@ pull the month out of
 -   the date the track is added to the playlist
 -   the release date of the track
 
+
 ```{r}
 plst_tracks_dr_analysis = plst_tracks_dr_analysis %>% mutate(
   trk_date = as_date(added_at) %>% month(label=T)%>% fct_drop(),
   trk_rel_date = as_date(track.album.release_date) %>% month(label=T)%>% fct_drop()) 
 ```
 
+
 ## Animation by date
 
 ::: columns
 ::: {.column width="50%"}
+
 ```{r, echo=TRUE}
 plst_tracks_dr_analysis %>%
  ggplot(aes(x = trk_date))+geom_bar(aes(fill=after_stat(count))) + theme_minimal()+
    transition_states(trk_date)+ shadow_mark()+enter_fade() +enter_grow()
 ```
+
 :::
 
 ::: {.column width="50%"}
+
 ```{r, echo=TRUE}
 plst_tracks_dr_analysis %>%
  ggplot(aes(x = trk_rel_date))+geom_bar(aes(fill=after_stat(count))) + theme_minimal()+
    transition_states(trk_rel_date)+ shadow_mark()+enter_fade() +enter_grow()
 
 ```
+
 :::
 :::
 
@@ -362,3 +407,4 @@ plst_tracks_dr_analysis %>%
 -   returns:
     -   the artist/track/features dataset
     -   the genres vector
+
