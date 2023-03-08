@@ -1,0 +1,3175 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data manipulation and visualization</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Statistical Learning" />
+    <script src="Tidy_data_manipulation_and_visualization_files/header-attrs/header-attrs.js"></script>
+    <link href="Tidy_data_manipulation_and_visualization_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="Tidy_data_manipulation_and_visualization_files/kePrint/kePrint.js"></script>
+    <link href="Tidy_data_manipulation_and_visualization_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Data manipulation and visualization
+]
+.subtitle[
+## in the tidyverse
+]
+.author[
+### Statistical Learning
+]
+.date[
+### Alfonso Iodice D'Enza
+]
+
+---
+
+
+
+
+
+
+class: animated fadeIn inverse center middle
+
+# what is tidyverse?
+
+---
+class: animated fadeIn
+
+![A wide image with a diagram of branching in git.](./figures/tidyverse.png)
+.footnote[### This is!]
+
+---
+class: animated fadeIn
+## A tibble (sort of a data frame)
+
+
+```r
+library("tidyverse")
+library("gapminder")
+library("kableExtra")
+gapminder %&gt;% slice_sample(n=5) %&gt;%  kable(format="html") %&gt;% kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Peru &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 69.906 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26769436 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5909.0201 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ghana &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.149 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5581001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 911.2989 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Cameroon &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.430 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17696293 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2042.0952 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Tunisia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 44.600 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3647735 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1468.4756 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Haiti &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1977 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49.923 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4908554 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1874.2989 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+--
+
+.my-pull-left[
+** Note **
+]
+.my-pull-right[
+&gt; - the symbol ** `\(\texttt{%&gt;%}\)` ** is the so-called ** pipe ** operator: it inputs what's on its left to what's on its right
+&gt; - One would obtain the same result by typing ** `\(\texttt{slice_sample(.data=gapminder,n=5)}\)` **
+]
+---
+class: animated fadeIn center middle
+
+# data manipulation with dplyr
+
+
+
+---
+class: animated fadeIn 
+
+### dplyr verbs
+
+In a tibble, **observations** are on **rows** and **variables** are on **columns** 
+
+--
+
+.my-pull-left[
+** by row **
+]
+
+.my-pull-right[
+&gt; - ** filter **   : retrieve the observations that meet specified conditions
+&gt; - ** slice **   : retrieve the observations by position (**slice_sample** is a variation)
+&gt; - ** arrange **  : sorts the observations according to one or more variables
+]
+
+--
+
+.my-pull-left[
+** by column **
+]
+
+.my-pull-right[
+&gt; - ** select **   : select the variables by name
+&gt; - ** mutate **   : transform existing variables or create new ones
+&gt; - ** summarize **   : create descriptive stats
+]
+
+---
+class: animated fadeIn 
+
+### filter
+
+The filter verb just retrieves observations that meet one or more conditions.
+
+--
+Say we want the data for Eurepan countries after year 2000.
+
+
+```r
+gapminder %&gt;% 
+  filter(continent=="Europe",year&gt;=2000) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.651 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3508512 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4604.212 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 76.423 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3600523 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5937.030 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Austria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.980 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8148312 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32417.608 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Austria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.829 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8199783 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36126.493 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.320 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10311970 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30485.884 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Belgium &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.441 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10392226 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33692.605 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Bosnia and Herzegovina &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.090 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4165416 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6018.975 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Bosnia and Herzegovina &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.852 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4552198 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7446.299 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Bulgaria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.140 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7661799 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7696.778 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Bulgaria &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73.005 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7322858 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10680.793 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Croatia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.876 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4481020 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11628.389 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Croatia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.748 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4493312 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14619.223 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Czech Republic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.510 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10256295 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17596.210 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Czech Republic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 76.486 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10228744 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22833.309 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Denmark &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77.180 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5374693 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32166.500 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Denmark &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.332 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5468120 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 35278.419 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Finland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.370 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5193039 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28204.591 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Finland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.313 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5238460 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33207.084 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.590 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59925035 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28926.032 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; France &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.657 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 61083916 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30470.017 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Germany &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.670 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 82350671 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30035.802 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Germany &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.406 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 82400996 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32170.374 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Greece &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.256 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10603863 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22514.255 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Greece &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.483 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10706290 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27538.412 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Hungary &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.590 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10083313 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14843.936 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Hungary &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73.338 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9956108 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18008.944 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Iceland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 288030 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 31163.202 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Iceland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 81.757 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 301931 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36180.789 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ireland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77.783 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3879155 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34077.049 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ireland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.885 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4109086 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40675.996 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Italy &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.240 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 57926999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27968.098 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Italy &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.546 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 58147733 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28569.720 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Montenegro &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73.981 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 720230 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6557.194 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Montenegro &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 684736 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9253.896 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Netherlands &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.530 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16122830 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33724.758 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Netherlands &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.762 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16570613 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36797.933 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Norway &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.050 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4535591 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 44683.975 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Norway &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.196 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4627926 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49357.190 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.670 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 38625976 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12002.239 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Poland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.563 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 38518241 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15389.925 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77.290 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10433867 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19970.908 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Portugal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.098 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10642836 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20509.648 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Romania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 71.322 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22404337 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7885.360 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Romania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.476 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22276056 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10808.476 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Serbia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73.213 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10111559 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7236.075 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Serbia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10150265 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9786.535 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Slovak Republic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 73.800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5410052 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13638.778 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Slovak Republic &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 74.663 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5447502 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18678.314 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Slovenia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 76.660 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2011497 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20660.019 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Slovenia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77.926 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2009245 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25768.258 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.780 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40152517 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24835.472 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Spain &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.941 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 40448191 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28821.064 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Sweden &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.040 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8954175 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29341.631 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Sweden &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.884 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9031088 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33859.748 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Switzerland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 80.620 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7361757 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34480.958 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Switzerland &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 81.701 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7554661 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37506.419 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Turkey &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.845 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 67308928 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6508.086 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Turkey &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 71.777 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 71158647 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8458.276 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; United Kingdom &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 78.471 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 59912431 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29478.999 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; United Kingdom &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79.425 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60776238 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33203.261 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn 
+
+### filter
+
+** `\(\texttt{filter(condition1,condition2)}\)` ** returns the observations that meet ** `\(\texttt{condition1}\)` AND  `\(\texttt{condition2}\)` **
+
+- For more complex conditions, one can use the ** logical operators ** 
+
+--
+
+Say we want the data for  countries before year 2000 ** OR ** with a life expectancy higher than 70.
+
+
+```r
+gapminder %&gt;% 
+  filter((year&gt;=2000)|(lifeExp&gt;70)) %&gt;%  slice(1:6) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42.129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25268405 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 726.7341 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43.828 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 31889923 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 974.5803 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1982 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.420 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2780097 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3630.8807 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3075321 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3738.9327 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 71.581 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3326498 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2497.4379 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1997 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.950 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3428038 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3193.0546 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+.my-pull-left[
+** Note **
+]
+.my-pull-right[
+&gt; no new tibble is created until the assigment is made. To create a new tibble...
+]
+
+--
+
+
+```r
+filtered_gapminder = gapminder %&gt;% 
+  filter((year&gt;=2000)|(lifeExp&gt;70)) 
+```
+
+
+---
+class: animated fadeIn 
+
+### arrange
+
+- The ** `\(\texttt{arrange}\)` ** verb re-orders (ascending) the observations according to a variable.
+
+--
+
+Say we want to arrange the countries with lowest gdpPercap
+
+
+
+```r
+gapminder %&gt;% 
+  arrange(gdpPercap) %&gt;%  slice(1:4) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Congo, Dem. Rep. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 44.966 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 55379852 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 241.1659 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Congo, Dem. Rep. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 46.462 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64606759 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 277.5519 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42.138 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 748747 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 298.8462 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Guinea-Bissau &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32.500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 580653 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 299.8503 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+and then we want to re-order the previous selection by country name
+
+
+```r
+gapminder %&gt;% 
+  arrange(gdpPercap) %&gt;%  slice(1:4) %&gt;% arrange(country) %&gt;%
+  kable(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Congo, Dem. Rep. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 44.966 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 55379852 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 241.1659 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Congo, Dem. Rep. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 46.462 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64606759 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 277.5519 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Guinea-Bissau &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32.500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 580653 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 299.8503 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Lesotho &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42.138 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 748747 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 298.8462 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn 
+
+### arrange
+
+- To arrange in descending order, it just takes
+
+
+
+```r
+gapminder %&gt;% 
+  arrange(desc(gdpPercap)) %&gt;%  slice(1:4) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Kuwait &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1957 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 58.033 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 212846 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 113523.13 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Kuwait &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1972 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 67.712 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 841934 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 109347.87 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Kuwait &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 55.565 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 160000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 108382.35 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Kuwait &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1962 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60.470 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 358266 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 95458.11 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn 
+
+### slice
+
+.pull-left[
+The ** `\(\texttt{slice}\)` ** verb picks the observations up according to their position in the tibble
+
+```r
+slice1=gapminder %&gt;%  slice(1:3) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size=8)
+```
+]
+.pull-right[
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28.801 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8425333 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 779.4453 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1957 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30.332 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9240934 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 820.8530 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1962 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 31.997 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10267083 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 853.1007 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+
+.pull-left[
+We can indicate some specific positions
+
+
+```r
+slice2=gapminder %&gt;%  slice(c(20,37,49)) %&gt;% 
+  kable(format="html") %&gt;%
+  kable_styling(font_size=10)
+```
+]
+.pull-right[
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Albania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3075321 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3738.933 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Angola &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30.015 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4232095 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3520.610 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Argentina &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 62.485 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17876956 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5911.315 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+
+
+.pull-left[
+Or we can pick them up at random, using  `\(\texttt{slice_sample(n= )}\)`
+
+```r
+slice3 = gapminder %&gt;%  slice_sample(n=3) %&gt;% 
+  kable(format="html") %&gt;%
+  kable_styling(font_size=10)
+```
+]
+.pull-right[
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Jordan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 65.869 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2820042 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4448.680 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Israel &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.750 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2693585 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8393.741 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Togo &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1977 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 52.887 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2308582 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1532.777 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+`\(\texttt{slice_min(n= )}\)` and `\(\texttt{slice_max(n= )}\)` are combinations of `\(\texttt{arrange}\)` and `\(\texttt{slice}\)`. Check `\(\texttt{?slice_min}\)` for help
+
+---
+class: animated fadeIn 
+### select 
+
+
+The ** `\(\texttt{select}\)` ** verb refers to variables, indicated by names
+
+
+```r
+gapminder %&gt;%  
+  select(country,gdpPercap) %&gt;% 
+  slice(1:4) %&gt;% kable(format="html") %&gt;%  kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 779.4453 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 820.8530 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 853.1007 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 836.1971 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+One can use the ** " `\(\texttt{:}\)` " ** operator in between variable names, to select a sequence of variables
+
+
+```r
+gapminder %&gt;%  
+  select(country:lifeExp) %&gt;% 
+  slice(1:4) %&gt;% kable(format="html") %&gt;%  kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; country &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; lifeExp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28.801 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1957 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30.332 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1962 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 31.997 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Afghanistan &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34.020 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn 
+### select: helper functions
+
+
+Selecting variables by name becomes increasingly tedious as then nunber of variables to deal with increases. 
+
+--
+
+- The ** helper functions ** makes possible to select multiple variables at a time based on patterns in their name. Self-explaining examples are
+
+- ** `\(\texttt{starts_with(pattern="abc")}\)` **
+
+- ** `\(\texttt{ends_with(pattern="abc")}\)` **
+
+- ** `\(\texttt{contains(pattern="abc")}\)` **
+
+- there is more to it, ** `\(\texttt{?tidyselect::language}\)` **
+
+
+---
+class: animated fadeIn 
+### mutate
+
+The ** `\(\texttt{mutate}\)` ** verb can modify and/or create new variables
+
+- One may want to express the population in millions, and create a variable with the full Gdp, not just the Gdp per-capita
+
+
+```r
+gapminder %&gt;% 
+  mutate(pop=round(pop/1000000,2),
+         gdp=gdpPercap*pop) %&gt;% 
+  select(pop, contains("gdp")) %&gt;% 
+  slice_sample(n=5) %&gt;% 
+  kable(format="html") %&gt;% kable_styling(font_size = 10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; pop &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdpPercap &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; gdp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2.73 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7113.692 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19420.38 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8.40 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1829.765 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15370.03 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9.56 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13149.041 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 125704.83 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 20.03 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5745.160 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 115075.56 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 25.73 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4029.330 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 103674.65 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+Depending on the name assigned to mutated variable
+
+- the new variable will overwrite the existing one with same name (as for ** `\(\texttt{pop}\)` **)
+
+- the new variable will added to the tibble if its name is new as well (as for ** `\(\texttt{gdp}\)` **)
+
+
+---
+class: animated fadeIn 
+### summarize
+
+The ** `\(\texttt{summarize}\)` ** makes it very easy to compute descriptive stats of given variable
+
+
+```r
+gapminder %&gt;% 
+  summarize(min_gdp=min(gdpPercap),
+            q1_gdp=quantile(gdpPercap,.25),
+            median_gdp=quantile(gdpPercap,.5),
+            mean_gdp_pc=mean(gdpPercap),
+            q3_gdp=quantile(gdpPercap,.75),
+            max_gdp=max(gdpPercap)
+            )  %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; min_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q1_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; median_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_gdp_pc &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q3_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; max_gdp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 241.1659 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1202.06 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3531.847 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7215.327 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9325.462 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 113523.1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn 
+### group by
+
+The ** `\(\texttt{group_by}\)` ** verb imposes a conditioning on the further operations. It works great with summarize, to have conditional descriptive statistics 
+
+
+```r
+gapminder %&gt;% 
+  group_by(continent) %&gt;% 
+  summarize(min_gdp=min(gdpPercap),
+            q1_gdp=quantile(gdpPercap,.25),
+            median_gdp=quantile(gdpPercap,.5),
+            mean_gdp_pc=mean(gdpPercap),
+            q3_gdp=quantile(gdpPercap,.75),
+            max_gdp=max(gdpPercap)
+            )  %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; min_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q1_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; median_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_gdp_pc &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q3_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; max_gdp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 241.1659 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 761.247 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1192.138 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2193.755 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2377.417 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 21951.21 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1201.6372 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3427.779 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5465.510 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7136.110 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7830.210 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42951.65 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 331.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1056.993 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2646.787 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7902.150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8549.256 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 113523.13 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 973.5332 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7213.085 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12081.749 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14469.476 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20461.386 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49357.19 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10039.5956 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14141.859 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17983.304 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18621.609 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22214.117 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34435.37 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn 
+### group by
+
+The ** `\(\texttt{group_by}\)` ** verb imposes a conditioning on the further operations. It works great with summarize, to have conditional descriptive statistics 
+
+
+```r
+gapminder %&gt;% 
+  filter(year&gt;2000) %&gt;% 
+  group_by(year,continent) %&gt;% 
+  summarize(min_gdp=min(gdpPercap),
+            q1_gdp=quantile(gdpPercap,.25),
+            median_gdp=quantile(gdpPercap,.5),
+            mean_gdp_pc=mean(gdpPercap),
+            q3_gdp=quantile(gdpPercap,.75),
+            max_gdp=max(gdpPercap)
+            ) %&gt;% kbl() %&gt;% kable_styling(font_size = 8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; min_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q1_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; median_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean_gdp_pc &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; q3_gdp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; max_gdp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 241.1659 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 780.5778 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1215.683 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2599.385 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3314.887 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12521.71 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1270.3649 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4858.3475 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6994.775 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9287.677 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8797.641 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 39097.10 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 611.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2092.7124 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4090.925 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10174.090 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19233.988 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 36023.11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4604.2117 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11721.8515 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23674.863 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 21711.732 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30373.363 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 44683.98 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 23189.8014 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25064.2897 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26938.778 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26938.778 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28813.266 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30687.75 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 277.5519 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 862.9515 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1452.267 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3089.033 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3993.502 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13206.48 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1201.6372 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5728.3535 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8948.103 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11003.032 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11977.575 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 42951.65 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 944.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2452.2104 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4471.062 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12473.027 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22316.193 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 47306.99 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5937.0295 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14811.8982 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28054.066 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25054.482 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33817.963 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 49357.19 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25185.0091 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27497.5987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29810.188 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 29810.188 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 32122.778 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34435.37 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn 
+### distinct
+
+.pull-left[
+The ** `\(\texttt{distinct}\)` ** verb reports the distinct values of a variable...
+
+
+```r
+gapminder %&gt;% 
+  distinct(year) %&gt;% kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; year &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1952 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1957 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1962 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1967 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1972 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1977 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1982 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1987 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1992 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1997 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2002 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2007 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+.pull-right[
+... or distinct combinations of values from multiple variables
+
+
+```r
+gapminder %&gt;% 
+  distinct(year, continent) %&gt;% nrow() %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; x &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 60 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+The value comes from the 12 distinct years considered, times the 5 continents.
+
+]
+
+
+---
+class: animated fadeIn 
+### count
+
+
+.pull-left[
+The ** `\(\texttt{count}\)` ** verb reports the (absolute) frequency distribution of a variable... 
+
+
+```r
+gapminder %&gt;%
+  filter(year==2007) %&gt;% 
+  count(continent) %&gt;% kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 52 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 33 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+.pull-right[
+... or the joint freq distribution of multiple variables
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  count(continent,high_low_lexp) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+---
+class: animated fadeIn 
+### count vs group_by + summarise
+
+
+.pull-left[
+One could consider  to use ** `\(\texttt{group_by}\)` ** and then ** `\(\texttt{summarize}\)` ** the groups via the number of rows (via ** `\(\texttt{n()}\)` **)... 
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  group_by(continent,high_low_lexp) %&gt;%
+  summarize(n=n()) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+.pull-right[
+
+Or  use ** `\(\texttt{count}\)` **
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  count(continent,high_low_lexp) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+&lt;h2 align="center"&gt;It's the same!...not so fast...&lt;/h2&gt;
+  
+
+
+---
+class: animated fadeIn 
+### count vs group_by + summarize
+
+Same as before, this time compute the relative frequencies, too
+.pull-left[
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  group_by(continent,high_low_lexp) %&gt;%
+  summarize(n=n()) %&gt;% 
+  mutate(relative_freqs= round(n/sum(n),3)) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; relative_freqs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.173 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.827 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.960 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.040 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.758 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.242 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+.pull-right[
+
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  count(continent,high_low_lexp) %&gt;%
+  mutate(relative_freqs=round(n/sum(n),3)) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; relative_freqs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.063 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.303 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.169 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.007 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.176 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.056 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.211 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.014 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+&lt;h2 align="center"&gt;It's not the same!...why ?!&lt;/h2&gt;
+
+
+---
+class: animated fadeIn 
+### count vs group_by + summarize
+There is clearly something wrong with ** `\(\texttt{group_by}\)` ** + ** `\(\texttt{summarize}\)` **, as the relative frequencies **do not add up to one** 
+
+.pull-left[
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; relative_freqs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.173 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.827 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.960 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.040 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.758 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.242 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+
+.pull-right[
+- this is due to the tibble being still ** grouped **  
+-  the  function ** `\(\texttt{sum()}\)` ** is still applied group-wise (continent-wise), not  overall  (e.g. ** `\(0.173=\frac{9}{9+43}\)` **)
+]
+
+--
+
+&lt;h3 align="center"&gt;to fix this, one has to `\(\texttt{ungroup}\)` before computing the relative frequecies&lt;/h3&gt;
+
+---
+class: animated fadeIn 
+### count vs group_by + summarize
+
+Same as before, this time compute the relative frequencies, too
+.pull-left[
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  count(continent,high_low_lexp) %&gt;%
+  mutate(relative_freqs=round(n/sum(n),3)) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; relative_freqs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.063 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.303 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.169 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.007 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.176 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.056 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.211 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.014 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+--
+
+.pull-right[
+
+
+
+```r
+gapminder %&gt;% 
+  filter(year==2007) %&gt;% 
+  mutate(high_low_lexp = ifelse(lifeExp&gt;65,"high","low"))  %&gt;% 
+  group_by(continent,high_low_lexp) %&gt;%
+  summarize(n=n()) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(relative_freqs= round(n/sum(n),3)) %&gt;% 
+  kbl() %&gt;% kable_styling(font_size = 10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; continent &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; high_low_lexp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; relative_freqs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.063 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Africa &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.303 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.169 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Americas &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.007 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.176 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Asia &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; low &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.056 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Europe &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.211 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Oceania &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; high &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.014 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+&lt;h2 align="center"&gt;Now it's the same!&lt;/h2&gt;
+
+
+
+---
+class: animated fadeIn center middle
+
+# data taming in the tidyverse
+
+---
+class: animated fadeIn 
+### what is data taming?
+
+** import data **
+
+&gt; The first step in analysis is to import the data from another platform, or in another format
+&gt; - ** `\(\texttt{readr}\)` ** is the package providing functions to import common format, e.g. **csv** or  **txt** 
+&gt; - ** `\(\texttt{readxls}\)` ** and  ** `\(\texttt{haven}\)` ** provide import functions for a variety of file types **xls**, **sql**, **json** 
+
+--
+
+** taming imported data **
+&gt; Opening a data set for the first time, one has to check that everything is as it should be, which is unlikely at best. Data taming is needed 
+&gt; - Cast variable types: are continuous variables, characters, factors, dates alle correctly identified?
+&gt; - Are the variable names, and the strings, consistently coded? (remember R is case sensitive, and a *space* is a character)
+&gt; - Are the missings coded in a consistent way? (several labels could be used in the data set (".", "NA","not available", " ",.....)
+
+
+---
+class: animated fadeIn 
+### data taming tools
+
+Some packages are particularly useful for data taming
+
+- cast types: ** `\(\texttt{readr}\)` ** import functions (e.g. ** `\(\texttt{read_csv}\)` **) have an option to specify the variable types 
+as the data is imported (** `\(\texttt{col_types=}\)` **)
+
+--
+
+- missings identification: ** `\(\texttt{readr}\)` ** import functions (e.g. ** `\(\texttt{read_csv}\)` ** ) have an option ** `\(\texttt{na=}\)` ** where is possible  to specify different labels associated to missing values (the default is ** `\(\texttt{na=c("","NA")}\)` **, so empty cells and cells containing "NA", will be considered missing)
+
+--
+
+- ** `\(\texttt{janitor}\)` ** package consists of functions to **clean up** and homogeneize variable **names** format, and of all the strings.  
+
+--
+
+- ** `\(\texttt{stringr}\)` ** package consists of functions to manipulate, combine, select and, in general, to deal with **strings**.
+
+--
+
+- ** `\(\texttt{lubridate}\)` ** package has functions to to deal with **dates**.
+
+--
+
+&lt;h3 align="center"&gt; Check out the &lt;a href="https://tidyverse.tidyverse.org/articles/paper.html"&gt;  tidyverse &lt;/a&gt; website for more!&lt;/h3&gt;
+
+
+---
+class: animated fadeIn center middle
+
+# tidy data?
+
+---
+class: animated fadeIn center middle
+##  tidy tables are all alike, every  un-tidy table is un-tidy in its own way
+
+---
+class: animated fadeIn 
+
+## tidy data
+
+- ** Each row corresponds to a different observation **
+
+-  ** Each column corresponds to a different variable **
+
+- ** Each cell corresponds to a unique combination observation/variable **
+
+
+Consider four students, and register whether they passed some of the test during a course.
+
+--
+
+.pull-left[
+** Is it tidy ? **
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; homework_1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; homework_2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; final_proj_3 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+It is not, values in cols 2 to 4 record whether a student passed a test.
+]
+
+--
+
+.pull-right[
+** Is it tidy ? **
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; test_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; A &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; B &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; C &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+It is not, the variables refer to the test type, and to student names
+]
+
+--
+&lt;h3 align="center"&gt; they are both un-tidy for different reasons &lt;/h3&gt;
+
+
+---
+class: animated fadeIn
+### tidyfy a table
+
+To make this table to be tidy, we need a single column recording whether the test is passed or not
+.pull-left[
+** Un-tidy  **
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; homework_1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; homework_2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; final_proj_3 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+.pull-left[
+** Tidy  **:
+the ** `\(\texttt{pivot_longer}\)` ** verb helps
+
+
+```r
+untidy_tab_1 %&gt;% pivot_longer(names_to = "test_name", 
+                              values_to = "passed?",
+                              cols=homework_1:final_proj_3) %&gt;% 
+  kbl(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student_name &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; test_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; passed? &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+
+---
+class: animated fadeIn
+### tidyfy a table
+
+To make this table to be tidy, we need a single column recording whether the test is passed or not
+.pull-left[
+** Un-tidy  **
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; test_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; A &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; B &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; C &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; D &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-left[
+** Tidy  **
+
+
+```r
+untidy_tab_2 %&gt;% pivot_longer(names_to = "student_name", 
+                              values_to = "passed?",cols=A:D) %&gt;% 
+  arrange(student_name) %&gt;% select(student_name,everything()) %&gt;% 
+  kbl(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student_name &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; test_name &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; passed? &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; homework_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; final_proj_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+class: animated fadeIn
+### tidyfy a table
+
+To make this table to be tidy, we need different columns for different variables 
+.pull-left[
+** Un-tidy  **
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; variable_name &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; presences &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; presences &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 10 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; presences &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; presences &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 10 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mode &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mode &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mode &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; online &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mode &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; tests_passed &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; tests_passed &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; tests_passed &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; tests_passed &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-left[
+** Tidy  **
+
+
+```r
+tidy_tab=long_tab %&gt;% pivot_wider(names_from = variable_name, 
+                              values_from = value) 
+  
+tidy_tab %&gt;% kbl(format="html") %&gt;% kable_styling(font_size=8)
+```
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; student &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; presences &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; mode &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; tests_passed &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; A &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; B &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; C &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; online &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; D &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; live &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+class: animated fadeIn
+### tidyfy a table
+
+
+
+```r
+glimpse(tidy_tab) 
+```
+
+```
+## Rows: 4
+## Columns: 4
+## $ student      &lt;chr&gt; "A", "B", "C", "D"
+## $ presences    &lt;chr&gt; "11", "10", "11", "10"
+## $ mode         &lt;chr&gt; "live", "live", "online", "live"
+## $ tests_passed &lt;chr&gt; "2", "3", "2", "0"
+```
+Note: `\(\texttt{presences}\)` and `\(\texttt{tests_passed}\)` are coded as **character**. 
+
+--
+
+to fix this, we parse the two variables as numeric
+
+
+```r
+tidy_tab=tidy_tab %&gt;% mutate(across(.cols=c(presences,tests_passed), ~parse_double(.)))
+glimpse(tidy_tab) 
+```
+
+```
+## Rows: 4
+## Columns: 4
+## $ student      &lt;chr&gt; "A", "B", "C", "D"
+## $ presences    &lt;dbl&gt; 11, 10, 11, 10
+## $ mode         &lt;chr&gt; "live", "live", "online", "live"
+## $ tests_passed &lt;dbl&gt; 2, 3, 2, 0
+```
+
+Now it works
+
+---
+class: animated fadeIn center middle
+
+# data visualization in the tidyverse
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+- In ggplot2, graphics are made of different **layers**
+
+- the ** mapping ** operation assigns a variable in a tibble to an element of a plot: different plots may have different elements to map:**aesthetics** refer to axes (x and y), but also to color, size.
+
+--
+
+```r
+pengs=palmerpenguins::penguins %&gt;% na.omit()
+pengs %&gt;% ggplot(mapping=aes(x=flipper_length_mm,y=bill_length_mm,size=body_mass_g,color=island))
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2a-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+&lt;p align="center"&gt; Nothing happens! (we just created the base layer)&lt;/p&gt;
+
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+Depending on what we want to display, we can add a **geom** to the layer: to create a scatterplot we need to add points
+
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=flipper_length_mm,y=bill_length_mm,size=body_mass_g,color=island))+
+  geom_point(alpha=.5)
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2b-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+**Note**: no new mapping has been specified for geom_point(), the mapping from the base layer is used (and could be used by other geoms). One characteristic that is specific for the points is **alpha** that is the transparency of the points: not a mapping, in fact, it is matched to a single value, not a variable.
+
+
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+The **geom** choice  depends on the nature of the mapped variables: barplots are for factors 
+
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=species,fill=island))+
+  geom_bar()
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2c-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+For unordered factors, one usually wants to display the bars according to their occurrence.
+
+- This is easily done using ** `\(\texttt{fct_infreq}\)` ** and ** `\(\texttt{fct_rev}\)` ** functions from the ** `\(\texttt{forcats}\)` ** package
+
+.pull-left[
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=fct_infreq(species),fill=island))+
+  geom_bar()
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2d-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+
+.pull-right[
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=fct_rev(fct_infreq(species)),fill=island))+
+  geom_bar()
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2e-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+**Note** : check the ** `\(\texttt{forcats}\)` ** package out for more, very useful, functions for handling factors
+
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+For single distributions, one may want to use an *histogram*, if one wants the relative frequencies instead of counts, 
+the y axis has to be specified.
+
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=body_mass_g))+
+  geom_histogram(aes(y=..density..),bins =15,fill="indianred",color="darkgrey",alpha=.3)+
+  geom_density(fill="cyan",alpha=.25)
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2f-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+### ggplot2: the grammar of graphics in R
+
+More advanced plot are easily obtained
+
+
+```r
+pengs %&gt;% ggplot(mapping=aes(x=flipper_length_mm,y=bill_length_mm,size=body_mass_g,color=island))+
+  geom_point(alpha=.5)+facet_grid(sex~species)
+```
+
+&lt;img src="Tidy_data_manipulation_and_visualization_files/figure-html/ggplot2g-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
