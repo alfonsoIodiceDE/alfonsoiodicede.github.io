@@ -19,6 +19,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [Linear regression: part 2](teaching_related/Linear_regression/Linear-Regression-part_2.html) 
 
+[Model selection](teaching_related/model_selection/model_selection.html) 
+
 
 ### Extra's 
 
