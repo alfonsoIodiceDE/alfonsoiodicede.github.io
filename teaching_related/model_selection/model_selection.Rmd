@@ -1,0 +1,1068 @@
+---
+title: "Model selection"
+subtitle: "with tidymodels"  
+author: "Statistical Learning"
+date: "Alfonso Iodice D\\'Enza"
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    nature:
+      navigation:
+        scroll: false
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: false
+---
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+xaringanExtra::use_animate_css()
+xaringanExtra::use_scribble()
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 6, fig.retina=5,
+  out.width = "75%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(xaringanExtra)
+library(tidyverse)
+library(purrr)
+library(magick)
+library(tidymodels)
+library(flipbookr)
+library(leaps)
+library(kableExtra)
+library(janitor)
+style_duo_accent(primary_color = "#03A696",
+                 secondary_color = "#035AA6",
+                 title_slide_background_image = "./figures/logo-unina.png",
+                 title_slide_background_position = "120% 140%",
+                 title_slide_background_size= 5,
+                 title_slide_text_color = "#FFFFFF",
+                 code_font_size  = "0.7rem",
+                 code_highlight_color="#E4F6EF"
+                 )
+                 
+style_extra_css(css = list(
+  ".my-pull-left"= list(float= "left",
+                         width = "10%"),
+  ".my-pull-right"= list(float= "right",
+                          width = "89%"),
+  ".my-pull-right + *" = list(clear = "both")
+  ),
+  outfile = "xaringan-themer.css",
+  append = TRUE)
+
+```
+
+class: animated fadeIn
+## Improving models
+
+- **sub-set selection**: reduce the number of predictors to compress the model variance and improve interpretability.
+
+&nbsp;
+
+- **shrinkage methods**: the $p$  predictors are kept in the model, the estimates of the coefficient are shrunken towards 0. This also compresses the variance.
+
+
+
+---
+class: animated fadeIn middle center inverse
+
+## best subset selection
+
+
+---
+class: animated fadeIn
+### best subset selection
+
+This approach uses the complete **search space**  of all the possible models one can obtain starting from  $p$ predictors ( ** $2^{p}$ ** ).
+
+- $\mathcal{M}_{0}$ is the **null model** (intercept only).
+
+> For $k=1,\ldots,p$
+
+>  - fit $p\choose k$ possible models on $k$ predictors
+>  
+>  - find  ** $\mathcal{M}_{k}$ **, the best model with $k$ predictors: lowest RSS or largest $R^{2}$.
+
+From the sequence ** $\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}$ ** of  ** best ** models given the number of predictors the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow $C_{p}$**, **AIC**, the **BIC**,  the **adjusted $R^{2}$ ** ). 
+
+
+
+
+---
+class: animated fadeIn
+### best subset selection
+
+best sub-set selection: **credit** dataset
+
+```{r, fig.align='center',out.width="50%"}
+magick::image_read_pdf("./figures/BestSubset.pdf",pages = 1)
+```
+
+The response is **balance**,  **11** predictors with **two dummy** for **ethnicity**.
+
+- each $\color{white!50!black}{\text{gray}}$ point is a model, with $x$ predictors, the y's are RSS (sx) and $R^{2}$ (dx).
+- each  $\color{red}{\text{red}}$ point is the best model with $x$ predictors.
+
+
+---
+class: animated fadeIn
+### Cons best subset selection
+
+- **computational complexity**:   ** $2^{p}$ ** models must be fitted, in the previous example ** 1024 ** models have been fitted. With 20 predictors, one needs to fit more than a million models (1048576)! 
+
+&nbsp;
+
+- **statistical problem**: due to the high number of fitted models, it is likely that one model randomly fits well, or even overfit, the training set 
+
+
+
+
+
+---
+class: animated fadeIn middle center inverse
+
+
+## stepwise selection
+
+
+---
+class: animated fadeIn
+### forward stepwise selection
+
+$\mathcal{M}_{0}$ is the **null model** (intercept only)
+
+>For  $k=0,\ldots,p-1$
+> 
+> - fit the $p - k$ possible models that add a further predictor to the model ** $\mathcal{M}_{k}$ ** ;
+> - find the best ** there is and define it $\mathcal{M}_{k+1}$ **.
+
+
+From the sequence ** $\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}$ ** of  **best** models given the number of predictors, the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow $C_{p}$**, **AIC**, **BIC**, **adjusted $R^{2}$ ** )
+
+
+---
+class: animated fadeIn
+### backward stepwise selection
+
+
+fit $\mathcal{M}_{p}$, the **full model**.
+
+>For  $k=p, p-1,\ldots,1$
+>
+> - fit all the  possible models that contain all the predictors in ** $\mathcal{M}_{k}$ ** but one;
+> - find the best among the $k$ models, that becomes ** $\mathcal{M}_{k-1}$ **.
+
+
+From the sequence ** $\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}$ ** of  **best** models given the number of predictors, the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow $C_{p}$**, **AIC**, **BIC**, **adjusted $R^{2}$ ** )
+
+
+---
+class: animated fadeIn
+### the stepwise approach
+
+- **the number of models to evaluate is $1+p(p+1)/2$, smaller than $2^{p}$**
+
+&nbsp;
+
+- **the reduced search space does not guarantee to find the best possible model**
+
+&nbsp;
+
+- **the backward selection cannot be applied when  $p>n$**
+
+
+---
+class: animated fadeIn
+### selecting the best model irrespective the size
+
+
+
+** adjust the  training error measure **
+> add some **price to pay** for each extra-predictor in the model
+
+&nbsp;
+
+** use  cross-validation to estimate the test error**
+> estimate the performance of the model on the test set: e.g. via **cross-validation**
+
+
+---
+class: animated fadeIn
+### Adjusting the training error
+
+.pull-left[
+** Mallow $C_{p} = \frac{1}{n} (RSS+2d\hat{\sigma}^{2})$ **
+
+&nbsp;
+
+** AIC $=  -2\log(L) +2d$ **
+
+&nbsp;
+
+** BIC $= \frac{1}{n} (RSS+\log(n)d\hat{\sigma}^{2})$ **
+
+&nbsp;
+
+** Adjusted $R^{2}=  1-\frac{RSS/(n-d-1)}{TSS/(n-1)}$ **
+]
+
+.pull-right[
+- $d$ is the number of parameters in the model;
+- $\hat{\sigma}^{2}$ is the estimate of the error $\epsilon$ variance;
+- $L$ is the max of the likelihood function;
+
+&nbsp;
+
+**Note**
+- for linear models, under normal assumptions, $L$ and $RSS$ coincide, thus ** $C_{p} = AIC$ **
+- $C_{p}$ and $BIC$ differ in  $2$ being replaced by $\log(n)$ in BIC: since, for  $n>7$, $\log(n)>2$, the $BIC$ tends to select a lower number of predictors;
+- the adjusted $R^{2}$ penalizes $RSS$ by $n-d-1$, that increases with the number of parameters in the model.
+]
+
+
+
+---
+class: animated fadeIn
+### Credit data example: adjusting the training error
+
+```{r, fig.align='center',out.width="50%",echo=FALSE}
+magick::image_read_pdf("./figures/AdjustedMeasures.pdf",pages = 1)
+```
+
+- Using $C_{p}$ and Adjusted-$R^{2}$ the choice is 6 and 7 predictors, respectively.The $BIC$ leads to choose 4 predictors.
+
+
+---
+class: animated fadeIn
+### Cross-validation selection
+
+
+
+- the choice is on $\mathcal{M}_{0},\mathcal{M}_{1},\ldots, \mathcal{M}_{p}$
+- $k$ -fold cross-validation can be used to estimate the test error and choose the best model;
+- an **advantage** is that ** $\hat{\sigma}$ ** and ** $d$ ** are not required (and they are sometimes not easy to identify);}
+- this approach can be applied to any type of model
+
+** Credit data example: BIC vs validation approaches **
+
+```{r, fig.align='center',out.width="50%",echo=FALSE}
+magick::image_read_pdf("./figures/CVcredit.pdf",pages = 1)
+```
+
+---
+class: animated fadeIn middle center inverse
+
+### subset selection: function $\texttt{leaps::regsubsets}$
+
+---
+class: animated fadeIn
+### Subset selection
+
+- note that $\texttt{leaps::regsubsets}$ does not have a pre-defined $\texttt{predict}$ function, nor has it $\texttt{broom::augment}$.
+
+- selection is done via the provided corrected training error measures: ** $C_{p}$ **, ** $AIC$ **, ** $BIC$ **, ** $Adjusted \ R^{2}$ **
+
+- An **ad-hoc** procedure is needed for cross-validation based selection.
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** basic cleaning **
+
+Remove missings and clean the names
+```{r,eval=FALSE}
+theme_set(theme_minimal)
+data(Hitters,package = "ISLR2") 
+my_hitters = Hitters %>% na.omit() %>%#<<
+  as_tibble() %>% clean_names()#<<
+
+set.seed(1)
+main_split=initial_split(my_hitters, prop=4/5)
+hit_train=training(main_split)
+hit_test=testing(main_split)
+hit_flds = vfold_cv(data = hit_train,v=10)
+```
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+
+** data splitting **
+
+keep the test observations for evaluation, arrange the training observations in folds, for cross-validation
+
+```{r,eval=FALSE}
+data(Hitters,package = "ISLR2") 
+my_hitters = Hitters %>% na.omit() %>%
+  as_tibble() %>% clean_names()
+
+set.seed(1)#<<
+main_split=initial_split(my_hitters, prop=4/5)#<<
+hit_train=training(main_split)#<<
+hit_test=testing(main_split)#<<
+hit_flds = vfold_cv(data = hit_train,v=10)#<<
+```
+```{r,eval=TRUE,echo=FALSE}
+data(Hitters,package = "ISLR2") 
+my_hitters = Hitters %>% na.omit() %>%
+  as_tibble() %>% clean_names()
+
+set.seed(1)#<<
+main_split=initial_split(my_hitters, prop=4/5)#<<
+hit_train=training(main_split)#<<
+hit_test=testing(main_split)#<<
+hit_flds = vfold_cv(data = hit_train,v=5)#<<
+```
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+To access the output of ** $\texttt{regsubsets}$ ** one can use the ** $\texttt{summary}$ ** function, or the available ** $\texttt{broom::tidy}$ **, that will be used here. Refer to the training observations
+
+```{r}
+reg_sub_out = regsubsets(salary~.,data=hit_train,
+                      nvmax = 19,method = "exhaustive")
+reg_sub_out %>% tidy %>% kbl() %>% kable_styling(font_size = 5)
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+
+
+```{r, echo=FALSE}
+reg_sub_out %>% tidy %>% kbl() %>% kable_styling(font_size = 5)
+```
+
+This table contains the sequence of different methods for each size, plus some appropriate performance measures.
+
+- To describe the different models, boolean variables are used for each predictor to indicate wether it is part of the model.
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+It is handy to define a model-size variable: this is easily done by counting the boolean variables row-wise 
+
+.pull-left[
+```{r}
+model_size_vs_perf = reg_sub_out %>% tidy %>%
+  rowwise() %>% 
+  mutate(n_predictors = sum(
+    c_across("(Intercept)":"new_leagueN")
+    )-1,.keep="unused") %>% 
+  arrange(n_predictors) %>% ungroup()
+```
+]
+
+.pull-right[
+```{r,echo=FALSE}
+model_size_vs_perf %>% kbl() %>% kable_styling(font_size=6)
+```
+]
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+For each index, create a boolean variable indicating the best value
+
+
+```{r,eval=FALSE}
+model_size_vs_perf_best = model_size_vs_perf %>% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),#<<
+                              across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %>% #<<
+  select(n_predictors,everything()) %>% #<<
+  pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")
+
+model_size_vs_perf = model_size_vs_perf %>% 
+  pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %>% 
+  bind_cols(model_size_vs_perf_best %>% select(best))
+
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+convert the table in long format
+
+
+```{r,eval=FALSE}
+model_size_vs_perf_best = model_size_vs_perf %>% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),#<<
+                              across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %>% #<<
+  select(n_predictors,everything()) %>% #<<
+  pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")#<<
+
+model_size_vs_perf = model_size_vs_perf %>% 
+  pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %>% 
+  bind_cols(model_size_vs_perf_best %>% select(best))
+
+```
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+create a further long table with all the values for different index and model-size
+
+
+```{r,eval=TRUE}
+model_size_vs_perf_best = model_size_vs_perf %>% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),
+                              across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %>% 
+  select(n_predictors,everything()) %>% 
+  pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")
+
+model_size_vs_perf = model_size_vs_perf %>% #<<
+  pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %>% #<<
+  bind_cols(model_size_vs_perf_best %>% select(best))#<<
+
+```
+--
+
+```{r,echo=FALSE}
+model_size_vs_perf %>% slice(1:8) %>% kbl() %>% kable_styling(font_size=8)
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+Finally, create a plot to summarize the information at hand
+
+```{r,fig.align="center",out.width="50%"}
+model_size_vs_perf %>% ggplot(aes(x=n_predictors,y=value))+geom_line()+geom_point(aes(color=best))+facet_wrap(~index,scales = "free")
+```
+
+---
+class: animated fadeIn center middle inverse
+## best subset with cross-validation
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** List-wise setup ** 
+
+Create a training and a validation set for each combination of folds
+
+```{r,echo=TRUE}
+tidy_structure = hit_flds %>%
+  mutate(
+  train = map(.x=splits,~training(.x)),
+  validate = map(.x=splits,~testing(.x))
+  )
+```
+
+```{r,eval=TRUE,echo=FALSE}
+tidy_structure
+```
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** best subsets on the different folds ** 
+
+Apply ** $\text{regsubsets}$ ** to each of the training folds previously defined
+
+- for best subset selection, choose ** $\texttt{method="exhaustive"}$ ** 
+
+
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure = tidy_structure %>%
+  mutate(
+  model_fits = map(.x=train,
+                     .f=~regsubsets(salary~.,
+                      data=.x,nvmax = 19,method = "exhaustive"))
+  )
+```
+
+Now the predictors have to be pulled out from the different sized models
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** pull information from each model sequence ** 
+
+
+- create the matrix $\bf{X}_{test}$, that contains the predictor values for the test observations
+- pull the coefficient estimates for each model
+
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure = tidy_structure %>%
+  mutate(
+    x_test = map(.x=validate,
+                 .f=~model.matrix(as.formula("salary~."),as.data.frame(.x))),
+    coefficients=map(.x=model_fits,~coef(.x,id=1:19))
+  ) %>% 
+  unnest(coefficients) %>% 
+  mutate(
+    x_test = map2(.x=x_test, .y=coefficients, ~.x[,names(.y)])
+  )
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** obtain the predictions: ${\bf \hat{y}}_{test}={\bf X}_{test}{\bf \hat{\beta}}$ ** 
+- compute the squared residuals
+
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure = tidy_structure %>% 
+  mutate(yhat = map2(.x=x_test, .y=coefficients, ~.x %*% .y),
+         squared_resids = map2(.x=yhat, .y=validate, ~(.x-.y$salary)^2)) %>% 
+  unnest(c(yhat,squared_resids)) %>% 
+  select(id,validate,coefficients, yhat, squared_resids)
+```
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** compute the RMSE by fold, for each model ** 
+- with the predictors, compute the squared residuals
+
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure = tidy_structure %>% 
+  group_by(id,coefficients) %>% 
+  summarise(RMSE=sqrt(mean(squared_resids))) %>% ungroup()
+```
+
+.pull-left[
+```{r,eval=TRUE,echo=TRUE}
+tidy_structure = tidy_structure %>% 
+  mutate(model_size=map_int(coefficients,length)) %>% 
+  group_by(model_size) %>% 
+  summarise(cv_RMSE=mean(RMSE))
+```
+]
+
+.pull-right[
+```{r,eval=TRUE,echo=FALSE}
+tidy_structure  %>% kbl() %>% kable_styling(font_size=8)
+```
+]
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** pick up the 'best model' according to cross-validation ** 
+
+
+
+.pull-left[
+```{r,eval=TRUE,echo=FALSE}
+tidy_structure  %>% kbl() %>% kable_styling(font_size=8)
+```
+]
+
+.pull-right[
+```{r,fig.align='right',out.width="70%"}
+tidy_structure  %>% 
+  ggplot(aes(x=model_size, y=cv_RMSE))+
+  geom_point()+geom_line()+theme_minimal()+
+  geom_point(aes(x = model_size[which.min(cv_RMSE)],
+                 y = min(cv_RMSE)),inherit.aes = FALSE,color="red",size=4,alpha=.5)
+```
+
+]
+
+--
+
+the optimal model size is `r tidy_structure$model_size[which.min(tidy_structure$cv_RMSE)]`
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+```{r}
+best_size=tidy_structure$model_size[which.min(tidy_structure$cv_RMSE)]
+best_out = regsubsets(salary~.,data=hit_train,nvmax=best_size,method="exhaustive")
+
+coef(best_out,id=best_size)
+```
+
+---
+class: animated fadeIn center middle inverse
+## Shrinkage methods
+
+---
+class: animated fadeIn
+### Shrinkage methods
+
+
+- **shrinkage methods**  keep  **all** the predictors in the model, but the coefficient estimates are constrained
+
+- the shrinkage determines a reduction of the estimates variability
+
+- eventually, some of the coefficients maybe constrained to zero, implicitly excluding the corresponding predictors from the model
+
+- the type of constraint defines the shrinkage method 
+  - **L2** constraint: **ridge regression**
+  - **L1** constraint: **lasso regression**
+
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+A  **constraint** is introduced on the optimization of the least squares function (RSS), in particular:
+
+** $$\underbrace{\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}}}_{RSS} + \underbrace{\color{red}{\lambda\sum_{j=1}^{p}{\beta^{2}_{j}}}}_{constraint}$$ **
+
+
+ ** $\lambda$ ** is the  **tuning parameter** that determines the strength of the constraint on the  estimates of ** $\beta_{j}$ **. 
+
+- if ** $\lambda=0$ ** then the ridge regression estimates ** $\hat{\beta}^{R}_{\lambda}$ ** are the same as OLS **  $\hat{\beta}$ **
+- if ** $\lambda\rightarrow \infty$ ** then  ** $\hat{\beta}^{R}_{j}\approx 0$ **
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+```{r, echo=FALSE, fig.align='center',out.width="70%"}
+magick::image_read_pdf("./figures/RidgeRegPictureA.pdf",pages = 1)
+```
+
+- estimates for different values of  $\lambda$, in figure right the x axis shows the ratio between **  $||\hat{\beta}^{R}_{\lambda}||_{2}$ ** and ** $||\hat{\beta}||_{2}$ **
+
+- the ** $\mathcal{L}_2$ ** norm is the square root of the sum of squared coefficients 
+ ** $||\hat{\beta}||_{2}=\sqrt{\sum_{j=1}^{p}{\hat{\beta}^{2}_{j}}}$ **
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+```{r, echo=FALSE, fig.align='center',out.width="70%"}
+magick::image_read_pdf("./figures/RidgeTradeOff.pdf",pages = 1)
+```
+
+- Synthetic data with $n=50$ and $p=45$: all of the true  $\beta$'s differ from 0.
+
+- The grid is on $\lambda$ and  $||\beta^{R}||/||\beta^{R}||$, the $\color{black}{\text{squared bias}}$, the $\color{blue!20!green}{\text{variance}}$ and  $\color{violet}{\text{MSE test}}$
+
+- the dotted line is the ** true MSE test **
+
+
+
+---
+class: animated fadeIn
+### lasso regression
+
+The lasso differs from ridge in the constraint
+
+** $$\underbrace{\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}}}_{RSS} + \underbrace{\color{red}{\lambda\sum_{j=1}^{p}{|\beta_{j}|}}}_{constraint}$$ **
+
+
+ ** $\lambda$ ** is the  **tuning parameter** that determines the strength of the constraint on the  estimates of ** $\beta_{j}$**. 
+
+- if ** $\lambda=0$ ** then the ridge regression estimates ** $\hat{\beta}^{R}_{\lambda}$ ** are the same as OLS ** $\hat{\beta}$ **
+- if ** $\lambda\rightarrow \infty$ ** then  ** $\hat{\beta}^{R}_{j}\approx 0$ **
+
+
+---
+class: animated fadeIn
+### lasso regression
+
+```{r, echo=FALSE, fig.align='center',out.width="70%"}
+magick::image_read_pdf("./figures/LassoReg.pdf",pages = 1)
+```
+
+- grid on  $\lambda$ and (right) the $\mathcal{L}_{1}$ ratio between Lasso and OLS coefficients
+
+
+---
+class: animated fadeIn
+### variables selection and the lasso
+
+
+The Lasso regression can be formalized as a constrained minimisation problem
+
+$$\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}} \ \ \ \text{subject to} \color{red}{\sum_{j=1}^{p}{|\beta_{j}|\leq s}}$$
+
+The Ridge regression can be formalized as a constrained minimisation problem
+
+$$\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}} \ \ \ \text{subject to} \color{red}{\sum_{j=1}^{p}{\beta^{2}_{j}\leq s}}$$
+---
+class: animated fadeIn
+### variables selection and the lasso
+
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/LassoRidgeSearch.pdf",pages = 1)
+```
+
+- the $\color{cyan}{\text{light blue areas}}$  are the admissible domain for  $\beta_{1}$ and $\beta_{2}$ solutions  (Lasso (left), Ridge).
+- the ellipses are level curves of the  RSS bivariate function.
+- the solution is given by the most external ellipses that touches the admissible domain.
+- the  Lasso solution may lead to a 0 coefficient, whereas the ridge maybe close to 0 but not 0. 
+
+
+---
+class: animated fadeIn
+### ridge vs lasso:  non null coefficients
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/RidgeVsLasso.pdf",pages = 1)
+```
+- Synthetic data with $n=50$ and $p=45$: all of the true  $\beta$'s differ from 0
+- The grid is on $\lambda$ and  $||\beta^{R}||/||\beta^{R}||$, the squared bias, the $\color{blue!20!green}{\text{variance}}$ and $\color{violet}{\text{MSE test}}$
+- the dotted line is the true MSE test
+- Ridge provides a lower MSE test
+
+
+---
+class: animated fadeIn
+### ridge vs lasso:  mostly null coefficients
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/RidgeVsLassoB.pdf",pages = 1)
+```
+
+- Synthetic data with $n=50$ and $p=45$: all but two  of the true  $\beta$'s are 0
+- The grid is on $\lambda$ and  $||\beta^{R}||/||\beta^{R}||$, the squared bias, the $\color{blue!20!green}{\text{variance}}$ and $\color{violet}{\text{MSE test}}$
+- the dotted line is the true MSE test
+- lasso provides a lower MSE test
+
+
+---
+class: animated fadeIn
+### Tuning the parameter $\lambda$: credit  data}
+
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/Tuning.pdf",pages = 1)
+```
+- ridge regression:  cross-validation estimates given a grid of values for  $\lambda$ (left); the vertical line is the optimal value
+- ridge regression: ridge coefficients standardized
+
+
+---
+class: animated fadeIn
+### Tuning the parameter $\lambda$: synthetic data}
+
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/TuningA.pdf",pages = 1)
+```
+- lasso regression:  cross-validation for values of  $||\beta^{L}||_{1}/||\beta||_{1}$ (left);  the vertical line is the optimal value
+- lasso regression:  lasso coefficients standardized. Note that the null (at a population level) coefficient are correctly identified!
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: hitters pre-processing
+
+Specify the recipe: when applying Ridge or Lasso regression, the numerical predictors have to be scaled, and categorical have to be trasformed in dummy, since ** $\texttt{glmnet}$ ** only handles numeric predictors.
+
+```{r}
+hit_recipe = recipe(salary~.,data=hit_train) %>% 
+  step_scale(all_numeric()) %>% 
+  step_zv(all_numeric(), -all_outcomes()) %>%
+  step_dummy(all_nominal())
+
+hit_recipe %>% prep() %>% juice() %>% slice(1:8) %>% 
+  kable() %>% kable_styling(font_size=6)
+
+
+```
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model specification
+    
+the model is still **linear_reg**, the  engine to use is  **glmnet**, that requires two parameters
+
+- **penalty**: this is the value of ** $\lambda$ **
+
+- **mixture**: indicates whether one wants to use ridge ( $\texttt{mixture=0}$ ) or lasso ( $\texttt{mixture=1}$ ).
+
+
+
+Specify the grid for the hyperparameter
+
+```{r}
+ lambda_grid <- grid_regular(penalty(), levels = 50)
+```
+
+Fix the grid that has to be evaluted: otherwise glmnet will pick a grid internally
+```{r}
+ridge_spec = linear_reg(mixture = 0, penalty = tune()) %>% set_engine("glmnet")
+lasso_spec = linear_reg(mixture = 1, penalty = tune()) %>% set_engine("glmnet")
+```
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model specification
+
+As usual, put it all together in a workflow
+
+```{r}
+ridge_wflow=workflow() %>% 
+  add_recipe(hit_recipe) %>% 
+  add_model(ridge_spec)
+  
+
+lasso_wflow=workflow() %>% 
+  add_recipe(hit_recipe) %>% 
+  add_model(lasso_spec)
+
+```
+
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model fit
+
+```{r}
+ridge_results = ridge_wflow %>% 
+  tune_grid(grid=lambda_grid,
+            resamples=hit_flds,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+              metrics = metric_set(rmse))  
+
+best_ridge = ridge_results %>% select_best("rmse")
+
+lasso_results = lasso_wflow %>% 
+  tune_grid(grid=lambda_grid,
+            resamples=hit_flds,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+              metrics = metric_set(rmse))  
+
+best_lasso = lasso_results %>% select_best("rmse")
+
+
+```
+
+
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: plot the penalties (via autoplot)
+
+```{r, fig.align='center',out.width="50%"}
+library("patchwork")
+autoplot(ridge_results) + ylim(.7,1) + ggtitle("ridge") | autoplot(lasso_results) + ylim(.7,1)+ ggtitle("lasso")
+
+```
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: finalization
+
+```{r}
+final_ridge <- finalize_workflow(ridge_wflow, best_ridge) %>%
+    last_fit(main_split)
+
+final_lasso <- finalize_workflow(lasso_wflow, best_lasso) %>%
+    last_fit(main_split)
+
+final_ridge %>% collect_metrics()
+final_lasso %>% collect_metrics()
+```
+
+
+
+---
+class: animated fadeIn
+### Ridge and Lasso: further comparison
+
+Consider $n=p$, $\beta_{0}=0$ and the model ${\bf y}={\bf X}{\bf \beta}$ such that
+
+
+$$\begin{bmatrix}
+y_{1}\\
+y_{2}\\
+...\\
+y_{j}\\
+...\\
+y_{n (p)}
+\end{bmatrix}=
+\begin{bmatrix}
+1 & 0 & ... & 0  & ... & 0  \\
+0 & 1 & ... & 0  & ... & 0  \\
+... & ... & ... & ...  & ... & ...  \\
+0 & 0 & ... & 1  & ... & 0  \\
+... & ... & ... & ...  & ... & ...  \\
+... & ... & ... & ...  & ... & 1  
+\end{bmatrix}
+\begin{bmatrix}
+\beta_{1}\\
+\beta_{2}\\
+...\\
+\beta_{j}\\
+...\\
+\beta_{p (n)}
+\end{bmatrix}$$
+
+The estimates  $\hat{\beta}_{1},\ldots,\hat{\beta}_{p}$ are obtained by minimizing $\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}$ and they are such that $\hat{\beta_{j}}=y_{j}$.
+
+
+---
+class: animated fadeIn
+### The Ridge problem  
+
+
+
+$$Ridge: \ \ \sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{\beta_{j}^{2}}$$
+
+And the corresponding solution $\forall j$ is
+
+$$\partial_{\beta_{j}} \left[\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{\beta_{j}^{2}}\right]= -2\left(y_{j}-\beta_{j}\right)+2\lambda\beta_{j}=0 \rightarrow \color{red}{\hat{\beta}_{j}=\frac{y_{j}}{1+\lambda}}$$
+---
+class: animated fadeIn
+### The Lasso problem  
+
+
+$$Lasso: \ \ \sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{|\beta_{j}|}$$
+Since $\partial_{x}|x|=\left\{\begin{matrix} 1 & se \ x>0\\-1 &se \ x<0\\ 0 &if \ x=0 \end{matrix}\right.$ , 
+The solution  $\forall j$ is
+
+$$\partial_{\beta_{j}} \left[\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{|\beta_{j}|}\right]=\left\{\begin{matrix} -2\left(y_{j}-\beta_{j}\right)+\lambda =0 & if \ \beta_{j}>0\\ -2\left(y_{j}-\beta_{j}\right)-\lambda =0 &if \ \beta_{j}<0\\ 0&if \ \beta_{j}=0 \end{matrix}\right.$$   
+
+then
+
+$$\hat{\beta}_{j}=\left\{\begin{matrix} y_{j}-\frac{\lambda}{2}  & if \ y_{j} >\frac{\lambda}{2}\\ 
+y_{j}+\frac{\lambda}{2}  & if \ y_{j} <-\frac{\lambda}{2}\\
+0  & if \ |y_{j}| \leq \frac{\lambda}{2}\\
+\end{matrix}\right.$$
+
+---
+class: animated fadeIn
+### Ridge vs  Lasso 
+
+```{r, echo=FALSE, fig.align='center',out.width="60%"}
+magick::image_read_pdf("./figures/EasyLR.pdf",pages = 1)
+```
+- The Ridge regression 'shrinks' the ols coefficient by a  factor $\frac{1}{1+\lambda}$
+- The Lasso regression 'shrinks' the ols coefficient by a   factor \alert{$\frac{\lambda}{2}$} outside of the thresholds  $|\frac{\lambda}{2}|$, inside the thresholds  $\left[-\frac{\lambda}{2};\frac{\lambda}{2}\right]$ the coefficients are led to 0
+
+
+
+---
+class: animated fadeIn
+### Ridge,  Lasso  and correlated predictors
+
+The **ridge** regression assigns  **similar coefficients** to **correlated predictors**, whereas **lasso** regression assigns quite **different** coefficient to correlated coefficients.
+
+To check this out, consider ** $n=p=2$ **, ** $x_{11}=x_{12}$ **, ** $x_{21}=x_{22}$ **
+
+Furthermore, ** $y_{1}+y_{2}=0$ **, ** $x_{11}+x_{21}=0$ **, ** $x_{12}+x_{22}=0$ **, then ** $\hat{\beta}_{0}=0$ ** as ** $\bar{y}=0$ **, ** $\bar{X}_{1}=0$ **, ** $\bar{X}_{2}=0$ **
+ 
+For instance,
+
+$$\left\{\begin{matrix}
+y_{1}=x_{11}\beta_{1}+x_{12}\beta_{2}+\epsilon_{1}\\
+y_{2}=x_{21}\beta_{1}+x_{22}\beta_{2}+\epsilon_{2}
+\end{matrix}\right.
+ \left\{\begin{matrix}
+2=3\beta_{1}+3\beta_{2}+\epsilon_{1}\\
+-2=-3\beta_{1}-3\beta_{2}+\epsilon_{2}
+\end{matrix}\right.$$
+
+then ** $cor(X_{1},X_{2})=1$ **
+
+---
+class: animated fadeIn
+### Ridge regression solution
+Consider  ** $n=p=2$ **, **  $x_{11}=x_{12}$ **, ** $x_{21}=x_{22}$ **.
+
+The  ridge target function is
+ 
+$$\underbrace{\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{21}\hat{\beta}_{1}-x_{22}\hat{\beta}_{2}\right)^{2}}_{{RSS}}+
+\underbrace{\lambda\left(\hat{\beta}_{1}^{2}+\hat{\beta}_{2}^{2}\right)}_{{constraint}}$$
+To be minimised wrt $\hat{\beta}_{1}$ and $\hat{\beta}_{2}$. To simplify, set $x_{11}=x_{12}={x_{1}}$ and $x_{21}=x_{22}={x_{2}}$. 
+
+
+$$\begin{split}
+\partial_{\hat{\beta}_{1}}&\left[\left(y_{1}-x_{1}\hat{\beta}_{1}-x_{1}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{2}\hat{\beta}_{1}-x_{2}\hat{\beta}_{2}\right)^{2}+
+\lambda\left(\hat{\beta}_{1}^{2}+\hat{\beta}_{2}^{2}\right)\right]=\\
+=& 2\left(y_{1}-x_{1}\hat{\beta}_{1}-x_{1}\hat{\beta}_{2}\right)(-x_{1})+ 2\left(y_{1}-x_{2}\hat{\beta}_{1}-x_{2}\hat{\beta}_{2}\right)(-x_{2})+2\lambda\hat{\beta}_{1}=\\
+=& - y_{1}x_{1} + x_{1}^{2}\hat{\beta}_{1}+ x_{1}^{2}\hat{\beta}_{2} - y_{2}x_{2} + x_{2}^{2}\hat{\beta}_{1}+ x_{2}^{2}\hat{\beta}_{2}+\lambda\hat{\beta}_{1}=\\
+=& \hat{\beta}_{1}\left(x_{1}^{2}+x_{2}^{2}+\lambda \right) + \hat{\beta}_{2}\left( x_{1}^{2}+x_{2}^{2}\right)- y_{1}x_{1}-y_{2}x_{2}=0 \rightarrow\\
+\rightarrow & \color{red}{\hat{\beta}_{1}}=\frac{y_{1}x_{1}+y_{2}x_{2}-\hat{\beta}_{2}\left( x_{1}^{2}+x_{2}^{2}\right)}{\left(x_{1}^{2}+x_{2}^{2}+\lambda \right)} 
+\end{split}$$
+
+similarly $\color{red}{\hat{\beta}_{2}}=\frac{y_{1}x_{1}+y_{2}x_{2}-\hat{\beta}_{1}\left( x_{1}^{2}+x_{2}^{2}\right)}{\left(x_{1}^{2}+x_{2}^{2}+\lambda \right)}$
+hence $\hat{\beta}_{1}=\hat{\beta}_{2}$.
+
+
+---
+class: animated fadeIn 
+### lasso regression solution
+
+
+Consider ** $n=p=2$ **, ** $x_{11}=x_{12}$ **, ** $x_{21}=x_{22}$ **.
+The Lasso target function is 
+$$\underbrace{\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{21}\hat{\beta}_{1}-x_{22}\hat{\beta}_{2}\right)^{2}}_{{RSS}}+
+\underbrace{\lambda\left(|\hat{\beta}_{1}|+|\hat{\beta}_{2}|\right)}_{{constraint}}$$
+To be minimised wrt $\hat{\beta}_{1}$ and $\hat{\beta}_{2}$. Since  $x_{11}=x_{12}$, $x_{21}=x_{22}$, $x_{11}+x_{21}=0$, $x_{12}+x_{22}=0$ is  $y_{1}+y_{2}=0$,  the RSS is
+
+
+$$\begin{split}
+&\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(\underbrace{y_{2}}_{\color{red}{=-y_{1}}}-\underbrace{x_{21}}_{{=-x_{11}}}\hat{\beta}_{1}-\underbrace{x_{22}}_{\color{red}{=x_{21}=-x_{11}}}\hat{\beta}_{2}\right)^{2}\\
+&\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{11}\hat{\beta}_{2}\right)^{2}+\left(-y_{1}+x_{11}\hat{\beta}_{1}+x_{11}\hat{\beta}_{2}\right)^{2}\\
+&2\left(y_{1}-x_{11}\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)\right)^{2} \rightarrow \partial_{\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)}:
+4\left(y_{1}-\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)x_{11}\right)x_{11}=0\\
+\end{split}$$
+
+The  OLS solution (unconstrained) is $\color{red}{\hat{\beta}_{1}+\hat{\beta}_{2}=\frac{y_{1}}{x_{11}}}$, parallel to the Lasso solution!
+
+
+---
+class: animated fadeIn 
+### Lasso regression solution
+
+The  Lasso solution lies on the RSS level curve $$\color{red}{2\left(y_{1}-x_{11}\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)\right)^{2}} \text{  tangent to the constraint  }|\hat{\beta}_{1}|+|\hat{\beta}_{2}|\leq s$$ 
+the RSS level curves, however, are parallel to $$\hat{\beta}_{1}+\hat{\beta}_{2}=\frac{y_{1}}{x_{11}}$$ then all the coefficients $\hat{\beta}_{1}$ and $\hat{\beta}_{2}$ such that $\hat{\beta}_{1}+\hat{\beta}_{2}= s$ are candidate solutions; the same holds for
+ $\hat{\beta}_{1}+\hat{\beta}_{2}= -s$.
+ 
+ In summary:
+
+-  if  $cor(X_{1},X_{2})=1$ the Ridge solution is $\hat{\beta}^{R}_{1}=\hat{\beta}^{R}_{2}$ whereas in the  Lasso solution 
+ $\hat{\beta}^{L}_{1}$ and $\hat{\beta}^{L}_{2}$ are not unique.
+- if $cor(X_{1},X_{2})\approx1$ (or $cor(X_{1},X_{2})\approx -1$), then $\hat{\beta}^{R}_{1}\approx\hat{\beta}^{R}_{2}$
+whereas $\hat{\beta}^{L}_{1}$ and $\hat{\beta}^{L}_{2}$ can be very different from each other.
+

@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Model selection</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Statistical Learning" />
+    <script src="model_selection_files/header-attrs/header-attrs.js"></script>
+    <link href="model_selection_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="model_selection_files/fabric/fabric.min.js"></script>
+    <link href="model_selection_files/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="model_selection_files/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script src="model_selection_files/kePrint/kePrint.js"></script>
+    <link href="model_selection_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Model selection
+## with tidymodels
+### Statistical Learning
+### Alfonso Iodice D'Enza
+
+---
+
+
+
+
+
+class: animated fadeIn
+## Improving models
+
+- **sub-set selection**: reduce the number of predictors to compress the model variance and improve interpretability.
+
+&amp;nbsp;
+
+- **shrinkage methods**: the `\(p\)`  predictors are kept in the model, the estimates of the coefficient are shrunken towards 0. This also compresses the variance.
+
+
+
+---
+class: animated fadeIn middle center inverse
+
+## best subset selection
+
+
+---
+class: animated fadeIn
+### best subset selection
+
+This approach uses the complete **search space**  of all the possible models one can obtain starting from  `\(p\)` predictors ( ** `\(2^{p}\)` ** ).
+
+- `\(\mathcal{M}_{0}\)` is the **null model** (intercept only).
+
+&gt; For `\(k=1,\ldots,p\)`
+
+&gt;  - fit `\(p\choose k\)` possible models on `\(k\)` predictors
+&gt;  
+&gt;  - find  ** `\(\mathcal{M}_{k}\)` **, the best model with `\(k\)` predictors: lowest RSS or largest `\(R^{2}\)`.
+
+From the sequence ** `\(\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}\)` ** of  ** best ** models given the number of predictors the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow `\(C_{p}\)`**, **AIC**, the **BIC**,  the **adjusted `\(R^{2}\)` ** ). 
+
+
+
+
+---
+class: animated fadeIn
+### best subset selection
+
+best sub-set selection: **credit** dataset
+
+
+```r
+magick::image_read_pdf("./figures/BestSubset.pdf",pages = 1)
+```
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-1-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+The response is **balance**,  **11** predictors with **two dummy** for **ethnicity**.
+
+- each `\(\color{white!50!black}{\text{gray}}\)` point is a model, with `\(x\)` predictors, the y's are RSS (sx) and `\(R^{2}\)` (dx).
+- each  `\(\color{red}{\text{red}}\)` point is the best model with `\(x\)` predictors.
+
+
+---
+class: animated fadeIn
+### Cons best subset selection
+
+- **computational complexity**:   ** `\(2^{p}\)` ** models must be fitted, in the previous example ** 1024 ** models have been fitted. With 20 predictors, one needs to fit more than a million models (1048576)! 
+
+&amp;nbsp;
+
+- **statistical problem**: due to the high number of fitted models, it is likely that one model randomly fits well, or even overfit, the training set 
+
+
+
+
+
+---
+class: animated fadeIn middle center inverse
+
+
+## stepwise selection
+
+
+---
+class: animated fadeIn
+### forward stepwise selection
+
+`\(\mathcal{M}_{0}\)` is the **null model** (intercept only)
+
+&gt;For  `\(k=0,\ldots,p-1\)`
+&gt; 
+&gt; - fit the `\(p - k\)` possible models that add a further predictor to the model ** `\(\mathcal{M}_{k}\)` ** ;
+&gt; - find the best ** there is and define it `\(\mathcal{M}_{k+1}\)` **.
+
+
+From the sequence ** `\(\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}\)` ** of  **best** models given the number of predictors, the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow `\(C_{p}\)`**, **AIC**, **BIC**, **adjusted `\(R^{2}\)` ** )
+
+
+---
+class: animated fadeIn
+### backward stepwise selection
+
+
+fit `\(\mathcal{M}_{p}\)`, the **full model**.
+
+&gt;For  `\(k=p, p-1,\ldots,1\)`
+&gt;
+&gt; - fit all the  possible models that contain all the predictors in ** `\(\mathcal{M}_{k}\)` ** but one;
+&gt; - find the best among the `\(k\)` models, that becomes ** `\(\mathcal{M}_{k-1}\)` **.
+
+
+From the sequence ** `\(\mathcal{M}_{0},\mathcal{M}_{1},\ldots,\mathcal{M}_{p}\)` ** of  **best** models given the number of predictors, the overall best is chosen 
+
+- due to the different degrees of freedom, a test error estimate is required to make the choice.
+- or, one can use some training error measures adjusted for the model complexity. (**Mallow `\(C_{p}\)`**, **AIC**, **BIC**, **adjusted `\(R^{2}\)` ** )
+
+
+---
+class: animated fadeIn
+### the stepwise approach
+
+- **the number of models to evaluate is `\(1+p(p+1)/2\)`, smaller than `\(2^{p}\)`**
+
+&amp;nbsp;
+
+- **the reduced search space does not guarantee to find the best possible model**
+
+&amp;nbsp;
+
+- **the backward selection cannot be applied when  `\(p&gt;n\)`**
+
+
+---
+class: animated fadeIn
+### selecting the best model irrespective the size
+
+
+
+** adjust the  training error measure **
+&gt; add some **price to pay** for each extra-predictor in the model
+
+&amp;nbsp;
+
+** use  cross-validation to estimate the test error**
+&gt; estimate the performance of the model on the test set: e.g. via **cross-validation**
+
+
+---
+class: animated fadeIn
+### Adjusting the training error
+
+.pull-left[
+** Mallow `\(C_{p} = \frac{1}{n} (RSS+2d\hat{\sigma}^{2})\)` **
+
+&amp;nbsp;
+
+** AIC `\(=  -2\log(L) +2d\)` **
+
+&amp;nbsp;
+
+** BIC `\(= \frac{1}{n} (RSS+\log(n)d\hat{\sigma}^{2})\)` **
+
+&amp;nbsp;
+
+** Adjusted `\(R^{2}=  1-\frac{RSS/(n-d-1)}{TSS/(n-1)}\)` **
+]
+
+.pull-right[
+- `\(d\)` is the number of parameters in the model;
+- `\(\hat{\sigma}^{2}\)` is the estimate of the error `\(\epsilon\)` variance;
+- `\(L\)` is the max of the likelihood function;
+
+&amp;nbsp;
+
+**Note**
+- for linear models, under normal assumptions, `\(L\)` and `\(RSS\)` coincide, thus ** `\(C_{p} = AIC\)` **
+- `\(C_{p}\)` and `\(BIC\)` differ in  `\(2\)` being replaced by `\(\log(n)\)` in BIC: since, for  `\(n&gt;7\)`, `\(\log(n)&gt;2\)`, the `\(BIC\)` tends to select a lower number of predictors;
+- the adjusted `\(R^{2}\)` penalizes `\(RSS\)` by `\(n-d-1\)`, that increases with the number of parameters in the model.
+]
+
+
+
+---
+class: animated fadeIn
+### Credit data example: adjusting the training error
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-2-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+- Using `\(C_{p}\)` and Adjusted-$R^{2}$ the choice is 6 and 7 predictors, respectively.The `\(BIC\)` leads to choose 4 predictors.
+
+
+---
+class: animated fadeIn
+### Cross-validation selection
+
+
+
+- the choice is on `\(\mathcal{M}_{0},\mathcal{M}_{1},\ldots, \mathcal{M}_{p}\)`
+- `\(k\)` -fold cross-validation can be used to estimate the test error and choose the best model;
+- an **advantage** is that ** `\(\hat{\sigma}\)` ** and ** `\(d\)` ** are not required (and they are sometimes not easy to identify);}
+- this approach can be applied to any type of model
+
+** Credit data example: BIC vs validation approaches **
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-3-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn middle center inverse
+
+### subset selection: function `\(\texttt{leaps::regsubsets}\)`
+
+---
+class: animated fadeIn
+### Subset selection
+
+- note that `\(\texttt{leaps::regsubsets}\)` does not have a pre-defined `\(\texttt{predict}\)` function, nor has it `\(\texttt{broom::augment}\)`.
+
+- selection is done via the provided corrected training error measures: ** `\(C_{p}\)` **, ** `\(AIC\)` **, ** `\(BIC\)` **, ** `\(Adjusted \ R^{2}\)` **
+
+- An **ad-hoc** procedure is needed for cross-validation based selection.
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** basic cleaning **
+
+Remove missings and clean the names
+
+```r
+theme_set(theme_minimal)
+data(Hitters,package = "ISLR2") 
+*my_hitters = Hitters %&gt;% na.omit() %&gt;%
+* as_tibble() %&gt;% clean_names()
+
+set.seed(1)
+main_split=initial_split(my_hitters, prop=4/5)
+hit_train=training(main_split)
+hit_test=testing(main_split)
+hit_flds = vfold_cv(data = hit_train,v=10)
+```
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+
+** data splitting **
+
+keep the test observations for evaluation, arrange the training observations in folds, for cross-validation
+
+
+```r
+data(Hitters,package = "ISLR2") 
+my_hitters = Hitters %&gt;% na.omit() %&gt;%
+  as_tibble() %&gt;% clean_names()
+
+*set.seed(1)
+*main_split=initial_split(my_hitters, prop=4/5)
+*hit_train=training(main_split)
+*hit_test=testing(main_split)
+*hit_flds = vfold_cv(data = hit_train,v=10)
+```
+
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+To access the output of ** `\(\texttt{regsubsets}\)` ** one can use the ** `\(\texttt{summary}\)` ** function, or the available ** `\(\texttt{broom::tidy}\)` **, that will be used here. Refer to the training observations
+
+
+```r
+reg_sub_out = regsubsets(salary~.,data=hit_train,
+                      nvmax = 19,method = "exhaustive")
+reg_sub_out %&gt;% tidy %&gt;% kbl() %&gt;% kable_styling(font_size = 5)
+```
+
+&lt;table class="table" style="font-size: 5px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; (Intercept) &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; at_bat &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; hits &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; hm_run &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; runs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; rbi &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; walks &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; years &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_at_bat &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_hits &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_hm_run &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_runs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; crbi &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_walks &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; leagueN &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; divisionW &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; put_outs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; assists &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; errors &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; new_leagueN &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; adj.r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BIC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mallows_cp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2990316 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2956615 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.91719 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.376782 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4261405 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4205959 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -100.58651 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.908474 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4677553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4600042 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -111.04849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26.075809 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5010351 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4912992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -119.26055 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.814875 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5235247 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5118464 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -123.59863 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.177686 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5286246 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5146923 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -120.51134 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.992301 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5330772 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5168967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -117.15731 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.084299 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5372468 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5188288 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -113.69393 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.297536 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5422410 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5216419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -110.62554 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.157435 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5454508 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5226091 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -106.75612 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.781997 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5481010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5229955 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -102.63700 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.646326 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5502808 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5228868 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -98.30532 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.712233 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5518698 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5221469 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -93.70150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.031345 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5543497 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5223543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -89.51974 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.968658 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5557979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5214524 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -84.85617 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.348079 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5563620 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5195837 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -79.77592 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.106345 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5172909 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -74.51987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.023935 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5148127 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -69.19399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.004729 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5566102 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5122712 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.85210 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.000000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+
+
+&lt;table class="table" style="font-size: 5px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; (Intercept) &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; at_bat &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; hits &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; hm_run &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; runs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; rbi &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; walks &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; years &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_at_bat &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_hits &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_hm_run &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_runs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; crbi &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; c_walks &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; leagueN &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; divisionW &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; put_outs &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; assists &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; errors &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; new_leagueN &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; adj.r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BIC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mallows_cp &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2990316 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2956615 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.91719 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.376782 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4261405 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4205959 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -100.58651 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.908474 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4677553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4600042 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -111.04849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26.075809 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5010351 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4912992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -119.26055 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.814875 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5235247 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5118464 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -123.59863 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.177686 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5286246 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5146923 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -120.51134 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.992301 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5330772 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5168967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -117.15731 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.084299 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5372468 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5188288 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -113.69393 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.297536 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5422410 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5216419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -110.62554 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.157435 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5454508 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5226091 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -106.75612 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.781997 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5481010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5229955 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -102.63700 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.646326 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5502808 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5228868 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -98.30532 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.712233 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5518698 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5221469 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -93.70150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.031345 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5543497 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5223543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -89.51974 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.968658 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5557979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5214524 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -84.85617 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.348079 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5563620 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5195837 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -79.77592 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.106345 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5172909 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -74.51987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.023935 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5148127 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -69.19399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.004729 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TRUE &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5566102 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5122712 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.85210 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.000000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+This table contains the sequence of different methods for each size, plus some appropriate performance measures.
+
+- To describe the different models, boolean variables are used for each predictor to indicate wether it is part of the model.
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+It is handy to define a model-size variable: this is easily done by counting the boolean variables row-wise 
+
+.pull-left[
+
+```r
+model_size_vs_perf = reg_sub_out %&gt;% tidy %&gt;%
+  rowwise() %&gt;% 
+  mutate(n_predictors = sum(
+    c_across("(Intercept)":"new_leagueN")
+    )-1,.keep="unused") %&gt;% 
+  arrange(n_predictors) %&gt;% ungroup()
+```
+]
+
+.pull-right[
+&lt;table class="table" style="font-size: 6px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; adj.r.squared &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BIC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mallows_cp &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; n_predictors &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.2990316 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2956615 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.91719 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.376782 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.4261405 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4205959 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -100.58651 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.908474 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.4677553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4600042 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -111.04849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26.075809 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5010351 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4912992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -119.26055 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13.814875 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5235247 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5118464 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -123.59863 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.177686 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5286246 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5146923 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -120.51134 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.992301 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5330772 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5168967 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -117.15731 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.084299 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5372468 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5188288 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -113.69393 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.297536 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5422410 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5216419 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -110.62554 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.157435 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5454508 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5226091 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -106.75612 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.781997 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5481010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5229955 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -102.63700 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7.646326 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5502808 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5228868 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -98.30532 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.712233 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5518698 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5221469 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -93.70150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.031345 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5543497 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5223543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -89.51974 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.968658 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5557979 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5214524 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -84.85617 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.348079 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5563620 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5195837 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -79.77592 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14.106345 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5172909 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -74.51987 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.023935 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 17 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5565992 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5148127 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -69.19399 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.004729 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.5566102 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5122712 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.85210 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.000000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 19 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+For each index, create a boolean variable indicating the best value
+
+
+
+```r
+*model_size_vs_perf_best = model_size_vs_perf %&gt;% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),
+*                             across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %&gt;%
+* select(n_predictors,everything()) %&gt;%
+  pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")
+
+model_size_vs_perf = model_size_vs_perf %&gt;% 
+  pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %&gt;% 
+  bind_cols(model_size_vs_perf_best %&gt;% select(best))
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+convert the table in long format
+
+
+
+```r
+*model_size_vs_perf_best = model_size_vs_perf %&gt;% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),
+*                             across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %&gt;%
+* select(n_predictors,everything()) %&gt;%
+* pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")
+
+model_size_vs_perf = model_size_vs_perf %&gt;% 
+  pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %&gt;% 
+  bind_cols(model_size_vs_perf_best %&gt;% select(best))
+```
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+create a further long table with all the values for different index and model-size
+
+
+
+```r
+model_size_vs_perf_best = model_size_vs_perf %&gt;% mutate(across(.cols=1:2, ~ .x==max(.x),.names="{.col}" ),
+                              across(.cols=3:4, ~ .x==min(.x),.names="{.col}" )) %&gt;% 
+  select(n_predictors,everything()) %&gt;% 
+  pivot_longer(names_to = "index", values_to = "best",cols="r.squared":"mallows_cp")
+
+*model_size_vs_perf = model_size_vs_perf %&gt;%
+* pivot_longer(names_to = "index", values_to = "value",cols="r.squared":"mallows_cp") %&gt;%
+* bind_cols(model_size_vs_perf_best %&gt;% select(best))
+```
+--
+
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; n_predictors &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; index &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; value &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; best &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; r.squared &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2990316 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; adj.r.squared &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2956615 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BIC &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -63.9171935 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mallows_cp &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 94.3767820 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; r.squared &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4261405 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; adj.r.squared &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4205959 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BIC &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -100.5865119 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mallows_cp &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 41.9084736 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; FALSE &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+Finally, create a plot to summarize the information at hand
+
+
+```r
+model_size_vs_perf %&gt;% ggplot(aes(x=n_predictors,y=value))+geom_line()+geom_point(aes(color=best))+facet_wrap(~index,scales = "free")
+```
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-15-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn center middle inverse
+## best subset with cross-validation
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** List-wise setup ** 
+
+Create a training and a validation set for each combination of folds
+
+
+```r
+tidy_structure = hit_flds %&gt;%
+  mutate(
+  train = map(.x=splits,~training(.x)),
+  validate = map(.x=splits,~testing(.x))
+  )
+```
+
+
+```
+## #  5-fold cross-validation 
+## # A tibble: 5 × 4
+##   splits           id    train               validate          
+##   &lt;list&gt;           &lt;chr&gt; &lt;list&gt;              &lt;list&gt;            
+## 1 &lt;split [168/42]&gt; Fold1 &lt;tibble [168 × 20]&gt; &lt;tibble [42 × 20]&gt;
+## 2 &lt;split [168/42]&gt; Fold2 &lt;tibble [168 × 20]&gt; &lt;tibble [42 × 20]&gt;
+## 3 &lt;split [168/42]&gt; Fold3 &lt;tibble [168 × 20]&gt; &lt;tibble [42 × 20]&gt;
+## 4 &lt;split [168/42]&gt; Fold4 &lt;tibble [168 × 20]&gt; &lt;tibble [42 × 20]&gt;
+## 5 &lt;split [168/42]&gt; Fold5 &lt;tibble [168 × 20]&gt; &lt;tibble [42 × 20]&gt;
+```
+
+
+---
+class: animated fadeIn
+
+### Subset selection example: hitters dataset
+
+** best subsets on the different folds ** 
+
+Apply ** `\(\text{regsubsets}\)` ** to each of the training folds previously defined
+
+- for best subset selection, choose ** `\(\texttt{method="exhaustive"}\)` ** 
+
+
+
+```r
+tidy_structure = tidy_structure %&gt;%
+  mutate(
+  model_fits = map(.x=train,
+                     .f=~regsubsets(salary~.,
+                      data=.x,nvmax = 19,method = "exhaustive"))
+  )
+```
+
+Now the predictors have to be pulled out from the different sized models
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** pull information from each model sequence ** 
+
+
+- create the matrix `\(\bf{X}_{test}\)`, that contains the predictor values for the test observations
+- pull the coefficient estimates for each model
+
+
+```r
+tidy_structure = tidy_structure %&gt;%
+  mutate(
+    x_test = map(.x=validate,
+                 .f=~model.matrix(as.formula("salary~."),as.data.frame(.x))),
+    coefficients=map(.x=model_fits,~coef(.x,id=1:19))
+  ) %&gt;% 
+  unnest(coefficients) %&gt;% 
+  mutate(
+    x_test = map2(.x=x_test, .y=coefficients, ~.x[,names(.y)])
+  )
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** obtain the predictions: `\({\bf \hat{y}}_{test}={\bf X}_{test}{\bf \hat{\beta}}\)` ** 
+- compute the squared residuals
+
+
+```r
+tidy_structure = tidy_structure %&gt;% 
+  mutate(yhat = map2(.x=x_test, .y=coefficients, ~.x %*% .y),
+         squared_resids = map2(.x=yhat, .y=validate, ~(.x-.y$salary)^2)) %&gt;% 
+  unnest(c(yhat,squared_resids)) %&gt;% 
+  select(id,validate,coefficients, yhat, squared_resids)
+```
+
+```r
+tidy_structure
+```
+
+```
+## # A tibble: 3,990 × 5
+##    id    validate           coefficients yhat[,1] squared_resids[,1]
+##    &lt;chr&gt; &lt;list&gt;             &lt;list&gt;          &lt;dbl&gt;              &lt;dbl&gt;
+##  1 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        684.               271.
+##  2 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        519.            516324.
+##  3 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        562.             81005.
+##  4 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        332.              2084.
+##  5 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        822.            143193.
+##  6 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        518.             11344.
+##  7 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        505.             59804.
+##  8 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        605.            133105.
+##  9 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        477.             26530.
+## 10 Fold1 &lt;tibble [42 × 20]&gt; &lt;dbl [2]&gt;        510.              3594.
+## # … with 3,980 more rows
+```
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** compute the RMSE by fold, for each model ** 
+- with the predictors, compute the squared residuals
+
+
+```r
+tidy_structure = tidy_structure %&gt;% 
+  group_by(id,coefficients) %&gt;% 
+  summarise(RMSE=sqrt(mean(squared_resids))) %&gt;% ungroup()
+```
+
+.pull-left[
+
+```r
+tidy_structure = tidy_structure %&gt;% 
+  mutate(model_size=map_int(coefficients,length)) %&gt;% 
+  group_by(model_size) %&gt;% 
+  summarise(cv_RMSE=mean(RMSE))
+```
+]
+
+.pull-right[
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; model_size &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cv_RMSE &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 375.0628 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 344.8000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 342.1666 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 336.2349 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 329.0513 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 321.3268 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 320.0809 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 322.1483 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.9335 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 322.9324 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.4789 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 13 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.3936 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 14 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 329.4810 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 15 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 328.6171 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 16 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 327.6944 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 17 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.8658 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 327.2598 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 19 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.3173 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 20 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.0963 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+** pick up the 'best model' according to cross-validation ** 
+
+
+
+.pull-left[
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; model_size &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; cv_RMSE &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 375.0628 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 344.8000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 342.1666 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 336.2349 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 329.0513 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 321.3268 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 320.0809 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 322.1483 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.9335 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 322.9324 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.4789 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 13 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.3936 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 14 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 329.4810 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 15 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 328.6171 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 16 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 327.6944 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 17 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.8658 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 327.2598 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 19 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.3173 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 20 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 326.0963 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+
+```r
+tidy_structure  %&gt;% 
+  ggplot(aes(x=model_size, y=cv_RMSE))+
+  geom_point()+geom_line()+theme_minimal()+
+  geom_point(aes(x = model_size[which.min(cv_RMSE)],
+                 y = min(cv_RMSE)),inherit.aes = FALSE,color="red",size=4,alpha=.5)
+```
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-26-1.png" width="70%" style="display: block; margin: auto 0 auto auto;" /&gt;
+
+]
+
+--
+
+the optimal model size is 8
+
+---
+class: animated fadeIn
+### Subset selection example: hitters dataset
+
+
+```r
+best_size=tidy_structure$model_size[which.min(tidy_structure$cv_RMSE)]
+best_out = regsubsets(salary~.,data=hit_train,nvmax=best_size,method="exhaustive")
+
+coef(best_out,id=best_size)
+```
+
+```
+##  (Intercept)       at_bat         hits          rbi        walks        years 
+##  263.9135463   -1.7492132    5.0738879    1.8684676    2.8832518  -29.6126356 
+##       c_hits    divisionW     put_outs 
+##    0.5653777 -159.0417608    0.4257097
+```
+
+---
+class: animated fadeIn center middle inverse
+## Shrinkage methods
+
+---
+class: animated fadeIn
+### Shrinkage methods
+
+
+- **shrinkage methods**  keep  **all** the predictors in the model, but the coefficient estimates are constrained
+
+- the shrinkage determines a reduction of the estimates variability
+
+- eventually, some of the coefficients maybe constrained to zero, implicitly excluding the corresponding predictors from the model
+
+- the type of constraint defines the shrinkage method 
+  - **L2** constraint: **ridge regression**
+  - **L1** constraint: **lasso regression**
+
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+A  **constraint** is introduced on the optimization of the least squares function (RSS), in particular:
+
+** `$$\underbrace{\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}}}_{RSS} + \underbrace{\color{red}{\lambda\sum_{j=1}^{p}{\beta^{2}_{j}}}}_{constraint}$$` **
+
+
+ ** `\(\lambda\)` ** is the  **tuning parameter** that determines the strength of the constraint on the  estimates of ** `\(\beta_{j}\)` **. 
+
+- if ** `\(\lambda=0\)` ** then the ridge regression estimates ** `\(\hat{\beta}^{R}_{\lambda}\)` ** are the same as OLS **  `\(\hat{\beta}\)` **
+- if ** `\(\lambda\rightarrow \infty\)` ** then  ** `\(\hat{\beta}^{R}_{j}\approx 0\)` **
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-28-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+- estimates for different values of  `\(\lambda\)`, in figure right the x axis shows the ratio between **  `\(||\hat{\beta}^{R}_{\lambda}||_{2}\)` ** and ** `\(||\hat{\beta}||_{2}\)` **
+
+- the ** `\(\mathcal{L}_2\)` ** norm is the square root of the sum of squared coefficients 
+ ** `\(||\hat{\beta}||_{2}=\sqrt{\sum_{j=1}^{p}{\hat{\beta}^{2}_{j}}}\)` **
+
+
+---
+class: animated fadeIn
+### ridge regression
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-29-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+- Synthetic data with `\(n=50\)` and `\(p=45\)`: all of the true  `\(\beta\)`'s differ from 0.
+
+- The grid is on `\(\lambda\)` and  `\(||\beta^{R}||/||\beta^{R}||\)`, the `\(\color{black}{\text{squared bias}}\)`, the `\(\color{blue!20!green}{\text{variance}}\)` and  `\(\color{violet}{\text{MSE test}}\)`
+
+- the dotted line is the ** true MSE test **
+
+
+
+---
+class: animated fadeIn
+### lasso regression
+
+The lasso differs from ridge in the constraint
+
+** `$$\underbrace{\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}}}_{RSS} + \underbrace{\color{red}{\lambda\sum_{j=1}^{p}{|\beta_{j}|}}}_{constraint}$$` **
+
+
+ ** `\(\lambda\)` ** is the  **tuning parameter** that determines the strength of the constraint on the  estimates of ** `\(\beta_{j}\)`**. 
+
+- if ** `\(\lambda=0\)` ** then the ridge regression estimates ** `\(\hat{\beta}^{R}_{\lambda}\)` ** are the same as OLS ** `\(\hat{\beta}\)` **
+- if ** `\(\lambda\rightarrow \infty\)` ** then  ** `\(\hat{\beta}^{R}_{j}\approx 0\)` **
+
+
+---
+class: animated fadeIn
+### lasso regression
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-30-1.png" width="70%" style="display: block; margin: auto;" /&gt;
+
+- grid on  `\(\lambda\)` and (right) the `\(\mathcal{L}_{1}\)` ratio between Lasso and OLS coefficients
+
+
+---
+class: animated fadeIn
+### variables selection and the lasso
+
+
+The Lasso regression can be formalized as a constrained minimisation problem
+
+`$$\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}} \ \ \ \text{subject to} \color{red}{\sum_{j=1}^{p}{|\beta_{j}|\leq s}}$$`
+
+The Ridge regression can be formalized as a constrained minimisation problem
+
+`$$\sum_{i=1}^{n}{\left(y_{i}-\beta_{0}-\sum_{j=1}^{p}{\beta_{j}x_{ij}}\right)^{2}} \ \ \ \text{subject to} \color{red}{\sum_{j=1}^{p}{\beta^{2}_{j}\leq s}}$$`
+---
+class: animated fadeIn
+### variables selection and the lasso
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-31-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- the `\(\color{cyan}{\text{light blue areas}}\)`  are the admissible domain for  `\(\beta_{1}\)` and `\(\beta_{2}\)` solutions  (Lasso (left), Ridge).
+- the ellipses are level curves of the  RSS bivariate function.
+- the solution is given by the most external ellipses that touches the admissible domain.
+- the  Lasso solution may lead to a 0 coefficient, whereas the ridge maybe close to 0 but not 0. 
+
+
+---
+class: animated fadeIn
+### ridge vs lasso:  non null coefficients
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-32-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+- Synthetic data with `\(n=50\)` and `\(p=45\)`: all of the true  `\(\beta\)`'s differ from 0
+- The grid is on `\(\lambda\)` and  `\(||\beta^{R}||/||\beta^{R}||\)`, the squared bias, the `\(\color{blue!20!green}{\text{variance}}\)` and `\(\color{violet}{\text{MSE test}}\)`
+- the dotted line is the true MSE test
+- Ridge provides a lower MSE test
+
+
+---
+class: animated fadeIn
+### ridge vs lasso:  mostly null coefficients
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-33-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+- Synthetic data with `\(n=50\)` and `\(p=45\)`: all but two  of the true  `\(\beta\)`'s are 0
+- The grid is on `\(\lambda\)` and  `\(||\beta^{R}||/||\beta^{R}||\)`, the squared bias, the `\(\color{blue!20!green}{\text{variance}}\)` and `\(\color{violet}{\text{MSE test}}\)`
+- the dotted line is the true MSE test
+- lasso provides a lower MSE test
+
+
+---
+class: animated fadeIn
+### Tuning the parameter `\(\lambda\)`: credit  data}
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-34-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+- ridge regression:  cross-validation estimates given a grid of values for  `\(\lambda\)` (left); the vertical line is the optimal value
+- ridge regression: ridge coefficients standardized
+
+
+---
+class: animated fadeIn
+### Tuning the parameter `\(\lambda\)`: synthetic data}
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-35-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+- lasso regression:  cross-validation for values of  `\(||\beta^{L}||_{1}/||\beta||_{1}\)` (left);  the vertical line is the optimal value
+- lasso regression:  lasso coefficients standardized. Note that the null (at a population level) coefficient are correctly identified!
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: hitters pre-processing
+
+Specify the recipe: when applying Ridge or Lasso regression, the numerical predictors have to be scaled, and categorical have to be trasformed in dummy, since ** `\(\texttt{glmnet}\)` ** only handles numeric predictors.
+
+
+```r
+hit_recipe = recipe(salary~.,data=hit_train) %&gt;% 
+  step_scale(all_numeric()) %&gt;% 
+  step_zv(all_numeric(), -all_outcomes()) %&gt;%
+  step_dummy(all_nominal())
+
+hit_recipe %&gt;% prep() %&gt;% juice() %&gt;% slice(1:8) %&gt;% 
+  kable() %&gt;% kable_styling(font_size=6)
+```
+
+&lt;table class="table" style="font-size: 6px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; at_bat &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; hits &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; hm_run &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; runs &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; rbi &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; walks &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; years &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; c_at_bat &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; c_hits &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; c_hm_run &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; c_runs &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; crbi &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; c_walks &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; put_outs &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; assists &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; errors &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; salary &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; league_N &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; division_W &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; new_league_N &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1.916809 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4197762 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8981975 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1656088 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3630547 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2559787 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.0204629 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3848060 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2425786 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7107835 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0828586 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1165508 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7886801 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9547633 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1964247 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4754738 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4783552 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2.096510 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.6600460 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4595710 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3598769 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.2717578 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1629433 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6734876 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3099211 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2688100 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3101601 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2337600 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3229409 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2295101 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.8357996 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2553521 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.9181159 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3525309 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3.594018 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.9487660 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.3682408 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.1859973 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.3319114 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.5584752 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2244959 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2656466 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2403268 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3877001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2818870 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3023276 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2295101 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5787561 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0392849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.0656633 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3911955 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3.820308 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.3200921 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.4805155 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.5356800 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.8241256 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.9771348 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6734876 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4845591 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4628516 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6849369 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5087717 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5943486 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3964265 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.6189898 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7267714 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.6230212 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4889944 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3.767063 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.3637775 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.4700433 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.9528756 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.1804609 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.0002624 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.1429423 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.0008230 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.8180543 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.6929571 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.5541713 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3808299 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2518732 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1648849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.8743482 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4754738 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.7057945 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2.622302 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.8784732 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1122747 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4764378 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0601536 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.6746383 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8979835 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5357207 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4753130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0387700 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3231388 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2439234 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3171412 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7483280 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.4160239 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.3607580 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.5685982 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3.500839 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.1890358 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.4595710 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.7586074 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.6503841 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.9074894 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3469753 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3026524 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2728420 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9950969 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2100516 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1749550 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.2059712 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.1169624 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0589274 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3279264 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.8536300 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1.231284 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8737084 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4490988 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8936334 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4164889 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8373192 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6734876 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2577756 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2225248 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0904634 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1993835 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1271150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1961268 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3575754 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0130950 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2950948 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2046953 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model specification
+
+the model is still **linear_reg**, the  engine to use is  **glmnet**, that requires two parameters
+
+- **penalty**: this is the value of ** `\(\lambda\)` **
+
+- **mixture**: indicates whether one wants to use ridge ( `\(\texttt{mixture=0}\)` ) or lasso ( `\(\texttt{mixture=1}\)` ).
+
+
+
+Specify the grid for the hyperparameter
+
+
+```r
+ lambda_grid &lt;- grid_regular(penalty(), levels = 50)
+```
+
+Fix the grid that has to be evaluted: otherwise glmnet will pick a grid internally
+
+```r
+ridge_spec = linear_reg(mixture = 0, penalty = tune()) %&gt;% set_engine("glmnet")
+lasso_spec = linear_reg(mixture = 1, penalty = tune()) %&gt;% set_engine("glmnet")
+```
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model specification
+
+As usual, put it all together in a workflow
+
+
+```r
+ridge_wflow=workflow() %&gt;% 
+  add_recipe(hit_recipe) %&gt;% 
+  add_model(ridge_spec)
+  
+
+lasso_wflow=workflow() %&gt;% 
+  add_recipe(hit_recipe) %&gt;% 
+  add_model(lasso_spec)
+```
+
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: model fit
+
+
+```r
+ridge_results = ridge_wflow %&gt;% 
+  tune_grid(grid=lambda_grid,
+            resamples=hit_flds,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+              metrics = metric_set(rmse))  
+
+best_ridge = ridge_results %&gt;% select_best("rmse")
+
+lasso_results = lasso_wflow %&gt;% 
+  tune_grid(grid=lambda_grid,
+            resamples=hit_flds,
+            control = control_grid(verbose = FALSE, save_pred = TRUE),
+              metrics = metric_set(rmse))  
+
+best_lasso = lasso_results %&gt;% select_best("rmse")
+```
+
+
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: plot the penalties (via autoplot)
+
+
+```r
+library("patchwork")
+autoplot(ridge_results) + ylim(.7,1) + ggtitle("ridge") | autoplot(lasso_results) + ylim(.7,1)+ ggtitle("lasso")
+```
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-41-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+### shrinkage methods example: finalization
+
+
+```r
+final_ridge &lt;- finalize_workflow(ridge_wflow, best_ridge) %&gt;%
+    last_fit(main_split)
+
+final_lasso &lt;- finalize_workflow(lasso_wflow, best_lasso) %&gt;%
+    last_fit(main_split)
+
+final_ridge %&gt;% collect_metrics()
+```
+
+```
+## # A tibble: 2 × 4
+##   .metric .estimator .estimate .config             
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+## 1 rmse    standard       0.894 Preprocessor1_Model1
+## 2 rsq     standard       0.402 Preprocessor1_Model1
+```
+
+```r
+final_lasso %&gt;% collect_metrics()
+```
+
+```
+## # A tibble: 2 × 4
+##   .metric .estimator .estimate .config             
+##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+## 1 rmse    standard       0.900 Preprocessor1_Model1
+## 2 rsq     standard       0.404 Preprocessor1_Model1
+```
+
+
+
+---
+class: animated fadeIn
+### Ridge and Lasso: further comparison
+
+Consider `\(n=p\)`, `\(\beta_{0}=0\)` and the model `\({\bf y}={\bf X}{\bf \beta}\)` such that
+
+
+`$$\begin{bmatrix}
+y_{1}\\
+y_{2}\\
+...\\
+y_{j}\\
+...\\
+y_{n (p)}
+\end{bmatrix}=
+\begin{bmatrix}
+1 &amp; 0 &amp; ... &amp; 0  &amp; ... &amp; 0  \\
+0 &amp; 1 &amp; ... &amp; 0  &amp; ... &amp; 0  \\
+... &amp; ... &amp; ... &amp; ...  &amp; ... &amp; ...  \\
+0 &amp; 0 &amp; ... &amp; 1  &amp; ... &amp; 0  \\
+... &amp; ... &amp; ... &amp; ...  &amp; ... &amp; ...  \\
+... &amp; ... &amp; ... &amp; ...  &amp; ... &amp; 1  
+\end{bmatrix}
+\begin{bmatrix}
+\beta_{1}\\
+\beta_{2}\\
+...\\
+\beta_{j}\\
+...\\
+\beta_{p (n)}
+\end{bmatrix}$$`
+
+The estimates  `\(\hat{\beta}_{1},\ldots,\hat{\beta}_{p}\)` are obtained by minimizing `\(\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}\)` and they are such that `\(\hat{\beta_{j}}=y_{j}\)`.
+
+
+---
+class: animated fadeIn
+### The Ridge problem  
+
+
+
+`$$Ridge: \ \ \sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{\beta_{j}^{2}}$$`
+
+And the corresponding solution `\(\forall j\)` is
+
+`$$\partial_{\beta_{j}} \left[\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{\beta_{j}^{2}}\right]= -2\left(y_{j}-\beta_{j}\right)+2\lambda\beta_{j}=0 \rightarrow \color{red}{\hat{\beta}_{j}=\frac{y_{j}}{1+\lambda}}$$`
+---
+class: animated fadeIn
+### The Lasso problem  
+
+
+`$$Lasso: \ \ \sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{|\beta_{j}|}$$`
+Since `\(\partial_{x}|x|=\left\{\begin{matrix} 1 &amp; se \ x&gt;0\\-1 &amp;se \ x&lt;0\\ 0 &amp;if \ x=0 \end{matrix}\right.\)` , 
+The solution  `\(\forall j\)` is
+
+`$$\partial_{\beta_{j}} \left[\sum_{j=1}^{p}{\left(y_{j}-\beta_{j}\right)^{2}}+\lambda\sum_{j=1}^{p}{|\beta_{j}|}\right]=\left\{\begin{matrix} -2\left(y_{j}-\beta_{j}\right)+\lambda =0 &amp; if \ \beta_{j}&gt;0\\ -2\left(y_{j}-\beta_{j}\right)-\lambda =0 &amp;if \ \beta_{j}&lt;0\\ 0&amp;if \ \beta_{j}=0 \end{matrix}\right.$$`   
+
+then
+
+`$$\hat{\beta}_{j}=\left\{\begin{matrix} y_{j}-\frac{\lambda}{2}  &amp; if \ y_{j} &gt;\frac{\lambda}{2}\\ 
+y_{j}+\frac{\lambda}{2}  &amp; if \ y_{j} &lt;-\frac{\lambda}{2}\\
+0  &amp; if \ |y_{j}| \leq \frac{\lambda}{2}\\
+\end{matrix}\right.$$`
+
+---
+class: animated fadeIn
+### Ridge vs  Lasso 
+
+&lt;img src="model_selection_files/figure-html/unnamed-chunk-43-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+- The Ridge regression 'shrinks' the ols coefficient by a  factor `\(\frac{1}{1+\lambda}\)`
+- The Lasso regression 'shrinks' the ols coefficient by a   factor \alert{$\frac{\lambda}{2}$} outside of the thresholds  `\(|\frac{\lambda}{2}|\)`, inside the thresholds  `\(\left[-\frac{\lambda}{2};\frac{\lambda}{2}\right]\)` the coefficients are led to 0
+
+
+
+---
+class: animated fadeIn
+### Ridge,  Lasso  and correlated predictors
+
+The **ridge** regression assigns  **similar coefficients** to **correlated predictors**, whereas **lasso** regression assigns quite **different** coefficient to correlated coefficients.
+
+To check this out, consider ** `\(n=p=2\)` **, ** `\(x_{11}=x_{12}\)` **, ** `\(x_{21}=x_{22}\)` **
+
+Furthermore, ** `\(y_{1}+y_{2}=0\)` **, ** `\(x_{11}+x_{21}=0\)` **, ** `\(x_{12}+x_{22}=0\)` **, then ** `\(\hat{\beta}_{0}=0\)` ** as ** `\(\bar{y}=0\)` **, ** `\(\bar{X}_{1}=0\)` **, ** `\(\bar{X}_{2}=0\)` **
+ 
+For instance,
+
+`$$\left\{\begin{matrix}
+y_{1}=x_{11}\beta_{1}+x_{12}\beta_{2}+\epsilon_{1}\\
+y_{2}=x_{21}\beta_{1}+x_{22}\beta_{2}+\epsilon_{2}
+\end{matrix}\right.
+ \left\{\begin{matrix}
+2=3\beta_{1}+3\beta_{2}+\epsilon_{1}\\
+-2=-3\beta_{1}-3\beta_{2}+\epsilon_{2}
+\end{matrix}\right.$$`
+
+then ** `\(cor(X_{1},X_{2})=1\)` **
+
+---
+class: animated fadeIn
+### Ridge regression solution
+Consider  ** `\(n=p=2\)` **, **  `\(x_{11}=x_{12}\)` **, ** `\(x_{21}=x_{22}\)` **.
+
+The  ridge target function is
+ 
+`$$\underbrace{\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{21}\hat{\beta}_{1}-x_{22}\hat{\beta}_{2}\right)^{2}}_{{RSS}}+
+\underbrace{\lambda\left(\hat{\beta}_{1}^{2}+\hat{\beta}_{2}^{2}\right)}_{{constraint}}$$`
+To be minimised wrt `\(\hat{\beta}_{1}\)` and `\(\hat{\beta}_{2}\)`. To simplify, set `\(x_{11}=x_{12}={x_{1}}\)` and `\(x_{21}=x_{22}={x_{2}}\)`. 
+
+
+`$$\begin{split}
+\partial_{\hat{\beta}_{1}}&amp;\left[\left(y_{1}-x_{1}\hat{\beta}_{1}-x_{1}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{2}\hat{\beta}_{1}-x_{2}\hat{\beta}_{2}\right)^{2}+
+\lambda\left(\hat{\beta}_{1}^{2}+\hat{\beta}_{2}^{2}\right)\right]=\\
+=&amp; 2\left(y_{1}-x_{1}\hat{\beta}_{1}-x_{1}\hat{\beta}_{2}\right)(-x_{1})+ 2\left(y_{1}-x_{2}\hat{\beta}_{1}-x_{2}\hat{\beta}_{2}\right)(-x_{2})+2\lambda\hat{\beta}_{1}=\\
+=&amp; - y_{1}x_{1} + x_{1}^{2}\hat{\beta}_{1}+ x_{1}^{2}\hat{\beta}_{2} - y_{2}x_{2} + x_{2}^{2}\hat{\beta}_{1}+ x_{2}^{2}\hat{\beta}_{2}+\lambda\hat{\beta}_{1}=\\
+=&amp; \hat{\beta}_{1}\left(x_{1}^{2}+x_{2}^{2}+\lambda \right) + \hat{\beta}_{2}\left( x_{1}^{2}+x_{2}^{2}\right)- y_{1}x_{1}-y_{2}x_{2}=0 \rightarrow\\
+\rightarrow &amp; \color{red}{\hat{\beta}_{1}}=\frac{y_{1}x_{1}+y_{2}x_{2}-\hat{\beta}_{2}\left( x_{1}^{2}+x_{2}^{2}\right)}{\left(x_{1}^{2}+x_{2}^{2}+\lambda \right)} 
+\end{split}$$`
+
+similarly `\(\color{red}{\hat{\beta}_{2}}=\frac{y_{1}x_{1}+y_{2}x_{2}-\hat{\beta}_{1}\left( x_{1}^{2}+x_{2}^{2}\right)}{\left(x_{1}^{2}+x_{2}^{2}+\lambda \right)}\)`
+hence `\(\hat{\beta}_{1}=\hat{\beta}_{2}\)`.
+
+
+---
+class: animated fadeIn 
+### lasso regression solution
+
+
+Consider ** `\(n=p=2\)` **, ** `\(x_{11}=x_{12}\)` **, ** `\(x_{21}=x_{22}\)` **.
+The Lasso target function is 
+`$$\underbrace{\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(y_{2}-x_{21}\hat{\beta}_{1}-x_{22}\hat{\beta}_{2}\right)^{2}}_{{RSS}}+
+\underbrace{\lambda\left(|\hat{\beta}_{1}|+|\hat{\beta}_{2}|\right)}_{{constraint}}$$`
+To be minimised wrt `\(\hat{\beta}_{1}\)` and `\(\hat{\beta}_{2}\)`. Since  `\(x_{11}=x_{12}\)`, `\(x_{21}=x_{22}\)`, `\(x_{11}+x_{21}=0\)`, `\(x_{12}+x_{22}=0\)` is  `\(y_{1}+y_{2}=0\)`,  the RSS is
+
+
+`$$\begin{split}
+&amp;\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{12}\hat{\beta}_{2}\right)^{2}+\left(\underbrace{y_{2}}_{\color{red}{=-y_{1}}}-\underbrace{x_{21}}_{{=-x_{11}}}\hat{\beta}_{1}-\underbrace{x_{22}}_{\color{red}{=x_{21}=-x_{11}}}\hat{\beta}_{2}\right)^{2}\\
+&amp;\left(y_{1}-x_{11}\hat{\beta}_{1}-x_{11}\hat{\beta}_{2}\right)^{2}+\left(-y_{1}+x_{11}\hat{\beta}_{1}+x_{11}\hat{\beta}_{2}\right)^{2}\\
+&amp;2\left(y_{1}-x_{11}\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)\right)^{2} \rightarrow \partial_{\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)}:
+4\left(y_{1}-\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)x_{11}\right)x_{11}=0\\
+\end{split}$$`
+
+The  OLS solution (unconstrained) is `\(\color{red}{\hat{\beta}_{1}+\hat{\beta}_{2}=\frac{y_{1}}{x_{11}}}\)`, parallel to the Lasso solution!
+
+
+---
+class: animated fadeIn 
+### Lasso regression solution
+
+The  Lasso solution lies on the RSS level curve `$$\color{red}{2\left(y_{1}-x_{11}\left(\hat{\beta}_{1}+\hat{\beta}_{2}\right)\right)^{2}} \text{  tangent to the constraint  }|\hat{\beta}_{1}|+|\hat{\beta}_{2}|\leq s$$` 
+the RSS level curves, however, are parallel to `$$\hat{\beta}_{1}+\hat{\beta}_{2}=\frac{y_{1}}{x_{11}}$$` then all the coefficients `\(\hat{\beta}_{1}\)` and `\(\hat{\beta}_{2}\)` such that `\(\hat{\beta}_{1}+\hat{\beta}_{2}= s\)` are candidate solutions; the same holds for
+ `\(\hat{\beta}_{1}+\hat{\beta}_{2}= -s\)`.
+ 
+ In summary:
+
+-  if  `\(cor(X_{1},X_{2})=1\)` the Ridge solution is `\(\hat{\beta}^{R}_{1}=\hat{\beta}^{R}_{2}\)` whereas in the  Lasso solution 
+ `\(\hat{\beta}^{L}_{1}\)` and `\(\hat{\beta}^{L}_{2}\)` are not unique.
+- if `\(cor(X_{1},X_{2})\approx1\)` (or `\(cor(X_{1},X_{2})\approx -1\)`), then `\(\hat{\beta}^{R}_{1}\approx\hat{\beta}^{R}_{2}\)`
+whereas `\(\hat{\beta}^{L}_{1}\)` and `\(\hat{\beta}^{L}_{2}\)` can be very different from each other.
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
