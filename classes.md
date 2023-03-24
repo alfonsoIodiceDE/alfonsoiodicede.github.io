@@ -19,6 +19,10 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [Linear regression: part 2](teaching_related/Linear_regression/Linear-Regression-part_2.html) 
 
+[Classification: part 1](teaching_related/classification/Classification_part1.html)
+
+[Classification: part 2](teaching_related/classification/Classification_part2.html)
+
 [Model selection](teaching_related/model_selection/model_selection.html) 
 
 

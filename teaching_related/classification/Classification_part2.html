@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Classification (part 2)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Statistical Learning" />
+    <script src="Classification_part2_files/header-attrs/header-attrs.js"></script>
+    <link href="Classification_part2_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="Classification_part2_files/fabric/fabric.min.js"></script>
+    <link href="Classification_part2_files/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="Classification_part2_files/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script src="Classification_part2_files/kePrint/kePrint.js"></script>
+    <link href="Classification_part2_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Classification (part 2)
+]
+.subtitle[
+## with tidymodels
+]
+.author[
+### Statistical Learning
+]
+.date[
+### Alfonso Iodice D'Enza
+]
+
+---
+
+
+
+
+
+
+class: animated fadeIn center middle inverse
+
+## generative models for classification
+
+---
+class: animated fadeIn 
+### estimating the posterior: an indirect approach
+
+in a classification problem the goal is to estimate `\(\color{blue}{P(Y=k|X)}\)`, that is, the posterior probability.
+
+--
+
+the ** logistic regression **  seeks to estimate the posterior probability `\(\color{red}{\text{directly}}\)`
+
+--
+
+another approach is to model the distributions of the predictors within each class, and then use the Bayes therorem to obtain the posterior: this is  what the ** generative models for classification ** do.    
+
+--
+
+- assuming the predictor `\(X\)` to be continuous, then its probability density function within the class `\(k\)` is ** `\(f_{k}(X)\)` **.
+
+--
+
+- also, let ** `\(P(Y=k)=\pi_{k}\)` ** (or, the prior) be the proportion of observations that belong to the `\(k^{th}\)` class.
+
+--
+
+- the posterior probability is linked to the above
+
+### `$$P(Y=k|X)=\frac{\pi_{k}f_{k}(X)}{\sum_{l=1}^{K}{\pi_{l}f_{l}(X)}}$$`
+
+
+
+---
+class: animated fadeIn 
+### estimating the posterior: an indirect approach
+
+
+- To obtain ** `\(\hat{P}(Y=k|X)\)` **, one needs to estimate
+
+- ** `\(\hat{\pi}_{k}\)` **: this is easily obtained by computing the proportion of training observations whithin the class `\(k\)`.
+
+- ** `\(\hat{f}_{k}(X)\)` **: the probability density is not easily obtained and some assumptions are needed.
+
+--
+
+- Depending on the assumptions made on 
+** `\(f_{k}(X)\)` ** we get 
+  - ** linear discriminant analysis (LDA) **
+  &amp;nbsp;
+  - ** quadratic discriminant analysis (QDA) **
+  &amp;nbsp;
+  - ** naive Bayes **
+
+
+---
+class: animated fadeIn middle center inverse
+## linear discriminant analysis (LDA)
+
+---
+class: animated fadeIn 
+### linear discriminant analysis LDA: one predictor
+
+In the linear discriminant analysis, the assumption on ** `\(f_{k}(X)\)` ** is that
+
+** `$$f_{k}(X)\sim N(\mu_{k},\sigma^{2})$$`**
+
+therefore
+
+** `$$f_{k}(X)=\frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)$$`**
+
+&amp;nbsp;
+
+- in each class, the predictor is normally distributed
+
+- the scale parameter ** `\(\sigma^{2}\)` ** is the same for each class 
+
+
+
+---
+class: animated fadeIn 
+### linear discriminant analysis LDA: one predictor
+
+
+Plugging in `\(f_{k}(X)\)` in the Bayes formula
+
+`$$p_{k}(x)=\frac{\pi_{k}\times f_{k}(x)}{\sum_{l=1}^{K}{\pi_{l}\times f_{l}(x)}} = \frac{\pi_{k}\times \overbrace{\frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)}^{\color{red}{{f_{k}(x)}}}}
+{\sum_{l=1}^{K}{\pi_{l}\times \underbrace{\frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{l} \right)^{2}\right)}_{\color{red}{{f_{l}(x)}}}}}$$`
+
+
+it takes to estimate the following parameters
+
+- `\(\mu_{1},\mu_{2},\ldots, \mu_{K}\)`
+- `\(\pi_{1},\pi_{2},\ldots, \pi_{K}\)`
+- `\(\sigma\)`
+
+to get, for each observation `\(x\)`, ** `\(\hat{p}_{1}(x)\)` **, ** `\(\hat{p}_{2}(x)\)` **, `\(\ldots\)` , ** `\(\hat{p}_{K}(x)\)` **: then the observation is assigned to the class for which `\(\hat{p}_{k}(x)\)` is max. 
+
+--
+
+`\(\color{red}{\text{Note}}:\)` not all the quantities involved in the Bayes formula play a role in the classification of an object: in fact, some of them  are constant across the classes.
+
+
+---
+class: animated fadeIn 
+### linear discriminant function `\(\delta\)`
+
+To get rid of the across-classes constant quantities 
+
+`$$\log\left[p_{k}(x)\right] = \log{\left[ \frac{\pi_{k}\times \frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)}
+{\sum_{l=1}^{K}{\pi_{l}\times \frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{l} \right)^{2}\right)}}\right]}$$`
+
+since `\(\color{red}{\log(a/b)=\log(a)-\log(b)}\)` it follows that
+
+`$$\log\left[p_{k}(x)\right]=\log{\left[ \pi_{k}\times \frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)\right]}-
+\underbrace{\log{\left[\sum_{l=1}^{K}{\pi_{l}\times \frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{l} \right)^{2}\right)}\right]}}_{\color{red}{\text{constant}}}$$`
+
+---
+class: animated fadeIn 
+### linear discriminant function `\(\delta\)`
+
+`$$\begin{split}
+&amp;\underbrace{\log{\left[ \pi_{k}\times \frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)\right]}}_{\color{red}{\log(a\times b)=\log(a)+\log(b)}}=\log(\pi_{k})+\underbrace{\log\left( \frac{1}{\sqrt{2\pi}\sigma}\right)}_{\color{red} {\text{constant}}}+\underbrace{\log\left[exp\left(-\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}\right)\right]}_{\color{red}{\log(\exp(a))=a}} =\\
+&amp;= \log(\pi_{k})  -\frac{1}{2\sigma^{2}}\left( x-\mu_{k} \right)^{2}=\log(\pi_{k}) - \frac{1}{2\sigma^{2}}\left(x^{2}+\mu_{k}^{2}-2x\mu_{k} \right)=\\
+&amp;= \log(\pi_{k}) - \underbrace{\frac{x^{2}}{2\sigma^{2}}}_{\color{red}{\text{const}}}- \frac{\mu_{k}^{2}}{2\sigma^{2}}+ \frac{2x\mu_{k}}{2\sigma^{2}}= \log(\pi_{k}) - \frac{\mu_{k}^{2}}{2\sigma^{2}}+ x\frac{\mu_{k}}{\sigma^{2}}=\color{red}{\delta_{k}(x)}\\
+\end{split}$$`
+---
+class: animated fadeIn 
+### two classes, same priors.
+
+Consider a single predictor `\(X\)`, normally distributed within the two classes, with parameters ** `\(\mu_{1}\)` ** , ** `\(\mu_{2}\)` ** and ** `\(\sigma^{2}\)` ** . 
+
+Also ** `\(\pi_{1}=\pi_{2}\)` **. Now, the observation `\(x\)` is assigned to class 1 if 
+
+`$$\begin{split}
+\delta_{1}(X) &amp;&gt;&amp;\delta_{2}(X)\\
+\color{blue}{\text{that is}}  \\
+log({\pi_{1}})-\frac{\mu_{1}^{2}}{2\sigma^{2}} + \frac{\mu_{1}}{\sigma^{2}}x  &amp;&gt;&amp; 
+log({\pi_{2}})-\frac{\mu_{2}^{2}}{2\sigma^{2}} + \frac{\mu_{2}}{\sigma^{2}}x \\
+\color{blue}{\text{ since }\pi_{1}=\pi_{2}}\\
+-\frac{\mu_{1}^{2}}{2\sigma^{2}} + \frac{\mu_{1}}{\sigma^{2}}x  &gt; 
+-\frac{\mu_{2}^{2}}{2\sigma^{2}} + \frac{\mu_{2}}{\sigma^{2}}x &amp; \  \rightarrow \ &amp;
+-\frac{\mu_{1}^{2}}{2} + \mu_{1}x  &gt; 
+-\frac{\mu_{2}^{2}}{2} + \mu_{2}x\\
+ (\mu_{1} - \mu_{2})x &gt; 
+\frac{\mu_{1}^{2}-\mu_{2}^{2}}{2} &amp; \  \rightarrow \ &amp;
+x &gt; 
+\frac{(\mu_{1}+\mu_{2})(\mu_{1}-\mu_{2})}{2(\mu_{1} - \mu_{2})}\\
+x &amp;&gt;&amp; 
+\frac{(\mu_{1}+\mu_{2})}{2}\\
+\end{split}$$`
+
+the ** Bayes decision boundary**, in which `\(\delta_{1}=\delta_{2}\)`, is at  `\(\color{red}{x=\frac{(\mu_{1}+\mu_{2})}{2}}\)`
+
+
+---
+class: animated fadeIn 
+### two classes, same priors.
+
+
+```r
+set.seed(1234)
+p_1 = ggplot()+xlim(-12,12)+theme_minimal() + xlim(-10,10) +
+  stat_function(fun=dnorm,args=list(mean=4,sd=2),geom="area",fill="dodgerblue",alpha=.25)+
+  stat_function(fun=dnorm,args=list(mean=-4,sd=2),geom="area",fill="indianred",alpha=.25)+
+  geom_vline(xintercept=0,size=2,alpha=.5)+geom_vline(xintercept=-4,color="grey",size=3,alpha=.5)+
+  geom_vline(xintercept=4,color="grey",size=3,alpha=.5) + geom_point(aes(x=-2,y=0),inherit.aes = FALSE,size=10,alpha=.5,color="darkgreen")+
+  geom_point(aes(x=1,y=0),inherit.aes = FALSE,size=10,alpha=.5,color="magenta") + xlab(0)
+p_1
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-1-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+.center[
+The `\(\color{darkgreen}{\text{green point}}\)` goes to class 1, the `\(\color{magenta}{\text{pink point}}\)` goes to class 2
+]
+
+
+---
+class: animated fadeIn 
+### two classes, same priors.
+
+Consider a training set with 100 observations from the two classes (50 each): one needs to estimate `\(\mu_1\)` and `\(\mu_2\)` to have the estimated boundary at `\(\frac{\hat{\mu}_{1}+\hat{\mu}_{2}}{2}\)`
+
+
+```r
+class_12=tibble(class_1=rnorm(50,mean = -4,sd=2),class_2=rnorm(50,mean = 4,sd=2)) %&gt;% 
+  pivot_longer(names_to="classes",values_to="values",cols = 1:2)
+mu_12 = class_12 %&gt;% group_by(classes) %&gt;% summarise(means=mean(values))
+mu_12_mean =  mean(mu_12$means)
+p_2=class_12 %&gt;% ggplot(aes(x=values,fill=classes)) + theme_minimal() + 
+  geom_histogram(aes(y=after_stat(density)),alpha=.5,color="grey") + xlim(-10,10) +
+  geom_vline(xintercept=mu_12 %&gt;% pull(means),color="grey",size=3,alpha=.75)+
+  geom_vline(xintercept = mu_12_mean, size=2, alpha=.75) + theme(legend.position = "none")
+p_2
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-2-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### two classes, same priors.
+
+The Bayes boundary is at `\(\color{red}{0}\)`; the estimated boundary is sligthly off at -0.31
+
+
+```r
+p_1 / p_2
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-3-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+class: animated fadeIn
+### Fitting the LDA
+
+** pre-process: specify the recipe **
+
+```r
+default=read_csv("./data/Default.csv") %&gt;% mutate(default=as.factor(default))
+
+set.seed(1234)
+def_split = initial_split(default,prop=3/4,strata=default)
+default_test = testing(def_split)
+defautl = training(def_split)
+def_rec = recipe(default~balance, data=default)
+```
+--
+    
+** specify the model ** 
+
+```r
+def_lda_spec = discrim_linear(mode="classification", engine="MASS")
+```
+
+--
+
+** put them together in the workflow **
+
+```r
+def_wflow_lda = workflow() %&gt;% add_recipe(def_rec) %&gt;% add_model(def_lda_spec)
+```
+
+--
+
+** fit the model **
+
+```r
+def_fit_lda = def_wflow_lda %&gt;% fit(data=default) 
+```
+
+---
+class: animated fadeIn
+### Fitting the LDA
+
+
+** Look at the results ** (note: no `\(\texttt{tidy}\)` nor `\(\texttt{glance}\)`  functions available for this model specification)
+
+```r
+def_fit_lda %&gt;%  extract_fit_engine()
+```
+
+```
+## Call:
+## lda(..y ~ ., data = data)
+## 
+## Prior probabilities of groups:
+##     No    Yes 
+## 0.9667 0.0333 
+## 
+## Group means:
+##       balance
+## No   803.9438
+## Yes 1747.8217
+## 
+## Coefficients of linear discriminants:
+##                 LD1
+## balance 0.002206916
+```
+
+--
+The function ** `\(\texttt{lda}\)` ** from the ** `\(\texttt{MASS}\)` ** is used. It implements the Fisher's discriminant analysis as described in Section 12.1 of [Modern Applied Statistics with S](https://www.researchgate.net/publication/224817420_Modern_Applied_Statistics_With_S), by Venables and Ripley. 
+
+&amp;nbsp;
+--
+Here LDA is presented as in ISLR;  Venables and Ripley refer  to the ISLR approach as  *discrimination via probability models*, and briefly describe it in the subsection of 12.1 titled Discrimination for normal populations.  
+
+---
+class: animated fadeIn
+### LDA with more than one predictor  
+  
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-9-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+Two examples of ** bivariate normal **: 
+- two independent components `\(X_{1}\)` and `\(X_{2}\)`, that is ** `\(cor(X_{1},X_{2})=0\)` ** , and with same variance  ** `\(var(X_{1})=var(X_{2})\)` **.
+
+- two non independent components `\(X_{1}\)` and `\(X_{2}\)`, that is `\(cor(X_{1},X_{2})\neq 0\)`, and with ** `\(var(X_{1})\neq var(X_{2})\)` **.
+
+
+---
+class: animated fadeIn
+### LDA with more than one predictor  
+
+
+Let `\(X\)` be a `\(p\)`-variate normal distribution, that is ** `\(X\sim N(\mu,\Sigma)\)` **.
+
+- ** `\(\mu\)` ** is the p-dimensional vector of means `\(\mu=\left[ \mu_{1},\mu_{2},\ldots,\mu_{p}\right]\)`.
+- `\(\bf \Sigma\)` is the covariance matrix
+
+`$$\bf{\Sigma}=\begin{bmatrix}
+\color{blue}{\sigma^{2}_{1}}&amp;\color{darkgreen}{\sigma_{12}}&amp;\ldots&amp;\color{darkgreen}{\sigma_{1p}}\\
+\color{darkgreen}{\sigma_{21}}&amp;\color{blue}{\sigma^{2}_{2}}&amp;\ldots&amp;\color{darkgreen}{\sigma_{2p}} \\
+\ldots&amp;\ldots&amp;\ldots&amp;\ldots \\
+\color{darkgreen}{\sigma_{p1}}&amp;\color{darkgreen}{\sigma_{p2}}&amp;\ldots&amp; \color{blue}{\sigma^{2}_{p}} \\
+ \end{bmatrix}$$`
+ 
+- diagonal terms are variances of the `\(p\)` components 
+
+- off-diagonal terms are pairwise covariances between the `\(p\)` components 
+
+** `$$f(x)= \frac{1}{(2\pi)^{p/2}|\Sigma |^{1/2}}\exp{\left(-\frac{1}{2} \left( x-\mu\right)^{\sf T} \Sigma^{-1}\left( x-\mu\right)\right)}$$` **
+
+ where ** `\(|\Sigma|\)` ** indicates the determinant of `\(\Sigma\)`.
+
+
+---
+class: animated fadeIn
+### LDA with more than one predictor  
+
+The assumption is that, within each class, `\(X\sim N({\bf \mu}_{k}, {\bf \Sigma})\)`, just like in the univariate case 
+
+And the linear discriminant function is 
+
+** `$$\delta_{k}(X)=\log{\pi}_{k} - \frac{1}{2}{\mu}_{k}^{\sf T}{\Sigma}^{-1}\mu_{k} + x^{\sf T}\Sigma^{-1}\mu_{k}$$` **
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-10-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Class-specific error
+
+- the ** Bayes classifier **-like classification rule ensures the maximum accuracy
+
+--
+
+- in several classification problems, not all classification errors are alike
+
+  - e.g. in the default problem one wants to avoid considering reliable customers that will default
+
+--
+
+- to control for the type I error, it is possible to shift the threshold away from 0.5 (that is, the one used in Bayes classifier)  
+
+
+```r
+lda_pred = def_fit_lda %&gt;% augment(new_data = default_test) %&gt;%
+  dplyr::select(default, .pred_class, .pred_Yes) %&gt;% 
+  mutate(.pred_class_0_05 = as.factor(ifelse(.pred_Yes&gt;.05,"Yes","No")),
+         .pred_class_0_1 = as.factor(ifelse(.pred_Yes&gt;.1,"Yes","No")),
+         .pred_class_0_2 = as.factor(ifelse(.pred_Yes&gt;.2,"Yes","No")),
+         .pred_class_0_3 = as.factor(ifelse(.pred_Yes&gt;.3,"Yes","No")),
+         .pred_class_0_4 = as.factor(ifelse(.pred_Yes&gt;.4,"Yes","No")),
+         .pred_class_0_5 = as.factor(ifelse(.pred_Yes&gt;.5,"Yes","No"))
+         )
+```
+---
+class: animated fadeIn
+### Class-specific error
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-12-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+### Class-specific error
+
+
+```r
+lda_pred %&gt;% 
+  pivot_longer(names_to = "threshold",values_to="prediction",cols = 4:9) %&gt;% 
+  dplyr::select(-.pred_class,-.pred_Yes) %&gt;% group_by(threshold) %&gt;% 
+  summarise(
+    accuracy=round(mean(default==prediction),2),
+    false_positive_rate = sum((default=="Yes")&amp;(default!=prediction))/sum((default=="Yes"))
+    ) %&gt;% arrange(desc(accuracy),desc(false_positive_rate)) %&gt;% kbl() %&gt;% kable_styling(font_size=10) 
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; threshold &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; accuracy &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; false_positive_rate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.97 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.8160920 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.97 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.7126437 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.97 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.6206897 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.96 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4942529 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.94 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.2873563 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; .pred_class_0_05 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1609195 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&amp;nbsp;
+
+--
+Since the  ** false positive rate ** increases along with the ** overall accuracy **, reducing it will cause the overall performance of the classifier to drop  
+
+
+---
+class: animated fadeIn
+### Roc curve
+
+
+```r
+  def_fit_lda %&gt;% augment(new_data=default_test) %&gt;% roc_curve(truth = factor(default,levels=c("Yes", "No")), .pred_Yes)%&gt;%
+  ggplot(aes(x=1-specificity,y=sensitivity))+ggtitle("lda roc curve") + 
+  geom_path(color="indianred")+geom_abline(lty=3)+coord_equal()+theme_minimal()
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-14-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn middle center inverse
+## quadratic discriminant analysis (QDA)
+
+
+---
+class: animated fadeIn
+### quadratic discriminant analysis (QDA)
+
+In QDA the assumption on the covariance matrix being constant across classes is removed `\({\bf \Sigma}_{k}\)`
+
+
+`$$\begin{split}
+\color{red}{\delta_{k}(X)}&amp;= log\left(\frac{1}{(2\pi)^{p/2}|\Sigma_{k}|^{1/2}}\right) -\frac{1}{2} \left( x -\mu_{k}\right)^{\sf T}{\bf \Sigma}_{k}^{-1}\left( x -\mu_{k}\right)+\log(\pi_{k})=\\
+&amp;=\log\left(\frac{1}{(2\pi)^{p/2}|\Sigma_{k}|^{1/2}}\right)-\frac{1}{2} \left[\left(x^{\sf T}{\bf \Sigma}_{k}^{-1}-\mu_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}\right)\left( x -\mu_{k}\right)\right]+\log(\pi_{k})=\\
+&amp;=\log\left(\frac{1}{(2\pi)^{p/2}|\Sigma_{k}|^{1/2}}\right)-\frac{1}{2} \left[ x^{\sf T}{\bf \Sigma}_{k}^{-1}x-\underbrace{\mu_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}x}_{\text{scalar}}-\underbrace{x^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}}_{\text{scalar}}+\mu_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}\right]+\\
+&amp;+\log(\pi_{k})=\\
+&amp;=\log\left(\frac{1}{(2\pi)^{p/2}|\Sigma_{k}|^{1/2}}\right)-\frac{1}{2} x^{\sf T}{\bf \Sigma}_{k}^{-1}x +\frac{1}{{2}}{2}x^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}-\frac{1}{2}\mu_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}+\log(\pi_{k})=\\
+&amp;=\log\left(\frac{1}{(2\pi)^{p/2}|\Sigma_{k}|^{1/2}}\right)\color{red}{-\frac{1}{2} x^{\sf T}{\bf \Sigma}_{k}^{-1}x} +x^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}-\frac{1}{2}\mu_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}\mu_{k}+\log(\pi_{k})\\
+\end{split}$$`
+
+---
+class: animated fadeIn
+### Fitting the QDA
+
+** pre-process: specify the recipe **
+
+```r
+def_rec = recipe(default~balance, data=default)
+```
+--
+
+** specify the model ** 
+
+```r
+def_qda_spec = discrim_quad(mode="classification", engine="MASS")
+```
+
+--
+
+** put them together in the workflow **
+
+```r
+def_wflow_qda = workflow() %&gt;% add_recipe(def_rec) %&gt;% add_model(def_qda_spec)
+```
+
+
+--
+
+** fit the model **
+
+```r
+def_fit_qda = def_wflow_qda %&gt;% fit(data=default) 
+```
+
+---
+class: animated fadeIn
+### Fitting the QDA
+
+
+** Look at the results ** (note: no `\(\texttt{tidy}\)` nor `\(\texttt{glance}\)`  functions available for this model specification)
+
+```r
+def_fit_qda %&gt;% augment(new_data = default_test) %&gt;%
+  dplyr::select(default, .pred_class, .pred_Yes) %&gt;% 
+  roc_curve(truth = factor(default,levels=c("Yes", "No")), .pred_Yes)%&gt;%
+  ggplot(aes(x=1-specificity,y=sensitivity))+ggtitle("qda roc curve") + 
+  geom_path(color="dodgerblue")+geom_abline(lty=3)+coord_equal()+theme_minimal()
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-19-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn center middle inverse
+
+## naive Bayes classifier
+
+---
+class: animated fadeIn
+### naive Bayes classifier
+
+- like LDA and QDA, the goal is to estimate  `\(f_{k}(X)\)`
+- unlike LDA and QDA, in the naive Bayes classifier case, `\(f_{k}(X)\)` is not assumed to be multivariate normal demsity
+- ** the assumpion is that the predictors are independent within each class `\(k\)` **
+
+- the joint  distribution of the `\(p\)` predictors in class `\(k\)` 
+
+ ** `$$f_{k}(X)=f_{k1}(X_{1})\times f_{k2}(X_{2})\times \ldots \times f_{kp}(X_{p})$$` **
+
+- while the assumption is naive, it simplifies the fit, since the focus is on the marginal distribution of each predictor
+
+- this is of help in case of few training observations
+
+---
+class: animated fadeIn
+### naive Bayes classifier
+
+- Since the goal is to fit `\(f_{kj}(X_{j})\)`, `\(j=1,\ldots,p\)`, one can fit ad hoc function for each predictor
+
+-  for continuos predictors, one can choose `\(f_{kj}(X_{j})\sim N(\mu_{k},\sigma_{k})\)` or a kernel density estimator
+
+- for categorical predictors, the relative frequencies distribution can be used instead. 
+
+
+---
+class: animated fadeIn
+### naive Bayes classifier
+
+- suppose to have two classes, and three predictors `\(X_{1}\)`, `\(X_{2}\)` (quantitative) and `\(X_{3}\)` (qualitative)
+
+- assume that `\(\hat{\pi}_{1}=\hat{\pi}_{2}\)`, and that `\(\hat{f}_{kj}(X_{j})\)` with `\(k=1,2\)`  and `\(j=1,2,3\)` are:
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-20-1.png" width="35%" style="display: block; margin: auto;" /&gt;&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-20-2.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+- consider `\({\bf x}^{\star {\sf T}}=\left[.4,1.5,1\right]\)`, then
+
+- `\(\color{red}{\hat{f}_{11}(.4)=.368,\hat{f}_{12}(1.5)=.484,\hat{f}_{13}(1)=.226}\)`
+for class 1 
+
+- `\(\color{blue}{\hat{f}_{21}(.4)=.030,\hat{f}_{22}(1.5)=.130,\hat{f}_{23}(1)=.616}\)` for class 2
+
+---
+class: animated fadeIn
+### naive Bayes classifier
+
+
+The posterior for each class  `\(P(Y=1|X_{1}=.4,X_{2}=1.5,X_{3}=1)\)` and `\(P(Y=2|X_{1}=.4,X_{2}=1.5,X_{3}=1)\)`, knowing that `\(\hat{\pi}_{1}=\hat{\pi}_{2}=.5\)`, is given by 
+`$$\begin{split}
+P(Y=1|X_{1}=.4,X_{2}=1.5,X_{3}=1) &amp;=
+\frac{\color{red}{\hat{\pi}_{1}\times\hat{f}_{11}(.4)\times \hat{f}_{12}(1.5)\times\hat{f}_{13}(1)}}{
+\color{red}{\hat{\pi}_{1}\times\hat{f}_{11}(.4)\times \hat{f}_{12}(1.5)\times\hat{f}_{13}(1)}+
+\color{blue}{\hat{\pi}_{2}\times\hat{f}_{21}(.4)\times\hat{f}_{22}(1.5)\times\hat{f}_{23}(1)}
+}=\\
+&amp;=\frac{\color{red}{.5 \times .368 \times .484 \times .226}}{
+\color{red}{.5 \times .368 \times .484 \times .226}+
+\color{blue}{ .5 \times .03 \times .130 \times .616}
+}=\\
+&amp;= \frac{\color{red}{0.0201}}{\color{red}{0.0201}+\color{blue}{0.0012}}=0.944
+\end{split}$$`
+
+
+Similarly, and ignoring that  `$$P(Y=2|X_{1}=.4,X_{2}=1.5,X_{3}=1)=1-P(Y=1|X_{1}=.4,X_{2}=1.5,X_{3}=1)$$` the class 2 posterior is
+
+&amp;nbsp;
+
+`$$P(Y=2|X_{1}=.4,X_{2}=1.5,X_{3}=1)=\frac{\color{blue}{0.0012}}{\color{red}{0.0201}+\color{blue} {0.0012}}=0.06$$`
+
+---
+class: animated fadeIn
+### Fitting naive Bayes
+
+** pre-process: specify the recipe **
+
+```r
+def_rec = recipe(default~balance, data=default)
+```
+--
+
+** specify the model ** 
+
+```r
+def_nb_spec = naive_Bayes(mode="classification", engine="naivebayes")
+```
+
+--
+
+** put them together in the workflow **
+
+```r
+def_wflow_nb = workflow() %&gt;% add_recipe(def_rec) %&gt;% add_model(def_nb_spec)
+```
+
+
+--
+
+** fit the model **
+
+```r
+def_fit_nb = def_wflow_nb %&gt;% fit(data=default) 
+```
+
+---
+class: animated fadeIn
+### Fitting naive Bayes
+
+
+```r
+def_fit_nb %&gt;% augment(new_data = default_test) %&gt;%
+  dplyr::select(default, .pred_class, .pred_Yes) %&gt;% 
+  roc_curve(truth = factor(default,levels=c("Yes", "No")), .pred_Yes)%&gt;%
+  ggplot(aes(x=1-specificity,y=sensitivity))+ggtitle("naive Bayes roc curve") + 
+  geom_path(color="darkgreen")+geom_abline(lty=3)+coord_equal()+theme_minimal()
+```
+
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-25-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Fitting naive Bayes
+
+.pull-left[
+** roc curves **
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-26-1.png" width="150%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+** auc **
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; method &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .estimate &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; logistic regression &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9482068 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; LDA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9482068 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; QDA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9482068 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; naive Bayes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.9482211 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+
+---
+class: animated fadeIn center middle inverse
+## logistic regression vs LDA vs QDA vs naive Bayes
+### an analytic comparison
+
+---
+class: animated fadeIn
+
+### logistic regression vs LDA vs QDA vs naive Bayes
+
+Consider the  `\(K\)` classes case,
+and let `\(K\)`  *baseline*, the predicted class `\(k\)` will be the one maximizing
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;= log \left(\frac{\pi_{k}f_{k}(x)}{\pi_{K}f_{K}(x)}\right)=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+
+log \left(\frac{f_{k}(x)}{f_{K}(x)}\right)=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+
+log \left(f_{k}(x)\right)-log \left(f_{K}(x)\right)
+\end{split}$$`
+
+for any of the considered classifiers.
+
+
+---
+class: animated fadeIn
+
+### the LDA and logistic regression
+
+the assumption is that whithin the `\(k^{th}\)` class, `\(X\sim N({\bf \mu}_{k},{\bf \Sigma})\)`
+
+`$$\begin{split}
+\color{red}{log \left(f_{k}(x)\right)} &amp;= log\left[\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}|^{1/2} } 
+exp\left(-\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{k})\right)\right]=\\
+&amp;=\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}|^{1/2} }\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{k})}
+\end{split}$$`
+
+&amp;nbsp;
+
+And 
+
+`$$\begin{split}
+\color{blue}{{log \left(f_{K}(x)\right)}} = 
+\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}|^{1/2} }\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{K})}}
+\end{split}$$`
+
+
+---
+class: animated fadeIn
+
+### the LDA and logistic regression
+
+plugging `\(\color{red}{log \left(f_{k}(x)\right)}\)` and `\(\color{blue}{{log \left(f_{K}(x)\right)}}\)` in
+
+&lt;p style="font-size:9pt" &gt;
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+
+\color{red}{log \left(f_{k}(x)\right)}-\color{blue}{log \left(f_{K}(x)\right)}=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}|^{1/2}}\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{k})}+\\
+&amp;-\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}|^{1/2}}\right) +\frac{1}{2} ({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{K})}}
+=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)-\color{red}{\frac{1}{2}({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{k})}
++\color{blue}{{\frac{1}{2}({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}({\bf x}-{\bf \mu}_{K})}}=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)-
+\color{red}{
+\frac{1}{2}\left[{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf x}-
+\underbrace{{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{k}-{\bf \mu}_{k}^{\sf T}{\bf \Sigma}^{-1}{\bf x}}_{-2{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{k}}+{\bf \mu}_{k}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{k}\right]
+}+\\
+&amp;+\color{blue}
+{\frac{1}{2}\left[{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf x}-
+\underbrace{{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{K}-{\bf \mu}_{K}^{\sf T}{\bf \Sigma}^{-1}{\bf x}}_{-2{\bf x}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{K}}+{\bf \mu}_{K}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{K}\right]
+}
+\end{split}$$`
+&lt;/p&gt;
+
+
+
+---
+class: animated fadeIn
+
+### the LDA and logistic regression
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) 
+&amp; = log \left(\frac{\pi_{k}}{\pi_{K}}\right)+ \color{red}{{\bf \mu}_{k}^{\sf T}{\bf \Sigma}^{-1}{\bf x}}-\color{blue}{{{\bf \mu}_{K}^{\sf T}{\bf \Sigma}^{-1}{\bf x}}}-
+\frac{1}{2}\underbrace{\color{red}{ {\bf \mu}_{k}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{k}}}_{a^2}+
+\frac{1}{2}\underbrace{\color{blue}{{ {\bf \mu}_{K}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{K}}}}_{b^2}
+\end{split}$$`
+
+--
+
+Now,  since `\(-a^{2}+b^{2}=(a+b)(a-b)\)`, the previous becomes 
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) = log \left(\frac{\pi_{k}}{\pi_{K}}\right)+({\bf \mu}_{k}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}{\bf x}-
+\frac{1}{2}({\bf \mu}_{k}+{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}({\bf \mu}_{k}-{\bf \mu}_{K})
+\end{split}$$`
+
+--
+and, setting 
+
+- `\(log \left(\frac{\pi_{k}}{\pi_{K}}\right)-\frac{1}{2}({\bf \mu}_{k}+{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}({\bf \mu}_{k}-{\bf \mu}_{K})=\color{forestgreen}{a_{k}}\)` 
+
+- `\(({\bf \mu}_{k}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}^{-1}{\bf x}=\color{forestgreen}{\sum_{j=1}^{p}{b_{kj}x_{j}}}\)` 
+
+it is clear that in LDA, just like in logistic regression, 
+**the log of the odds is a linear function of the predictors**
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) = a_{k}+\sum_{j=1}^{p}{b_{kj}x_{j}}
+\end{split}$$`
+---
+class: animated fadeIn
+
+### the QDA case
+
+the assumption is that whithin the `\(k^{th}\)` class, `\(X\sim N({\bf \mu}_{k},{\bf \Sigma}_{k})\)`
+
+`$$\begin{split}
+\color{red}{log \left(f_{k}(x)\right)} &amp;= log\left[\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{k}|^{1/2} } 
+exp\left(-\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}_{k}^{-1}({\bf x}-{\bf \mu}_{k})\right)\right]=\\
+&amp;=\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{k}|^{1/2} }\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}_{k}^{-1}({\bf x}-{\bf \mu}_{k})}
+\end{split}$$`
+
+&amp;nbsp;
+
+And 
+
+`$$\begin{split}
+\color{blue}{{log \left(f_{K}(x)\right)}} = 
+\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{K}|^{1/2} }\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}_{K}^{-1}({\bf x}-{\bf \mu}_{K})}}
+\end{split}$$`
+
+---
+class: animated fadeIn
+
+### the QDA case
+
+&lt;p style="font-size:10pt" &gt;
+again, plugging in `\(\color{red}{log \left(f_{k}(x)\right)}\)` and `\(\color{blue}{{log \left(f_{K}(x)\right)}}\)`  
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+
+\color{red}{log \left(f_{k}(x)\right)}-\color{blue}{log \left(f_{K}(x)\right)}=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{k}|^{1/2}}\right) -\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}_{k}^{-1}({\bf x}-{\bf \mu}_{k})}+\\
+&amp;-\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{K}|^{1/2}}\right) +\frac{1}{2} ({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}_{K}^{-1}({\bf x}-{\bf \mu}_{K})}}
+\end{split}$$`
+&lt;/p&gt;
+
+&lt;p style="font-size:10pt"&gt;
+
+re-writing the following quantities
+`$$\begin{split}
+\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{k}|^{1/2}}\right)} &amp;= \color{red}{log(1)-log\left((2\pi)^{p/2}\right)-log\left(|{\bf\Sigma}_{k}|^{1/2}\right)}\\
+\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{K}|^{1/2}}\right)}} &amp;= \color{blue}{{log(1)-log\left((2\pi)^{p/2}\right)-log\left(|{\bf\Sigma}_{K}|^{1/2}\right)}}
+\end{split}$$`
+&lt;/p&gt;
+--
+
+&lt;p style="font-size:10pt" &gt;
+
+it results that
+`$$\begin{split}
+\color{red}{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{k}|^{1/2}}\right)}-\color{blue}{{log\left(\frac{1}{(2\pi)^{p/2}|{\bf \Sigma}_{K}|^{1/2}}\right)}}  &amp;= 
+\color{red}{-log\left((2\pi)^{p/2}\right)-log\left(|{\bf\Sigma}_{k}|^{1/2}\right)}\color{blue}{{+log\left((2\pi)^{p/2}\right)+log\left(|{\bf\Sigma}_{K}|^{1/2}\right)}}=
+\color{blue}{{log\left(|{\bf\Sigma}_{K}|^{1/2}\right)}}\color{red}{-log\left(|{\bf\Sigma}_{k}|^{1/2}\right)}=log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)
+\end{split}$$`
+&lt;/p&gt;
+
+
+---
+class: animated fadeIn
+
+### the QDA case
+&lt;p style="font-size:10pt" &gt;
+the logit can be re-written accordingly 
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)\color{red}{ -\frac{1}{2} ({\bf x}-{\bf \mu}_{k})^{\sf T}{\bf \Sigma}_{k}^{-1}({\bf x}-{\bf \mu}_{k})}
+\color{blue}{{+\frac{1}{2} ({\bf x}-{\bf \mu}_{K})^{\sf T}{\bf \Sigma}_{K}^{-1}({\bf x}-{\bf \mu}_{K})}}\\
+&amp;= log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)-\color{red}{
+\frac{1}{2}\left[{\bf x}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf x}-
+\underbrace{{\bf x}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}-{\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf x}}_{-2
+{\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf x}}+{\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}\right]
+}+
+\color{blue}
+{\frac{1}{2}\left[{\bf x}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf x}-
+\underbrace{{\bf x}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K}-{\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf x}}_{-2
+{\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf x}}+{\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K}\right]}=\\
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)-
+\color{red}{
+\frac{1}{2}{\bf x}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf x} + {\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf x} -\frac{1}{2}{\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}
+}+
+\color{blue}{
+\frac{1}{2}{\bf x}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf x} - {\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf x} -\frac{1}{2}{\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K}
+}=\\ 
+&amp;=log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)-
+\frac{1}{2} {\bf x}^{\sf T}\left({\bf \Sigma}_{K}^{-1} - {\bf \Sigma}_{k}^{-1} \right){\bf x} + 
+\left({\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}-
+{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)^{\sf T}{\bf x}+\frac{1}{2}\left({\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}- {\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)
+\end{split}$$`
+&lt;/p&gt;
+
+--
+
+&lt;p style="font-size:10pt" &gt;
+finally
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;= \overbrace{\frac{1}{2} {\bf x}^{\sf T}\left({\bf \Sigma}_{K}^{-1} - {\bf \Sigma}_{k}^{-1} \right){\bf x}}^{\text{second degree term}} + \overbrace{\left({\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}-
+{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)^{\sf T}{\bf x}}^{\text{first degree term}}+\frac{1}{2}\left({\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}- {\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)+\\
+&amp; + log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)
+\end{split}$$`
+&lt;/p&gt;
+
+---
+class: animated fadeIn
+
+### the QDA case
+
+
+By defining the coefficients
+
+`$$\begin{split}
+a_{k} &amp;= \frac{1}{2}\left({\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}- {\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)+
+log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)\\
+b_{kj} &amp;=\left({\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}-{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)^{\sf T}{\bf x} \\
+c_{kjl} &amp;= \frac{1}{2} {\bf x}^{\sf T}\left({\bf \Sigma}_{K}^{-1} - {\bf \Sigma}_{k}^{-1} \right){\bf x}
+\end{split}$$`
+
+the QDA can be written as a second degree function of the `\(X\)`:
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;=  a_{k} + \sum_{j=1}^{p}b_{j}x_{j}+\sum_{j=1}^{p}\sum_{l=1}^{p}{c_{kjl}x_{j}x_{l}}
+\end{split}$$`
+
+
+---
+class: animated fadeIn
+
+### the naive Bayes case
+
+The logit, in this case, is
+
+&lt;p style="font-size:10pt" &gt;
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;= log\left(\frac{\pi_{k}f_{k}(x)}{\pi_{K}f_{K}(x)} \right)=
+log\left(\frac{\pi_{k}}{\pi_{K}} \right)+log\left(\frac{f_{k}(x)}{f_{K}(x)} \right)=log\left(\frac{\pi_{k}}{\pi_{K}} \right)+
+log\left(\frac{\prod_{j=1}^{p}f_{kj}(x_{j})}{\prod_{j=1}^{p}f_{Kj}(x_{j})} \right)=\\
+&amp;=log\left(\frac{\pi_{k}}{\pi_{K}} \right)+\sum_{j=1}^{p}log\left(\frac{f_{kj}(x_{j})}{f_{Kj}(x_{j})} \right)
+\end{split}$$`
+&lt;/p&gt;
+
+Setting
+
+`$$\begin{split}
+a_{k}&amp;=log\left(\frac{\pi_{k}}{\pi_{K}} \right) \quad \text{ and } \quad
+g_{kj}&amp;=log\left(\frac{f_{kj}(x_{j})}{f_{Kj}(x_{j})} \right)
+\end{split}$$`
+
+the logit can be re-written as a function of the predictors
+
+`$$\begin{split}
+log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right) &amp;= a_{k}+\sum_{j=1}^{p}g_{kj}(x_{j})
+\end{split}$$`
+
+
+---
+class: animated fadeIn middle center inverse
+
+## finding 1: the LDA is a special case of QDA
+
+
+---
+class: animated fadeIn
+### the LDA is a special case of QDA
+Looking at the coefficients of the QDA, it is clear that, when ** `\({\bf\Sigma}_{k}={\bf\Sigma}_{K}={\bf\Sigma}\)` **, then the QDA is just LDA
+
+`$$\begin{split}
+\color{red}{a_{k}}&amp;=\frac{1}{2}\left({\bf \mu}_{k}^{\sf T}{\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}- {\bf \mu}_{K}^{\sf T}{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)+
+log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}_{K}|^{1/2}}{|{\bf\Sigma}_{k}|^{1/2}}\right)=\\
+&amp;=\frac{1}{2}\left({\bf \mu}_{k}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{k}- {\bf \mu}_{K}^{\sf T}{\bf \Sigma}^{-1}{\bf \mu}_{K} \right)+
+log \left(\frac{\pi_{k}}{\pi_{K}}\right)+log\left(\frac{|{\bf\Sigma}|^{1/2}}{|{\bf\Sigma}|^{1/2}}\right)=\\
+&amp;=\frac{1}{2}\left({\bf \mu}_{k}+{\bf \mu}_{K}\right)^{\sf T}{\bf \Sigma}^{-1}\left({\bf \mu}_{k}-{\bf \mu}_{K}\right)+
+log \left(\frac{\pi_{k}}{\pi_{K}}\right)+0 \longrightarrow  \color{red}{\text{as for LDA}}
+\end{split}$$`
+
+
+
+
+`$$\begin{split}
+\color{red}{b_{kj}} &amp;={\bf x}^{\sf T}\left({\bf \Sigma}_{k}^{-1}{\bf \mu}_{k}-{\bf \Sigma}_{K}^{-1}{\bf \mu}_{K} \right)= \\
+&amp;={\bf x}^{\sf T}\left({\bf \Sigma}^{-1}{\bf \mu}_{k}-{\bf \Sigma}^{-1}{\bf \mu}_{K} \right)= \\
+&amp;={\bf x}^{\sf T}{\bf \Sigma}^{-1}\left({\bf \mu}_{k}-{\bf \mu}_{K} \right)  \longrightarrow \color{red}{\text{as for LDA}}
+\end{split}$$`
+
+
+`$$\begin{split}
+\color{red}{c_{kjl}} &amp;= \frac{1}{2} {\bf x}^{\sf T}\left({\bf \Sigma}_{K}^{-1} - {\bf \Sigma}_{k}^{-1} \right){\bf x}=
+  \frac{1}{2} {\bf x}^{\sf T}\left({\bf \Sigma}^{-1} - {\bf \Sigma}^{-1} \right){\bf x}=\color{red}{0}
+\end{split}$$`
+
+
+---
+class: animated fadeIn middle center inverse
+
+## finding 2: the naive Bayes as a special case of LDA
+
+---
+class: animated fadeIn
+### the naive Bayes as a special case of LDA
+
+Any classifier with a linear decision boundary can be defined as a naive Bayes such that
+
+`$$\begin{split}
+g_{kj}(x_{j})=b_{kj}x_{j}
+\end{split}$$`
+
+If for naive Bayes, one assumes that 
+`\(\color{red}{f_{kj}(x_{j}) \sim N(\mu_{kj},\sigma^{2}_{j})}\)` then `\(g_{kj}(x_{j})=log\left(\frac{f_{k}(x_{j})}{f_{K}(x_{j})}\right)=b_{kj}x_{j}\)` , 
+with `\(\color{red}{b_{kj}=(\mu_{kj}-\mu_{Kj})/\sigma^{2}_{j}}\)` . 
+
+The naive Bayes, in this case, boils down to an LDA with diagonal covariance matrix `\({\bf \Sigma}\)` 
+
+---
+class: animated fadeIn middle center inverse
+
+## finding 3: the naive Bayes is NOT a special case of QDA
+
+
+---
+class: animated fadeIn
+
+### the naive Bayes is NOT a special case of QDA
+
+- the naive Bayes is ** additive **, for each `\(j\)` and `\(l\)` the cooresponding `\(g_{kj}(x_{j})\)` and  `\(g_{kl}(x_{l})\)` are added up.
+
+&amp;nbsp;
+
+--
+
+- in QDA, multiplicative effects are considered, see the coefficient `\(c_{kjl}x_{j}x_{l}\)` when `\(j \neq l\)`
+
+&amp;nbsp;
+
+--
+
+- when interactions are of help in discriminating among classes, then QDA always outperforms naive Bayes.
+
+---
+class: animated fadeIn middle center inverse
+
+### finding 4: multinomial logistic regression and LDA are the same linear combination of the predictors
+
+---
+class: animated fadeIn middle center inverse
+
+### coefficients are estimated in a different way
+
+
+---
+class: animated fadeIn
+
+### multinomial logistic regression and LDA
+
+.pull-left[
+multinomial logistic regression
+
+`$$log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right)=\color{red}{\beta_{k0}+\sum_{j=1}^{p}\beta_{kj}x_{j}}$$`
+
+]
+
+.pull-right[
+LDA
+`$$log \left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)} \right)=\color{blue}{a_{k}+\sum_{j=1}^{p}b_{kj}x_{j}}$$`
+]
+
+
+- LDA the coefficients are estimated assuming a multivariate normal distribution of the predictors within each class 
+
+- whether the LDA outperforms the multinomial logistic depends on how the assumtion is supported by the data at hand
+
+---
+class: animated fadeIn center middle inverse
+## logistic regression vs LDA vs QDA vs naive Bayes
+### an empirical comparison
+
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-28-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+Two predictors: `\(X_{1}\sim N(\mu_{1},\sigma)\)` and `\(X_{2}\sim N(\mu_{2},\sigma)\)`. Training set size: `\(n=20\)`
+
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-29-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+Two predictors: `\(X_{1}\sim N(\mu_{1},\sigma)\)` and `\(X_{2}\sim N(\mu_{2},\sigma)\)`; `\(cor(X_{1},X_{2})=-0.5\)`. Training set size: `\(n=20\)`
+
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-30-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+Two predictors: `\(X_{1}\sim t_{n-1 gdl}\)` and `\(X_{2}\sim t_{n-1 gdl}\)`. Training set size: `\(n=50\)`
+
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-31-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+Two predictors: `\(X_{1}\sim N(\mu_{1},\sigma)\)` and `\(X_{2}\sim N(\mu_{2},\sigma)\)`; `\(cor(X_{1},X_{2})_{class1}=0.5\)`, `\(cor(X_{1},X_{2})_{class2}=-0.5\)`. Training set size: `\(n=50\)`
+
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-32-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+Two predictors: `\(X_{1}\sim N(\mu_{1},\sigma)\)` and `\(X_{2}\sim N(\mu_{2},\sigma)\)`; `\(y\)` generated via logistic function with predictors `\(X_{1}X_{2}\)`, `\(X^{2}_{1}\)` and `\(X^{2}_{2}\)`
+---
+class: animated fadeIn
+&lt;img src="Classification_part2_files/figure-html/unnamed-chunk-33-1.png" width="30%" style="display: block; margin: auto;" /&gt;
+
+`\(X\sim N({\bf\mu},{\bf \Sigma}_{k})\)`, a bivariate normal distribution `\({\bf \Sigma}_{k}\)` is diagonal, and it changes in each class. `\(n=6\)`
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

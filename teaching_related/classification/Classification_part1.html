@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Classification (part 1)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Statistical Learning" />
+    <script src="Classification_part1_files/header-attrs/header-attrs.js"></script>
+    <link href="Classification_part1_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="Classification_part1_files/fabric/fabric.min.js"></script>
+    <link href="Classification_part1_files/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="Classification_part1_files/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script src="Classification_part1_files/kePrint/kePrint.js"></script>
+    <link href="Classification_part1_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Classification (part 1)
+## with tidymodels
+### Statistical Learning
+### Alfonso Iodice D'Enza
+
+---
+
+
+
+
+
+class: animated fadeIn 
+### classification
+
+In a classification problem the **response** is a **categorical** variable
+
+
+--
+
+rather than predicting the value of `\(Y\)`, one wants to estimate the ** posterior probability **
+
+.center[
+### `\(P(Y=k\mid X=x_{i})\)` 
+]
+
+that is, the probability that the observation `\(i\)` belongs the the class `\(k\)`, given that the predictor value for `\(i\)` is `\(x_{i}\)`
+
+
+---
+class: animated fadeIn 
+### will a credit card owner default? 
+
+
+```r
+set.seed(1234)
+default=read_csv("./data/Default.csv")
+default %&gt;% slice_sample(n=6) %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; default &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; student &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; balance &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; income &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 311.32186 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22648.76 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 697.13558 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18377.15 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 470.10718 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16014.11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1200.04162 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 56081.08 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 553.64902 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 47021.49 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10.23149 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27237.38 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn 
+### Do balance and income bring useful info to identify deafulters?
+
+
+```r
+p1 = default %&gt;% ggplot(aes(x = balance, y=income,color=default))+
+  geom_point(alpha=.5,size=3)+theme_minimal() 
+p1
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-2-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Do balance and income bring useful info to identify deafulters?
+
+
+```r
+p2 = default %&gt;% pivot_longer(names_to = "predictor",values_to="value",cols=c(balance,income)) %&gt;% 
+  ggplot(aes(x = default, y = value))+geom_boxplot(aes(fill=default))+
+  facet_wrap(~predictor,scales="free")+theme_minimal()
+p2
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-3-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### balance is useful, income is not
+
+
+```r
+p1 | p2
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-4-1.png" width="45%" style="display: block; margin: auto;" /&gt;
+
+
+Note: to arrange multiple plots together, give a look at the 
+** `\(\texttt{patchwork}\)` ** package
+
+
+---
+class: animated fadeIn 
+### linear regression for non-numeric response?
+
+** if `\(Y\)` is categorical **
+
+&gt; With `\(K\)` categories, one cound code `\(Y\)` as an integer vector
+--
+
+&gt; - for non ordinal factors it would not make sense 
+--
+
+&amp;nbsp;
+
+&gt; - even for ordinal factors, one implicitly assumes constant differences between categories
+
+--
+
+** if `\(Y\)` is binary **
+
+&gt; The goal is estimate `\(P(Y=1|X)\)`, which is, in fact, numeric
+--
+
+&gt; - So one can model `\(P(Y=1|X)=\beta_{0}+\beta_{1}X\)`
+--
+
+&amp;nbsp;
+
+&gt; - What can possibly be wrong with this approach?
+
+---
+class: animated fadeIn 
+### linear regression for non-numeric response?
+
+** `\(P(\texttt{default}=\texttt{yes}|\texttt{balance})=\beta_{0}+\beta_{1}\texttt{balance}\)` ** 
+
+
+```r
+default %&gt;% mutate(def_01 = ifelse(default== "Yes",1,0)) %&gt;%  
+  ggplot(aes(x=balance, y=def_01)) + geom_point(aes(color = default),size=4, alpha=.5) + 
+  geom_smooth(method="lm") + theme_minimal()
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-5-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.center[
+** `\(P(\texttt{default}=\texttt{yes}|\texttt{balance})\)`  is bounded in `\([0, 1]\)`, therefore the linear fit cannot be used ** 
+]
+
+---
+class: animated fadeIn 
+### use the logistic function instead
+
+** `\(P(\texttt{default}=\texttt{yes}|\texttt{balance})=\frac{e^{\beta_{0}+\beta_{1}\texttt{balance}}}{1+e^{\beta_{0}+\beta_{1}\texttt{balance}}}\)` ** 
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-6-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+--
+
+modeling the posterior `\(P(Y=1|X)\)` by means of a logistic function is the goal of ** logistic regression **
+
+
+--
+.left[
+Note: just like in linear regression, the fit refers to the conditional expectation of `\(Y\)` given `\(X\)`; since `\(Y\in\{0,1\}\)`, it results that
+** $$E[Y|X] \equiv P(Y=1|X) $$ **
+]
+
+---
+class: animated fadeIn 
+### The odds and the logit
+
+$$
+`\begin{split}
+p(X)&amp;=\frac{e^{\beta_{0}+\beta_{1}X}}{1+e^{\beta_{0}+\beta_{1}X}}\\
+\left(1+e^{\beta_{0}+\beta_{1}X}\right)p(X)&amp;=e^{\beta_{0}+\beta_{1}X}\\
+p(X)+e^{\beta_{0}+\beta_{1}X}p(X)&amp;=e^{\beta_{0}+\beta_{1}X}\\
+p(X)&amp;=e^{\beta_{0}+\beta_{1}X}+e^{\beta_{0}-\beta_{1}X}p(X)\\
+p(X)&amp;=e^{\beta_{0}+\beta_{1}X}\left(1-p(X)\right)\\
+\frac{p(X)}{\left(1-p(X)\right)}&amp;=e^{\beta_{0}+\beta_{1}X}
+\end{split}`
+$$
+
+--
+
+- ** `\(\frac{p(X)}{\left(1-p(X)\right)}\)` ** are the **odds**, that take value in `\([0,\infty]\)`
+
+--
+
+- ** `\(log\left(\frac{p(X)}{\left(1-p(X)\right)}\right)=\beta_{0}+\beta_{1}X\)` ** is the **logit**: there is a linear relation between the logit and the predictor
+
+
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+** a toy sample **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-7-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+** a toy sample **: fit the logistic function
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-8-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+** a toy sample **: for a new point ** `\(\texttt{balance}=1400\)` **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-9-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+**a toy sample**: one can estimate ** `\(P(\texttt{default=Yes}|\texttt{balance}=1400)\)` **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-10-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+**a toy sample**: one can estimate ** `\(P(\texttt{default=Yes}|\texttt{balance}=1400)=.62\)` **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-11-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+**How to find the logistic function? ** estimate  its parameters ** `\(P(Y=1|X) = \frac{e^{\beta_{0}+\beta_{1}X}}{1 + e^{\beta_{0}+\beta_{1}X}}\)` **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-12-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+**Least squares?** One could switch to the logit, which is a linear function ** `\(logit(p(Y=1|X))=\beta_{0} + \beta_{1}  X\)` ** 
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-13-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the posterior probability via the logistic function
+
+**Least squares?** but the logit mapping, for the blue points, is ** $$log\left(\frac{p(Y=1|X)}{1-p(Y=1|X)}\right) =
+log\left(\frac{1}{1-1}\right) = log(1) -  log(0) = 0  -Inf= +Inf$$ **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-14-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the logit via the linear function
+
+**Least squares?** but the logit mapping, for the red points, is  ** $$log\left(\frac{p(Y=1|X)}{1-p(Y=1|X)}\right) =
+log\left(\frac{0}{1-0}\right) = log(0) = -Inf$$ **
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-15-1.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the logit via the linear function
+
+**logit: mapping**
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-16-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Estimating the logit via the linear function
+
+**logit: mapping**
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-17-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the logit via the linear function
+
+**logit: mapping**
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-18-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn 
+### Estimating the logit via the linear function
+
+**logit: mapping**
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-19-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+### Maximization of the likelihood function
+
+The estimates for `\(\beta_{0}\)` and `\(\beta_{1}\)` are such that the following likelihood function is maximised:
+
+$$
+`\begin{split}
+\ell\left(\hat{\beta}_{0},\hat{\beta}_{1}\right)=&amp;
+\color{blue}{\prod_{\forall i}{p(x_{i})}}\times \color{red}{\prod_{\forall i'}{\left(1-p(x_{i})\right)}}=\\
+=&amp;\color{blue}{
+\prod_{\forall i}
+\frac{e^{\hat{\beta}_{0}+\hat{\beta}_{1}x_{i}}}{1+e^{\hat{\beta}_{0}+\hat{\beta}_{1}x_{i}}}}
+\times
+\color{red}{ \prod_{\forall i^{\prime}}{\left(1-
+\frac{e^{\hat{\beta}_{0}+\hat{\beta}_{1}x_{i'}}}{1+e^{\hat{\beta}_{0}+\hat{\beta}_{1}x_{i'}}}
+\right)}
+}
+\end{split}`
+$$
+
+Note: the `\(i\)` index is for blue points, `\(i'\)` is for red points 
+
+
+
+---
+class: animated fadeIn
+### Fitting the logistic regression
+
+** pre-process: specify the recipe **
+
+```r
+def_rec = recipe(default~balance, data=default)
+```
+--
+
+** specify the model **
+
+```r
+def_model_spec = logistic_reg(mode="classification", engine="glm")
+```
+
+--
+
+** put them together in the workflow **
+
+```r
+def_wflow = workflow() %&gt;% add_recipe(def_rec) %&gt;% add_model(def_model_spec)
+```
+
+--
+
+** fit the model **
+
+```r
+def_fit = def_wflow %&gt;% fit(data=default) 
+```
+
+---
+class: animated fadeIn
+### Fitting the logistic regression
+
+
+** Look at the results **
+
+```r
+def_fit %&gt;%  tidy %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -10.6513306 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3611574 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -29.49221 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; balance &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0054989 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0002204 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.95309 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+```r
+def_fit %&gt;%  glance() %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; null.deviance &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; df.null &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; logLik &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AIC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BIC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; deviance &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; df.residual &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; nobs &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2920.65 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9999 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -798.2258 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1600.452 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1614.872 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1596.452 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9998 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn
+### Fitting the logistic regression: a qualitative predictor
+
+Suppose you want to use `\(\texttt{student}\)` as the qualitative predictor for your logistic regression. 
+You can update, within the workflow, the recipe only.
+
+** update the recipe in the workflow and re-fit**
+
+```r
+def_wflow2 = def_wflow %&gt;% update_recipe(recipe(default~student,data=default))
+def_fit2 = def_wflow2 %&gt;% fit(data=default) 
+```
+
+--
+
+** look at the results **
+
+```r
+def_fit2 %&gt;%  tidy %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -3.5041278 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0707130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -49.554219 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; studentYes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.4048871 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1150188 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.520181 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0004313 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn
+### Fitting the logistic regression: a qualitative predictor
+
+It appears that if a customer is a student, he is more likely to default ( `\(\hat{\beta}_{1} = 0.4\)` ).
+
+- For non students 
+$$
+`\begin{split}
+log\left(\frac{p(X)}{1-p(X)}\right) = -3.504 &amp;\rightarrow&amp; \ \frac{p(X)}{1-p(X)} = e^{-3.504}\rightarrow\\
+p(X) = e^{-3.504}-e^{-3.504}p(X)&amp;\rightarrow&amp; \ p(X) +e^{-3.504}p(X) = e^{-3.504}\rightarrow\\
+p(X)(1 +e^{-3.504}) = e^{-3.504}  &amp;\rightarrow &amp; \ p(X) = \frac{e^{-3.504}}{1 +e^{-3.504}}=\color{blue}{0.029}
+\end{split}`
+$$
+
+--
+
+- For students 
+$$
+p(X) = \frac{e^{-3.504+0.4}}{1 +e^{-3.504+0.4}}=\color{red}{0.042}
+$$
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+
+In case of multiple predictors
+
+
+`$$log\left(\frac{p(X)}{1-p(X)} \right)=\beta_{0}+\beta_{1}X_{1}+\beta_{2}X_{2}+\ldots+\beta_{p}X_{p}$$`
+
+and following relation holds
+
+`$$p(X)=\frac{e^{{\beta}_{0}+{\beta}_{1}X_{1}+{\beta}_{2}X_{2}+\ldots+{\beta}_{p}X_{p}}}{1+e^{{\beta}_{0}+{\beta}_{1}X_{1}+{\beta}_{2}X_{2}+\ldots+{\beta}_{p}X_{p}}}$$`
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+Let's consider two predictors `\(\texttt{balance}\)` and `\(\texttt{student}\)`,
+again we just update the recipe within the workflow
+
+** update the recipe in the workflow and re-fit**
+
+```r
+def_wflow3 = def_wflow %&gt;% update_recipe(recipe(default~balance+student,data=default))
+def_fit3 = def_wflow3 %&gt;% fit(data=default) 
+```
+
+
+** look at the results **
+
+```r
+def_fit3 %&gt;%  tidy %&gt;% kbl() %&gt;% kable_styling(font_size=12)
+```
+
+&lt;table class="table" style="font-size: 12px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -10.7494959 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.3691914 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -29.116326 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0e+00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; balance &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0057381 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0002318 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24.749526 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0e+00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; studentYes &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.7148776 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1475190 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -4.846003 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.3e-06 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+.center[ 
+
+### anything weird?   
+
+]
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+
+
+
+```r
+p_stu = def_fit2 %&gt;% augment(new_data=default) %&gt;% 
+  ggplot(aes(x=balance, y= .pred_Yes,color=student))+geom_line(size=3)+
+  theme_minimal() + ylim(c(0,.1))+xlab("balance")+ylab("P(default=yes|student)")
+
+p_stu 
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-30-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+
+
+
+```r
+p_bal_stu = def_fit3 %&gt;% augment(new_data=default) %&gt;% ggplot(aes(x=balance, y= .pred_Yes,color=student)) +
+  geom_line(size=3) + theme_minimal() + xlab("balance") + ylab("P(default=yes|balance,student)")
+
+p_bal_stu
+```
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-31-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-32-1.png" width="67%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+### Multiple logistic regression
+
+
+&lt;img src="Classification_part1_files/figure-html/unnamed-chunk-33-1.png" width="67%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn center middle inverse
+
+
+## more than two classes? 
+
+
+---
+class: animated fadeIn center middle inverse
+
+## multinomial logistic regression
+
+
+---
+class: animated fadeIn
+### multinomial logistic regression
+
+Suppose to have  `\(K\)` classes and  let  \color{red}{ `\(K-th\)` } be the  \color{red}{baseline}.
+
+For the other `\(K-1\)` classes, the logistic model is
+
+`$$P(Y=k|X=x)=\frac{e^{{\beta}_{k0}+{\beta}_{k1}X_{1}+{\beta}_{k2}X_{2}+\ldots+{\beta}_{kp}X_{p}}}{1+\sum_{l=1}^{K-1}{e^{{\beta}_{l0}+{\beta}_{l1}X_{1}+{\beta}_{l2}X_{2}+\ldots+{\beta}_{p}X_{lp}}}}$$`
+
+For the  baseline, `\(k=K\)`, the previous becomes
+
+`$$P(Y=K|X=x)=\frac{1}{1+\sum_{l=1}^{K-1}{e^{{\beta}_{l0}+{\beta}_{l1}X_{1}+{\beta}_{l2}X_{2}+\ldots+{\beta}_{p}X_{lp}}}}$$`
+
+Note: the models for the general class  `\(k\)` and  for the  baseline `\(K\)` have the same denominator.
+
+
+
+---
+class: animated fadeIn
+### multinomial logistic regression
+
+
+Il ratio between the posterior of the general class `\(k\)` and the baseline `\(K\)` risulta
+
+`$$\frac{P(Y=k|X=x)}{P(Y=K|X=x)} = e^{{\beta}_{k0}+{\beta}_{k1}X_{1}+{\beta}_{k2}X_{2}+\ldots+{\beta}_{kp}X_{p}}$$`
+
+that can be re-written as
+
+`$$log\left(\frac{P(Y=k|X=x)}{P(Y=K|X=x)}\right) ={\beta}_{k0}+{\beta}_{k1}X_{1}+{\beta}_{k2}X_{2}+\ldots+{\beta}_{kp}X_{p}$$`
+---
+class: animated fadeIn
+### multinomial logistic regression: softmax coding
+
+When no baseline is considered, the posterior for the general class `\(k\)` is
+
+`$$P(Y=k|X=x)=\frac{e^{{\beta}_{k0}+{\beta}_{k1}X_{1}+{\beta}_{k2}X_{2}+\ldots+{\beta}_{kp}X_{p}}}{1+\sum_{l=1}^{K-1}{e^{{\beta}_{l0}+{\beta}_{l1}X_{1}+{\beta}_{l2}X_{2}+\ldots+{\beta}_{p}X_{lp}}}}$$`
+
+and the ratio between the posterior of any two classes `\(k\)` and `\(k'\)` given by
+
+
+`$$log\left(\frac{P(Y=k|X=x)}{P(Y=k'|X=x)}\right) =({\beta}_{k0}-{\beta}_{k'0})+({\beta}_{k1}-{\beta}_{k'1})X_{1}+
+({\beta}_{k2}-{\beta}_{k'2})X_{2}+\ldots+({\beta}_{kp}-{\beta}_{k'p})X_{p}$$`
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
