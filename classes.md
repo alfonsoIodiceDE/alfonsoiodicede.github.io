@@ -25,6 +25,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [Model selection](teaching_related/model_selection/model_selection.html) 
 
+[Non linear regression](teaching_related/nonlinear_regression/Intro_non_linear_and_GAM.html) 
+
 
 ### Extra's 
 
