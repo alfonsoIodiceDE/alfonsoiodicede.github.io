@@ -1,0 +1,3707 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Non-linear modeling</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alfonso Iodice D'Enza" />
+    <script src="Intro_non_linear_and_GAM_files/header-attrs/header-attrs.js"></script>
+    <link href="Intro_non_linear_and_GAM_files/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="Intro_non_linear_and_GAM_files/kePrint/kePrint.js"></script>
+    <link href="Intro_non_linear_and_GAM_files/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Non-linear modeling
+]
+.subtitle[
+## Advanced Statistical Learning
+]
+.author[
+### Alfonso Iodice D'Enza
+]
+
+---
+
+
+
+
+
+class: animated fadeIn 
+### Linear models
+
+The general fomula is  ** `\(Y=f(X)+\epsilon\)` **
+
+- Estimate ** `\(f(.)\)` ** via ** `\(\hat{f}(.)\)` **
+
+- If ** `\(Y\)` ** is numeric, and  ** `\(X\)` ** is a single predictor,  ** _assuming_ **   ** `\(f(.)\)` ** is linear, the model is
+
+** `$$y_{i} = \beta_{0} + \beta_{1} x_{i} + \epsilon_{i}$$` **
+
+--
+.my-pull-left[ 
+### Pros
+ ]
+ .my-pull-right[ 
+&gt;  -  To obtain ** `\(\hat{f}(.)\)` ** it only takes to estimate the parameters ** `\(\hat{\beta}_{0}\)` ** and  ** `\(\hat{\beta}_{1}\)` **
+&gt;
+&gt;  - Straighforward interpretation, also for the multiple predictors case.
+
+]
+
+--
+.my-pull-left[ 
+###Cons 
+ ]
+
+.my-pull-right[ 
+&gt;  -  ** `\(\hat{f}(.)\)` ** might have high ** _bias_ ** and lead to poor predictions
+ ]
+
+--
+
+.center[
+** The aim is to remove the linearity assumption and improve the predictive power, while still beeing able to interpret the results **
+]
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+### Toy example: linear case `\((f(x_{i}) = 1 +.75 x_{i})\)`
+.panel1-toy_example-user[
+
+```r
+*set.seed(1234)
+*x = runif(1000,min=0,max = 10)
+*eps = rnorm(1000,0,1.5)
+*b_0 = 1
+*b_1 = .75
+*y = b_0 + b_1 * x + eps
+```
+]
+ 
+.panel2-toy_example-user[
+
+]
+
+---
+count: false
+ 
+### Toy example: linear case `\((f(x_{i}) = 1 +.75 x_{i})\)`
+.panel1-toy_example-user[
+
+```r
+set.seed(1234)
+x = runif(1000,min=0,max = 10)
+eps = rnorm(1000,0,1.5)
+b_0 = 1
+b_1 = .75
+y = b_0 + b_1 * x + eps
+*pop_xy = tibble(y=y, x=x)
+*sam_xy = pop_xy %&gt;%
+* slice(sample(1:1000,30))
+
+*sam_xy %&gt;%
+* ggplot(aes(x = x,y = y)) +
+* geom_point(size=3,alpha=.5,
+*            color="darkblue")+
+* xlim(c(0,11))+ylim(c(0,11))+
+* theme_minimal()
+```
+]
+ 
+.panel2-toy_example-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/toy_example_user_02_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Toy example: linear case `\((f(x_{i}) = 1 +.75 x_{i})\)`
+.panel1-toy_example-user[
+
+```r
+set.seed(1234)
+x = runif(1000,min=0,max = 10)
+eps = rnorm(1000,0,1.5)
+b_0 = 1
+b_1 = .75
+y = b_0 + b_1 * x + eps
+pop_xy = tibble(y=y, x=x)
+sam_xy = pop_xy %&gt;%
+  slice(sample(1:1000,30))
+
+sam_xy %&gt;%
+  ggplot(aes(x = x,y = y)) +
+  geom_point(size=3,alpha=.5,
+             color="darkblue")+
+  xlim(c(0,11))+ylim(c(0,11))+
+  theme_minimal()+
+* geom_smooth(method="lm",
+*             color="darkgreen")
+```
+]
+ 
+.panel2-toy_example-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/toy_example_user_03_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-toy_example-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-toy_example-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-toy_example-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+### Toy example: non linear case `\((f(x_{i}) = 1 +3 x_{i}-.5 x^{2}_{i})\)`
+.panel1-toy_example_nl-user[
+
+```r
+*set.seed(1234)
+*x = runif(1000,min=0,max = 10)
+*eps = rnorm(1000,0,1.5)
+*b_0 = 1
+*b_1 = 3
+*b_2 = -.5
+*y = b_0 + b_1 * x + b_2 * (x^2) + eps
+```
+]
+ 
+.panel2-toy_example_nl-user[
+
+]
+
+---
+count: false
+ 
+### Toy example: non linear case `\((f(x_{i}) = 1 +3 x_{i}-.5 x^{2}_{i})\)`
+.panel1-toy_example_nl-user[
+
+```r
+set.seed(1234)
+x = runif(1000,min=0,max = 10)
+eps = rnorm(1000,0,1.5)
+b_0 = 1
+b_1 = 3
+b_2 = -.5
+y = b_0 + b_1 * x + b_2 * (x^2) + eps
+*pop_xy = tibble(y=y, x=x)
+*sam_xy = pop_xy %&gt;%
+* slice(sample(1:1000,30))
+
+*sam_xy %&gt;%
+*ggplot(aes(x = x,y = y)) +
+* geom_point(size=3,alpha=.5,
+*            color="darkblue")+
+* theme_minimal()
+```
+]
+ 
+.panel2-toy_example_nl-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/toy_example_nl_user_02_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Toy example: non linear case `\((f(x_{i}) = 1 +3 x_{i}-.5 x^{2}_{i})\)`
+.panel1-toy_example_nl-user[
+
+```r
+set.seed(1234)
+x = runif(1000,min=0,max = 10)
+eps = rnorm(1000,0,1.5)
+b_0 = 1
+b_1 = 3
+b_2 = -.5
+y = b_0 + b_1 * x + b_2 * (x^2) + eps
+pop_xy = tibble(y=y, x=x)
+sam_xy = pop_xy %&gt;%
+  slice(sample(1:1000,30))
+
+sam_xy %&gt;%
+ggplot(aes(x = x,y = y)) +
+  geom_point(size=3,alpha=.5,
+             color="darkblue")+
+  theme_minimal() +
+* geom_smooth(method="lm",
+*             color="red")
+```
+]
+ 
+.panel2-toy_example_nl-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/toy_example_nl_user_03_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Toy example: non linear case `\((f(x_{i}) = 1 +3 x_{i}-.5 x^{2}_{i})\)`
+.panel1-toy_example_nl-user[
+
+```r
+set.seed(1234)
+x = runif(1000,min=0,max = 10)
+eps = rnorm(1000,0,1.5)
+b_0 = 1
+b_1 = 3
+b_2 = -.5
+y = b_0 + b_1 * x + b_2 * (x^2) + eps
+pop_xy = tibble(y=y, x=x)
+sam_xy = pop_xy %&gt;%
+  slice(sample(1:1000,30))
+
+sam_xy %&gt;%
+ggplot(aes(x = x,y = y)) +
+  geom_point(size=3,alpha=.5,
+             color="darkblue")+
+  theme_minimal() +
+  geom_smooth(method="lm",
+              color="red")+
+* geom_smooth(method = "loess",
+*             color="darkgreen")
+```
+]
+ 
+.panel2-toy_example_nl-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/toy_example_nl_user_04_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-toy_example_nl-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-toy_example_nl-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-toy_example_nl-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+
+
+
+---
+class: animated fadeIn 
+
+###  Non-linear approaches
+
+Non-linear approaches are often extensions of the linear ones; they consider a single predictor ** `\(X\)` **.
+
+a) ** Polynomial regression ** 
+&gt; it is the simples way to estimate `\(f()\)` via a non-linear `\(\hat{f}()\)`. It just takes to replace the predictor `\(X\)` with its power `\(d\)` polynomial
+** `\(y_{i}=\beta_{0}+\beta_{1}X+\beta_{2}X^{2}+\ldots+\beta_{d}X^{d}+\epsilon_{i}\)`  **.
+
+--
+
+b) ** Step functions **
+&gt; the `\(X\)` range is split in `\(K\)` regions, `\(R_{j}\)`, `\(j=1,\ldots, K\)`; within `\(R_{j}\)`, `\(y_{i}\)` is averaged for each `\(i\)` such that `\(x_{i}\in R_{j}\)`. The resulting `\(\hat{f}()\)` is piece-wise constant.
+
+
+---
+class: animated fadeIn 
+
+###  Non-linear approaches
+
+Non-linear approaches are often extensions of the linear ones; they consider a single predictor ** `\(X\)` **.
+
+c) ** Regression splines ** 
+&gt; a combination of polynomial regression and step functions: in each of the `\(K\)` regions `\(R_{j}\)`, a polynomial regression is fit: not just a piece-wise polynomial `\(\hat{f}()\)`, continuity at the knots must be assured. 
+
+--
+
+d) ** Smoothing splines **
+&gt; Similar to regression splines, the model flexibility is specified according to a  ** _smoothness penalty_ **.
+
+--
+
+e) ** Local Regression **
+&gt; In this case ** `\(\hat{f}()\)` ** is fitted on ** non-disjoint regions ** of  `\(X\)`. 
+ 
+ 
+---
+class: animated fadeIn inverse center middle
+
+
+# Polynomial regression
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+#####Study the dependence of  wage from age, from the **Wage** dataset in the package **ISLR2**
+.panel1-wage_vs_age-user[
+
+```r
+*library(ISLR2)
+*data(Wage)
+
+*w_vs_a = Wage %&gt;%
+* tibble(.rows=1) %&gt;%
+* dplyr::select(wage,age) %&gt;%
+* mutate(age = as.double(age))
+```
+]
+ 
+.panel2-wage_vs_age-user[
+
+]
+
+---
+count: false
+ 
+#####Study the dependence of  wage from age, from the **Wage** dataset in the package **ISLR2**
+.panel1-wage_vs_age-user[
+
+```r
+library(ISLR2)
+data(Wage)
+
+w_vs_a = Wage %&gt;%
+  tibble(.rows=1) %&gt;%
+  dplyr::select(wage,age) %&gt;%
+  mutate(age = as.double(age))
+
+*w_vs_a %&gt;%
+* ggplot(aes(x=age,y=wage))+
+* geom_point(alpha=.5,color="orange")+
+* theme_minimal()
+```
+]
+ 
+.panel2-wage_vs_age-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/wage_vs_age_user_02_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+#####Study the dependence of  wage from age, from the **Wage** dataset in the package **ISLR2**
+.panel1-wage_vs_age-user[
+
+```r
+library(ISLR2)
+data(Wage)
+
+w_vs_a = Wage %&gt;%
+  tibble(.rows=1) %&gt;%
+  dplyr::select(wage,age) %&gt;%
+  mutate(age = as.double(age))
+
+w_vs_a %&gt;%
+  ggplot(aes(x=age,y=wage))+
+  geom_point(alpha=.5,color="orange")+
+  theme_minimal()+
+* geom_smooth(method="lm")
+```
+]
+ 
+.panel2-wage_vs_age-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/wage_vs_age_user_03_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-wage_vs_age-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-wage_vs_age-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-wage_vs_age-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+class: animated fadeIn
+
+### Degree 4 polynomial regression
+
+** Pre-processing (recipe) specification **
+
+```r
+pre_proc_w_vs_a = w_vs_a %&gt;% 
+  recipe(wage~age) %&gt;% 
+  step_poly(age,degree=4,
+            options=list(raw=T)) #BREAK
+```
+--
+
+** Pre-processed data **
+
+```r
+pre_proc_w_vs_a %&gt;%
+  prep() %&gt;% bake(new_data=NULL) %&gt;%
+  slice(1:6) %&gt;% 
+  knitr::kable(format="html",digits=2)
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; wage &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_3 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_4 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 75.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 324 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5832 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 104976 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 70.48 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 24 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 576 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 13824 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 331776 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 130.98 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 45 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2025 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 91125 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4100625 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 154.69 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1849 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 79507 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3418801 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 75.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2500 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 125000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6250000 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 127.12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 54 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2916 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 157464 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8503056 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+
+---
+class: animated fadeIn
+### Degree 4 polynomial regression
+
+** model specification **
+
+```r
+linear_model_spec = linear_reg(
+  mode="regression")%&gt;%
+  set_engine("lm")
+```
+
+--
+
+** workflow specification: combine recipe and model specifications **
+
+```r
+poly_wflow = workflow() %&gt;% 
+  add_recipe(pre_proc_w_vs_a) %&gt;% 
+  add_model(linear_model_spec)
+```
+
+
+---
+class: animated fadeIn
+### Degree 4 polynomial regression
+
+** fit the model: indicate the data to apply the workflow to **
+
+```r
+poly_fit = poly_wflow %&gt;% 
+  fit(data=w_vs_a)
+```
+
+--
+
+** model estimates **
+
+```r
+poly_fit %&gt;% tidy() %&gt;%
+  knitr::kable(digits=2)
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -184.15 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -3.07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 21.25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.89 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.61 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.56 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.21 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -2.74 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.01 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.22 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.03 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.95 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn
+
+### Polynomial fit
+
+To obtain point-wise confidence intervals, it takes ** `\(SE\left[\hat{f}(x_{0})\right]\)` **
+
+
+--
+Each observation ** `\(x_{0}\)` ** is associated to the vector ** `\({\bf \ell}^{\sf T}=[1,x_{0},x_{0}^{2},x_{0}^{3},x_{0}^{4}]\)` **, then
+
+--
+
+** `$$SE\left[\hat{f}(x_{0})\right] = \left[{\bf \ell}^{\sf T}_{0} {\bf C}{\bf \ell}_{0} \right]^{1/2}$$` **
+
+
+where `\({\bf C}\)` is the covariance matrix of the coefficient estimators
+
+.left-column[ 
+$$
+{\bf C}= 
+`\begin{bmatrix}
+SE({\hat{\beta}_{0}})^{2} &amp; cov(\hat{\beta}_{0},\hat{\beta}_{1}) &amp; \ldots &amp; \ldots &amp; cov(\hat{\beta}_{0},\hat{\beta}_{4}) \\
+cov(\hat{\beta}_{1},\hat{\beta}_{0}) &amp;SE({\hat{\beta}_{1}})^{2}&amp; \ldots&amp; \ldots &amp; cov(\hat{\beta}_{1},\hat{\beta}_{4}) \\
+\vdots &amp;\vdots &amp; SE({\hat{\beta}_{2}})^{2} &amp; \vdots &amp; \vdots \\
+\vdots &amp;\vdots &amp; \vdots &amp; \ldots &amp; \vdots \\
+cov(\hat{\beta}_{4},\hat{\beta}_{0}) &amp;\ldots &amp; \ldots &amp; \ldots &amp;SE({\hat{\beta}_{4}})^{2}\\
+\end{bmatrix}`
+$$
+]
+--
+.right-column[ 
+&lt;h3 style="text-align:right;"&gt;Why?&lt;/h3&gt;
+]
+
+---
+class: animated fadeIn  center middle
+
+
+&lt;h1 style="color: orange;"&gt;Intermission...&lt;/h1&gt;
+
+---
+class: animated fadeIn
+
+### Recall linear regression
+
+
+### $$ {\bf y}={\bf X}{\bf \beta}+ {\bf \epsilon} $$
+
+** `\({\bf y}\)` ** vector of response values, ** `\({\bf X}\)` ** predictor matrix,
+** `\({\bf \beta}\)` ** coefficient vector  and ** `\({\bf \epsilon}\)` ** error vectors.
+
+--
+###  OLS target
+
+### $$ \min_{\hat{\beta}}  ({\bf y}-{\bf X}{\bf \hat{\beta}})^{\sf T}({\bf y}-{\bf X}{\bf \hat{\beta}})$$
+
+--
+###  OLS solution
+
+### $$ \hat{\beta} = ({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}{\bf y} $$
+
+---
+class: animated fadeIn
+
+### Distributional assumptions
+
+** `\(\epsilon \sim N(0,\sigma^{2}{\bf I})\)` **, assuming non-stochastic predictors, it follows that
+
+** `$$E[{\bf y}]= E[{\bf X}\beta+\epsilon]={\bf X}\beta \ \ \text{ and } \ \ var[{\bf y}]= \sigma^{2}{\bf I}$$` **
+
+--
+### Distribution of linear combinations
+
+** $$ \text{if } \quad {\bf U}\sim N({\bf \mu},{\bf\Sigma}) \quad \text{ and } \quad {\bf V} = {\bf c}+{\bf D}{\bf U} \quad \text{then} \quad {\bf V}\sim N({\bf c}+{\bf D}\mu,{\bf D}{\bf \Sigma}{\bf D}^{\sf T})$$ **
+
+--
+### Distribution of `\(\hat{\beta}\)`
+
+ ** `\(\hat{\beta} =  ({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}{\bf y}\)` ** is a linear combination of ** `\(\bf y\)` **, with
+** `\({\bf c} = 0\)` ** and ** `\({\bf D} = ({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}\)` **, then
+
+--
+
+- ** `\(E[\hat{\beta}]={\bf D} E[y] = {\bf D}{\bf X}\beta= ({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}{\bf X}\beta = \beta\)` **
+
+--
+
+- ** `\(var(\hat{\beta})= {\bf D} \sigma^{2}{\bf D}^{\sf T}=({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}\sigma^{2}[({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}]^{\sf T} = \sigma^{2}({\bf X}^{\sf T}{\bf X})^{-1}{\bf X}^{\sf T}{\bf X}({\bf X}^{\sf T}{\bf X})^{-1}=\sigma^{2}({\bf X}^{\sf T}{\bf X})^{-1}\)` **
+
+---
+class: animated fadeIn  center middle
+
+
+&lt;h1 style="color: orange;"&gt;...end of intermission&lt;/h1&gt;
+
+
+---
+class: animated fadeIn
+
+### `\(SE(\hat{f}(x_{0}))= \ell_{0}^{\sf T}\hat{\beta}\ell_{0}\)` 
+
+** `\(\hat{f}(x_{0})\)` ** is a linear combination of ** `\(\hat{\beta}\)` ** with 
+** `\({\bf D} = \ell_{0}^{\sf T}\)` **, so 
+
+** `$$SE(\hat{f}(x_{0}))=[var(\hat{f}(x_{0}))]^{1/2}=[{\bf D}\hat{\sigma}^{2}({\bf X}^{\sf T}{\bf X})^{-1}{\bf D}^{\sf T}]^{1/2} = [\ell_{0}^{\sf T}{\bf C}\ell_{0}]^{1/2}$$` **
+
+Therefore the 95% confidence interval is 
+** `$$\hat{f}(x_{0})\pm z_{\alpha/2}SE(\hat{f}(x_{0}))=\hat{f}(x_{0})\pm 1.96SE(\hat{f}(x_{0}))$$` **
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+### Polynomal regression **Covariance matrix of `\(\hat{\beta}\)` **
+.panel1-poly_fit_plot-user[
+
+```r
+*C_mat = poly_fit %&gt;%
+* extract_fit_engine() %&gt;%
+* vcov()
+```
+]
+ 
+.panel2-poly_fit_plot-user[
+
+]
+
+---
+count: false
+ 
+### Polynomal regression **Covariance matrix of `\(\hat{\beta}\)` **
+.panel1-poly_fit_plot-user[
+
+```r
+C_mat = poly_fit %&gt;%
+  extract_fit_engine() %&gt;%
+  vcov()
+
+*C_mat %&gt;%
+*knitr::kable(format="html",
+*            digits=4)
+```
+]
+ 
+.panel2-poly_fit_plot-user[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; (Intercept) &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_3 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_4 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3604.8469 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -351.2230 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.1027 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.1760 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9e-04 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -351.2230 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 34.6538 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.2072 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0177 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1e-04 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12.1027 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.2072 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0425 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.0006 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0e+00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.1760 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0177 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.0006 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0e+00 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0009 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.0001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0e+00 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+&lt;style&gt;
+.panel1-poly_fit_plot-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-poly_fit_plot-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-poly_fit_plot-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+class: animated fadeIn
+
+### New values
+
+** Create a grid of values for age **
+
+```r
+grid_age = tibble(age=
+            seq(from=min(w_vs_a$age),
+            to=max(w_vs_a$age),
+            by=0.01)
+            )#BREAK
+```
+
+--
+
+.pull-left[
+** Create a matrix with `\(\ell_{0}\)`'s on rows **
+
+
+```r
+l_0s = poly_fit %&gt;% 
+  extract_recipe() %&gt;% 
+  bake(new_data=grid_age) %&gt;%
+  mutate(int=1) %&gt;% 
+  select(int,
+         starts_with("age"))
+```
+]
+
+.pull-right[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; int &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_3 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; age_poly_4 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 324.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5832.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 104976.0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.01 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 324.36 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5841.73 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 105209.5 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.02 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 324.72 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5851.46 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 105443.3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.03 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5861.21 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 105677.6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 18.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 325.44 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5870.97 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 105912.2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+class: animated fadeIn
+
+### Two ways to compute `\(SE(\hat{f}(x_{0}))\)`
+
+
+.pull-left[
+** Computation using `\({\bf \ell}_{0}^{\sf T}{\bf C}{\bf \ell}_{0}\)` **
+
+```r
+SE_fx_0s = l_0s %&gt;% pmap(~c(...)) %&gt;%
+  map(.f=function(x)
+    sqrt(t(x) %*% C_mat %*% t(t(x)))
+    ) %&gt;%
+  unlist
+```
+]
+
+--
+.pull-right[
+** Computation using `\(\texttt{predict()}\)` **
+
+```r
+x_0s_preds = poly_fit %&gt;% extract_fit_engine() %&gt;%
+  predict(newdata = 
+          poly_fit %&gt;% 
+          extract_recipe() %&gt;%
+          bake(new_data=grid_age),
+          se=T)
+```
+]
+
+
+--
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; lt_C_l &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; pred_se &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.30 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.30 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.29 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.29 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.28 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.28 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.27 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.27 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.26 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.26 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5.25 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.25 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+**Confidence band computation and plot**
+.panel1-poly_fit_plot3-user[
+
+```r
+*poly_fun = grid_age %&gt;%
+* mutate(preds=x_0s_preds$fit,
+* low_band =x_0s_preds$fit - 1.96*x_0s_preds$se.fit,
+* up_band =x_0s_preds$fit + 1.96*x_0s_preds$se.fit
+*        )
+```
+]
+ 
+.panel2-poly_fit_plot3-user[
+
+]
+
+---
+count: false
+ 
+**Confidence band computation and plot**
+.panel1-poly_fit_plot3-user[
+
+```r
+poly_fun = grid_age %&gt;%
+  mutate(preds=x_0s_preds$fit,
+  low_band =x_0s_preds$fit - 1.96*x_0s_preds$se.fit,
+  up_band =x_0s_preds$fit + 1.96*x_0s_preds$se.fit
+         )
+
+*w_vs_a %&gt;%
+* ggplot(aes(x=age,y=wage))+
+* geom_point(alpha=.5,color="orange")+
+* geom_point(data=poly_fun,aes(x=age,y=preds),size=.05,color="blue")+
+* geom_ribbon(data=poly_fun,
+*             aes(x=age,ymin=low_band,ymax=up_band)
+*             ,fill="green",color="green",alpha=.25,inherit.aes = F)+
+* theme_minimal()
+```
+]
+ 
+.panel2-poly_fit_plot3-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_fit_plot3_user_02_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-poly_fit_plot3-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-poly_fit_plot3-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-poly_fit_plot3-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+**Confidence band (tidy) computation and plot**
+.panel1-poly_fit_plot4-user[
+
+```r
+* poly_fun = poly_fit %&gt;%
+*   augment(new_data = grid_age) %&gt;%
+*   mutate(poly_fit %&gt;%
+*            predict(new_data=grid_age,
+*                    type="conf_int"))
+```
+]
+ 
+.panel2-poly_fit_plot4-user[
+
+]
+
+---
+count: false
+ 
+**Confidence band (tidy) computation and plot**
+.panel1-poly_fit_plot4-user[
+
+```r
+  poly_fun = poly_fit %&gt;%
+    augment(new_data = grid_age) %&gt;%
+    mutate(poly_fit %&gt;%
+             predict(new_data=grid_age,
+                     type="conf_int"))
+
+*w_vs_a %&gt;%
+* ggplot(aes(x=age,y=wage))+
+* geom_point(alpha=.5,color="orange")+
+* geom_point(data=poly_fun,aes(x=age,y=.pred),size=.05,color="blue")+
+* geom_ribbon(data=poly_fun,
+*             aes(x=age,ymin=.pred_lower,ymax=.pred_upper)
+*             ,fill="blue",color="blue",alpha=.25,inherit.aes = F)+
+* theme_minimal()
+```
+]
+ 
+.panel2-poly_fit_plot4-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_fit_plot4_user_02_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-poly_fit_plot4-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-poly_fit_plot4-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-poly_fit_plot4-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+
+
+
+---
+class: animated fadeIn inverse center middle
+
+
+## Polynomial (logistic) regression
+
+
+---
+class: animated fadeIn middle
+
+
+** `\(P(Y=1|X) = \frac{e^{\beta_{0}+\beta_{1}X+\beta_{2}X^{2}+\beta_{4}X^{4}+\beta_{3}X^{3}}}{1+e^{\beta_{0}+\beta_{1}X+\beta_{2}X^{2}+\beta_{3}X^{3}+\beta_{4}X^{4}}}\)` **
+
+
+ Same dataset, turn `\(\texttt{wage}\)` into a binary variable: if `\(\texttt{wage}_{i}&gt;250\)` then  ** `\(\texttt{high_wage}_{i}\)` ** `\(=TRUE\)`
+
+```r
+w_vs_a %&gt;% 
+  mutate(high_wage=wage&gt;250) %&gt;% 
+  ggplot(aes(x=age,y=wage, color=high_wage)) + 
+  geom_point() + theme_minimal()
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_log-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+class: animated fadeIn middle
+
+** `\(P(Y=1|X) = \frac{e^{\beta_{0}+\beta_{1}X+\beta_{2}X^{2}+\beta_{4}X^{4}+\beta_{3}X^{3}}}{1+e^{\beta_{0}+\beta_{1}X+\beta_{2}X^{2}+\beta_{3}X^{3}+\beta_{4}X^{4}}}\)` **
+
+ Same dataset, turn `\(\texttt{wage}\)` into a binary variable: if `\(\texttt{wage}_{i}&gt;250\)` then  ** `\(\texttt{high_wage}_{i}\)` ** `\(=TRUE\)`
+
+```r
+w_vs_a %&gt;% 
+  mutate(high_wage=wage&gt;250) %&gt;% #BREAK
+  ggplot(aes(x=age,y=as.numeric(high_wage), color=high_wage)) + 
+  geom_point() + theme_minimal()
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_log2-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+
+
+** Pre-processing:**
+Insert the `\(\texttt{wage}\)` transformation into `\(\texttt{high_wage}\)` in the recipe specification.
+
+Note: specify ** `\(\texttt{skip=TRUE}\)` ** to ignore this step for new data (that contains `\(\texttt{age}\)` only)
+
+
+```r
+prep_poly_log = w_vs_a %&gt;% recipe(wage~age) %&gt;%
+  step_mutate(high_wage = as.factor(wage&gt;250),
+              role="outcome",skip=TRUE) %&gt;% 
+  step_rm(wage) %&gt;%
+  step_poly(age,degree=4,
+            options=list(raw=T))
+```
+
+--
+
+** Model specification **
+
+```r
+logistic_model_spec = logistic_reg(
+  mode="classification")%&gt;%
+  set_engine("glm")
+```
+
+--
+** Create the workflow and fit the model **
+
+.pull-left[
+
+```r
+poly_log_wflow = workflow() %&gt;% 
+  add_recipe(prep_poly_log) %&gt;% 
+  add_model(logistic_model_spec)
+
+poly_log_fit = poly_log_wflow %&gt;% 
+  fit(data=w_vs_a)
+```
+]
+
+--
+.pull-right[
+
+```r
+poly_log_fit %&gt;% tidy() %&gt;% 
+  knitr::kable(format="html",digits=3) %&gt;% 
+  kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -109.553 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 47.627 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -2.300 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.021 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 8.995 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.184 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.150 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.032 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -0.282 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.135 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -2.082 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.037 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.004 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.002 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2.023 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.043 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; age_poly_4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.968 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.049 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+class: animated fadeIn
+** Compute the fit with via `\(\texttt{augment()}\)`, and the confidence bands via `\(\texttt{predict()}\)` **
+
+
+```r
+fit_data = poly_log_fit %&gt;% 
+  augment(new_data = grid_age) %&gt;% 
+  mutate(poly_log_fit %&gt;% predict(new_data=grid_age,type="conf_int")) 
+
+fit_data %&gt;% 
+  select(age,
+         ends_with("TRUE")) %&gt;% 
+  slice(1:10) %&gt;% 
+  knitr::kable(format="html",digits=5) %&gt;% 
+  kable_styling(font_size=10)
+```
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; age &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .pred_TRUE &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .pred_lower_TRUE &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; .pred_upper_TRUE &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00166 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.01 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00167 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.02 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00167 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.03 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00168 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.04 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00168 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.05 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00169 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.06 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00169 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.07 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00170 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00170 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 18.09 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00171 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn
+
+count: false
+ 
+** Polynomial logistic fit **
+.panel1-poly_logistic_plot-user[
+
+```r
+*w_vs_a %&gt;%
+* mutate(high_wage=wage&gt;250,
+*        high_wage=as.numeric(high_wage)/4) %&gt;%
+* ggplot(aes(x=age,y=high_wage,
+*            color=wage&gt;250))+
+* geom_point()+
+* theme_minimal() +
+* scale_y_continuous(limits = c(0,.3))
+```
+]
+ 
+.panel2-poly_logistic_plot-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_logistic_plot_user_01_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+** Polynomial logistic fit **
+.panel1-poly_logistic_plot-user[
+
+```r
+w_vs_a %&gt;%
+  mutate(high_wage=wage&gt;250,
+         high_wage=as.numeric(high_wage)/4) %&gt;%
+  ggplot(aes(x=age,y=high_wage,
+             color=wage&gt;250))+
+  geom_point()+
+  theme_minimal() +
+  scale_y_continuous(limits = c(0,.3))+
+* geom_point(data=fit_data,
+*            aes(x=age,y=.pred_TRUE),
+*            size=.05,color="blue",
+*             inherit.aes = F)+
+* geom_ribbon(data=fit_data,
+*             aes(x=age,
+*                 ymin=.pred_lower_TRUE,
+*                 ymax=.pred_upper_TRUE),
+*             fill="green",
+*             color="green",
+*             alpha=.25,
+*             inherit.aes = F)
+```
+]
+ 
+.panel2-poly_logistic_plot-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/poly_logistic_plot_user_02_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-poly_logistic_plot-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-poly_logistic_plot-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-poly_logistic_plot-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+
+---
+class: animated fadeIn center middle inverse
+
+## Step functions: regression
+
+
+---
+class: animated fadeIn
+
+### Step functions
+
+.my-pull-left[
+** Global fit **
+]
+
+.my-pull-right[
+&gt; Polynomial regression, and even regression, fit ** `\(f(.)\)` ** with ** `\(\hat{f}(.)\)` ** using the observed data all at once.
+
+]
+
+--
+
+.my-pull-left[
+** Local fit **
+]
+
+.my-pull-right[
+&gt; Split the `\(X\)` range into `\(K\)` intervals, and fit the function within each interval 
+
+]
+
+--
+
+For ** `\(c_{1},c_{2},\ldots,c_{K}\)` ** breaks, one defines the following ** `\(C_{j}\)` **, ** `\(j = 0,K\)` **, indicator (step) functions. For each observation ** `\(i\)` **, one of the step functions will be ** `\(1\)` **, and all the others will be ** `\(0\)` **, depending on the interval  ** `\(x_{i}\)` ** belongs to.
+
+**
+`\begin{eqnarray}
+C_{0}(X) &amp;=&amp; I(  X&lt;c_{1})\\
+C_{1}(X) &amp;=&amp; I( c_{1}\leq X&lt;c_{2})\\
+C_{2}(X) &amp;=&amp; I( c_{2}\leq X&lt;c_{3})\\
+\ldots  \ldots \\
+C_{K-1}(X) &amp;=&amp; I( c_{K-1}\leq X&lt;c_{K})\\
+C_{K}(X) &amp;=&amp; I( c_{K}\leq X)\\
+\end{eqnarray}`
+**
+
+---
+class: animated fadeIn
+** Pre-processing: split the predictor age into three intervals **
+
+```r
+step_regions_plot = w_vs_a %&gt;% 
+  ggplot(aes(x=age, y=wage))+
+  theme_minimal()+
+  annotate(geom="rect",xmin=min(w_vs_a$age),xmax = 35,ymin=0,ymax=max(w_vs_a$wage),fill="indianred",alpha=.25)+
+  annotate(geom="rect",xmin=35,xmax=50,ymin=0,ymax=max(w_vs_a$wage),fill="lightgreen",alpha=.25)+
+  annotate(geom="rect",xmin=50,xmax=65,ymin=0,ymax=max(w_vs_a$wage),fill="lightblue",alpha=.25)+
+  annotate(geom="rect",xmin=65,xmax=80,ymin=0,ymax=max(w_vs_a$wage),fill="indianred",alpha=.25)+
+  geom_point(alpha=.5)
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/step_regions_plot-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+** Pre-processing: split the predictor age into three intervals **
+
+.pull-left[
+
+
+```r
+step_pre_proc = w_vs_a %&gt;% recipe(wage~age) %&gt;% 
+  step_mutate(age=cut(age,
+        breaks = c(0,35,50,65,80))) 
+```
+
+]
+
+.pull-right[
+
+&lt;table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; age &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; wage &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (0,35] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.04315 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (0,35] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70.47602 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (35,50] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 130.98218 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (35,50] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 154.68529 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (35,50] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.04315 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (50,65] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 127.11574 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (35,50] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 169.52854 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (0,35] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 111.72085 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (35,50] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 118.88436 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (50,65] &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 128.68049 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+]
+
+---
+class: animated fadeIn
+
+** Define the workflow and fit the model **
+
+```r
+lm_wflow=workflow() %&gt;% 
+  add_recipe(step_pre_proc) %&gt;% 
+  add_model(linear_model_spec)
+
+step_lm_fit = lm_wflow %&gt;% fit(data=w_vs_a)
+```
+
+** Compute preds and confidence band **
+
+
+```r
+step_fit_data = step_lm_fit %&gt;% 
+  augment(new_data= grid_age) %&gt;% 
+  mutate(step_lm_fit %&gt;% predict(new_data=grid_age,type="conf_int"))
+```
+
+
+---
+class: animated fadeIn
+
+** Update the plot with the step function **
+
+
+```r
+step_regions_plot + 
+  geom_point(data = step_fit_data, aes(x=age, y=.pred), size=.1,color="magenta",inherit.aes = FALSE)+
+  geom_ribbon(data = step_fit_data, aes(x=age, ymin=.pred_lower,ymax=.pred_upper),
+              fill="magenta",inherit.aes = FALSE,alpha=.25)
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/step_fun_reg_c-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn center middle inverse
+
+## Step functions: classification
+
+---
+class: animated fadeIn
+
+Split the predictor ** `\(\texttt{age}\)` ** into three intervals and use it to predict whether the wage is higher than 250
+
+
+```r
+prep_step_log = w_vs_a %&gt;% recipe(wage~age) %&gt;%
+  step_mutate(high_wage = as.factor(wage&gt;250),
+              role="outcome",skip=TRUE) %&gt;% 
+  step_mutate(age=cut(age,
+        breaks = c(0,35,50,65,80))) %&gt;% 
+  step_rm(wage)
+```
+
+--
+
+
+```r
+step_regions_plot + geom_point(data=w_vs_a %&gt;% mutate(high_wage=(wage&gt;250)),
+                                aes(x=age,y=wage,color=high_wage),inherit.aes = FALSE)
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/step_logit_plot-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated fadeIn
+
+** Workflow specification and fit **
+
+
+```r
+class_step_wf = workflow() %&gt;% 
+  add_recipe(prep_step_log) %&gt;% 
+  add_model(logistic_model_spec)
+
+class_step_fit = class_step_wf %&gt;%
+  fit(data = w_vs_a)
+```
+
+--
+
+
+```r
+class_fit_data = class_step_fit  %&gt;% 
+  augment(new_data=grid_age) %&gt;% 
+  mutate(class_step_fit %&gt;%
+           predict(new_data=grid_age,
+                   type = "conf_int")) %&gt;% 
+  select(age,ends_with("TRUE"))
+```
+
+
+---
+class: animated fadeIn
+
+** step function for classification: final plot **
+
+
+```r
+w_vs_a %&gt;% 
+  mutate(high_wage=as.factor(wage&gt;250)) %&gt;% 
+  ggplot(aes(x=age, y=as.double(wage&gt;250)/4,color=high_wage))+ylab("wage &gt; 250")+
+  geom_point(alpha=.25,size=5)+theme_minimal()+
+  geom_point(data = class_fit_data, aes(x=age, y=.pred_TRUE), size=.1,color="blue",inherit.aes = FALSE)+
+  geom_ribbon(data = class_fit_data, aes(x=age, ymin=.pred_lower_TRUE,ymax=.pred_upper_TRUE),
+              fill="lightblue",inherit.aes = FALSE,alpha=.25)+
+  annotate(geom="rect",xmin=min(w_vs_a$age),xmax = 35,ymin=0,ymax=.25,fill="indianred",alpha=.25)+
+  annotate(geom="rect",xmin=35,xmax=50,ymin=0,ymax=.25,fill="lightgreen",alpha=.25)+
+  annotate(geom="rect",xmin=50,xmax=65,ymin=0,ymax=.25,fill="lightblue",alpha=.25)+
+  annotate(geom="rect",xmin=65,xmax=80,ymin=0,ymax=.25,fill="indianred",alpha=.25)
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/step_fun_reg_d-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn inverse center middle
+
+# Basis functions
+
+
+---
+class: animated fadeIn
+
+### Basis functions: a general setup
+
+A ** basis function `\(b_{j}(.)\)` **, `\(j=1,\ldots,K\)` takes as input the predictor `\(X\)`.
+
+### `$$y_{i} = \beta_{0}+ \beta_{1}b_{1}(x_{i}) + \beta_{2}b_{2}(x_{i}) + \ldots + \beta_{K}b_{K}(x_{i})+\epsilon_{i}$$`
+
+--
+
+- If ** `\(b_{j}(x_{i})=x_{i}^{j}\)` ** then the above is a ** polynomial regression **
+
+--
+
+- If ** `\(b_{j}(x_{i})=I(c_{j} \leq x_{i} &lt; c_{j+1})\)` ** then the model is piecewise constant (that is ** `\(b_{j}\)`'s ** are **step functions** )
+
+
+--
+
+- Once the ** `\(b_{j}\)`'s ** are defined, then one uses OLS to estimate the coefficients
+
+
+--
+
+
+- One of the most common definitions for ** `\(b_{j}\)`'s ** are the ** regression splines **
+
+
+---
+class: animated fadeIn
+
+### Regression splines: piecewise linear
+
+- Just like for step functions, the ** `\(X\)` ** is split into regions, and `\(\hat{f}(.)\)` is obtained for each region
+
+
+
+--
+- A **linear regression** is fitted, not just the mean, as in the step function case
+
+
+
+--
+&gt;Suppose again you are regressing ** `\(\texttt{wage}\)` ** on ** `\(\texttt{age}\)` **. And that the range of `\(\texttt{age}\)` is split     once, at 50: ** `\(R_{1}:\texttt{age}&lt;50\)` ** and   ** `\(R_{2}:\texttt{age}\geq 50\)` **. 
+&gt;
+&gt;Note that the split value ** `\(\texttt{age}=50\)` ** is referred to as **knot**. 
+
+
+---
+class: animated fadeIn 
+
+
+
+```r
+w_vs_a %&gt;%
+  ggplot(aes(x=age,y=wage)) + theme_minimal()+
+  geom_point(color="darkgreen")+
+  geom_vline(aes(xintercept=50),color="orange")+
+  annotate(geom="rect",xmin=min(w_vs_a$age),xmax=50,ymin=0,ymax=max(w_vs_a$wage),fill="indianred",alpha=.25)+
+  annotate(geom="rect",xmin=50,xmax=max(w_vs_a$age),ymin=0,ymax=max(w_vs_a$wage),fill="lightblue",alpha=.25)+
+  annotate(geom="text",x=22,y=220,label="paste(italic(R),1)",parse=TRUE,size=15,alpha=.3)+
+  annotate(geom="text",x=75,y=220,label="paste(italic(R),2)",parse=TRUE,size=15,alpha=.3)-&gt;two_regions_plot
+two_regions_plot
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/one_knot-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn 
+
+### Two linear regressions, one per region
+
+
+** Turn the data into a list, according to the knot: then fit a linear model on each element of the list **
+
+
+
+
+```r
+simple_reg_recipe = w_vs_a %&gt;% recipe(wage~age)
+
+w_vs_a_list = w_vs_a %&gt;% 
+  mutate(region=age&gt;50,
+         age=as.double(age)) %&gt;% 
+  group_by(region) %&gt;% 
+  group_map(~workflow() %&gt;%
+              add_recipe(simple_reg_recipe) %&gt;%
+              add_model(linear_model_spec) %&gt;%
+              fit(data = .x) 
+            )
+```
+
+--
+
+** Compute the predictions on a grid of age values, to draw the regression lines and bands **
+
+```r
+fitted_curves_and_band = w_vs_a_list %&gt;% map2(.y=grid_age,.f=function(x,.y){
+  line_pred=augment(x,new_data=grid_age);
+  band_pred=predict(x,new_data=grid_age,type="conf_int");
+  return(bind_cols(line_pred,band_pred))
+  })
+```
+
+
+
+---
+class: animated fadeIn 
+
+count: false
+ 
+### Two linear regressions per region
+.panel1-two_regs3a-user[
+
+```r
+*two_regions_plot
+```
+]
+ 
+.panel2-two_regs3a-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_regs3a_user_01_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Two linear regressions per region
+.panel1-two_regs3a-user[
+
+```r
+two_regions_plot+
+* geom_line(data=fitted_curves_and_band[[1]] %&gt;%
+*             filter(age&lt;50),
+*            aes(x=age,y=.pred),
+*            color="blue", size=1.5,
+*            inherit.aes = FALSE)
+```
+]
+ 
+.panel2-two_regs3a-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_regs3a_user_02_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Two linear regressions per region
+.panel1-two_regs3a-user[
+
+```r
+two_regions_plot+
+  geom_line(data=fitted_curves_and_band[[1]] %&gt;%
+              filter(age&lt;50),
+             aes(x=age,y=.pred),
+             color="blue", size=1.5,
+             inherit.aes = FALSE)+
+* geom_line(data=fitted_curves_and_band[[2]] %&gt;%
+*             filter(age&gt;=50),
+*            aes(x=age,y=.pred),
+*            color="red", size=1.5,
+*            inherit.aes = FALSE)
+```
+]
+ 
+.panel2-two_regs3a-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_regs3a_user_03_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-two_regs3a-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-two_regs3a-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-two_regs3a-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+
+
+---
+class: animated fadeIn 
+
+### Regression splines: piecewise linear
+
+.my-pull-left[
+** pre-proc **
+]
+
+.my-pull-right[
+
+```r
+pre_proc_w_vs_a = w_vs_a %&gt;% 
+  recipe(wage~age) %&gt;%
+  step_mutate(age_to_knot = 
+                ifelse(age&gt;50,age-50,0))
+```
+]
+
+
+.my-pull-left[
+** workflow and fit **
+]
+
+
+.my-pull-right[
+
+```r
+pw_linear = workflow() %&gt;%
+  add_recipe(pre_proc_w_vs_a) %&gt;%
+  add_model(linear_model_spec)
+
+pw_linear_fit = pw_linear %&gt;%
+  fit(data=w_vs_a)
+```
+]
+
+
+---
+class: animated fadeIn 
+
+### Regression splines: piecewise linear
+
+.my-pull-left[
+** preds and confidence bands **
+]
+
+.my-pull-right[
+
+```r
+two_reg_fit_data=pw_linear_fit %&gt;% 
+  augment(new_data=grid_age) %&gt;% 
+  mutate(pw_linear_fit %&gt;% predict(new_data=grid_age,
+                                   type="conf_int"))
+```
+]
+
+.pull-left[
+
+```r
+two_regions_plot+
+  geom_line(data=two_reg_fit_data,
+             aes(x=age,y=.pred),
+             color="blue",
+             inherit.aes = FALSE)+
+  geom_ribbon(data=two_reg_fit_data,
+             aes(x=age,ymin=.pred_lower,
+                 ymax=.pred_upper),
+             fill="blue",alpha=.25,
+             inherit.aes = FALSE)-&gt;two_regions_and_fit
+```
+]
+
+.pull-right[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_reg_plot_make2-1.png" width="100%" style="display: block; margin: auto 0 auto auto;" /&gt;
+]
+
+---
+class: animated fadeIn
+### Regression splines: piecewise polynomial
+
+
+
+--
+- A **polynomial regression** is fitted within each region
+
+
+--
+
+### cubic splines
+
+
+&gt;Within each of the regions defined by the split, fit a degree 3 polynomial regression
+
+
+** `$$\texttt{wage}_{i,x_{i}\in R_{1}}= \beta_{0,R_{1}} + \beta_{1,R_{1}} \texttt{age}_{i}+\beta_{2,R_{1}} \texttt{age}^{2}_{i} +\beta_{3,R_{1}} \texttt{age}^{3}_{i}+\epsilon_{i}$$` **
+
+** `$$\texttt{wage}_{i,x_{i}\in R_{2}}= \beta_{0,R_{2}} + \beta_{1,R_{2}} \texttt{age}_{i}+\beta_{2,R_{2}} \texttt{age}^{2}_{i} +\beta_{3,R_{2}} \texttt{age}^{3}_{i}+\epsilon_{i}$$` **
+
+
+---
+class: animated fadeIn
+### Regression splines: piecewise polynomial
+
+** Fit  different polynomial (degree 3) regressions within each region, independent from one another **
+
+
+```r
+two_poly_recipe = w_vs_a %&gt;% 
+  mutate(age=as.double(age),
+         region=age&gt;50) %&gt;% 
+  recipe(wage~age) %&gt;% 
+  step_poly(age,3)
+
+w_vs_a_list_2 = w_vs_a %&gt;% 
+  mutate(region=age&gt;50,
+         age=as.double(age)) %&gt;% 
+  group_by(region) %&gt;% 
+  group_map(~workflow() %&gt;%
+              # add_recipe(two_poly_recipe) %&gt;% 
+              add_formula(wage ~ poly(age,3)) %&gt;%
+              add_model(linear_model_spec) %&gt;%
+              fit(data = .x) 
+            )
+```
+
+** Combine predictions and confidence bands for each region **
+
+
+```r
+fitted_curves_and_band_2 = w_vs_a_list_2 %&gt;% map2(.y=grid_age,.f=function(x,.y){
+  line_pred=augment(x,new_data=grid_age);
+  band_pred=predict(x,new_data=grid_age,type="conf_int");
+  return(bind_cols(line_pred,band_pred))
+  })
+```
+
+
+---
+class: animated fadeIn 
+
+count: false
+ 
+### Two polynomial regressions per region
+.panel1-two_poly_regs3-user[
+
+```r
+*two_regions_plot
+```
+]
+ 
+.panel2-two_poly_regs3-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_poly_regs3_user_01_output-1.png" width="75%" /&gt;
+]
+
+---
+count: false
+ 
+### Two polynomial regressions per region
+.panel1-two_poly_regs3-user[
+
+```r
+two_regions_plot+
+* geom_point(data=fitted_curves_and_band_2[[1]] %&gt;% filter(age&lt;50),
+*            aes(x=age,y=.pred),
+*            color="blue",
+*            inherit.aes = FALSE)+
+* geom_point(data=fitted_curves_and_band_2[[2]]%&gt;% filter(age&gt;=50),
+*            aes(x=age,y=.pred),
+*            color="red",
+*            inherit.aes = FALSE)
+```
+]
+ 
+.panel2-two_poly_regs3-user[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/two_poly_regs3_user_02_output-1.png" width="75%" /&gt;
+]
+
+&lt;style&gt;
+.panel1-two_poly_regs3-user {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-two_poly_regs3-user {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-two_poly_regs3-user {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+
+--
+
+.center[
+## *Not ideal!*
+]
+
+---
+class: animated fadeIn
+### Cubic splines
+
+Let ** `\(\hat{f}_{1}(.)\)` ** and ** `\(\hat{f}_{2}(.)\)` ** be the two degree 3 polynomials fitted in regions ** `\(R_{1}\)` ** and
+** `\(R_{2}\)` ** , and let ** `\(\xi\)` ** the only considered knot
+
+** Single fitting curve `\(\hat{f}(.)\)`: conditions ** 
+
+- continuity at the knot: `\(\hat{f}_{1}(\xi) = \hat{f}_{2}(\xi)\)`
+- `\(\hat{f}(.)\)` is supposed to be smooth at the knot, too:
+  
+  - `\(\hat{f}^{\prime}_{1}(\xi) = \hat{f}^{\prime}_{2}(\xi)\)`
+  
+  - `\(\hat{f}^{\prime\prime}_{1}(\xi) = \hat{f}^{\prime\prime}_{2}(\xi)\)`
+  
+
+.center[
+
+### In  general  a degree `\(d\)` spline is a piecewise degree `\(d\)` polynomial
+
+**  derivatives up to degree `\(d-1\)` are required to be continuous at each knot **
+]  
+  
+---
+class: animated fadeIn
+### Spline basis representation
+
+
+Basis functions are useful to represent regression splines, including piecewise polynomials. 
+
+Suppose to have ** `\(K\)` ** knots
+
+.my-pull-left[
+**cubic spline via basis functions**
+]
+
+.my-pull-right[
+&gt; ** `$$y_{i}= \beta_{0} +\beta_{1} b_{1}(x_{i}) +\beta_{2} b_{2}(x_{i}) +\ldots +\beta_{K} b_{K}(x_{i})+\ldots+\beta_{K+3} b_{K+3}(x_{i}) +\epsilon_{i}$$` **
+&gt; for a degree 3 (cubic) polynomial and `\(K\)` knots, `\(K+3\)` basis functions `\(b_{j}(.)\)`, `\(j=1,\ldots,K+3\)`, are needed.
+]
+
+
+--
+
+
+.my-pull-left[
+**choice of `\(b_{j}(.)\)`'s **
+]
+
+.my-pull-right[
+&gt; - for each term of the polynomial, the choice is obvious: ** `\(b_{j}(x_{i})=x_{i}^{j}\)` **, `\(j=1,\ldots,d\)`; for cubic splines ** `\(d=3\)` **
+&gt; - at each knot ** `\(\xi\)` **,  ** `\(b_{j}(x_{i})= h(x_{i},\xi)\)` ** a **truncated power basis function** is used
+&gt; - ** `\(h(x_{i},\xi) = (x_{i}-\xi)_{+}^{3} = (x_i-\xi)^{3}  \text{ if } x_{i} &gt; \xi, \text{ otherwise } (x_{i}-\xi)_{+}^{3} = 0\)` ** 
+]
+
+
+---
+class: animated fadeIn center middle
+
+
+&lt;h1 style="color: orange"&gt;Truncated power basis: check&lt;/h1&gt;
+   
+---
+class: animated fadeIn
+
+### Truncated power basis functions: single knot
+
+Suppose to have a single knot at ** `\(\xi\)` **
+
+** `$$f(x_{i})= \beta_{0} +\beta_{1} x_{i} +\beta_{2} x_{i}^{2}+\beta_{3} x_{i}^{3} +\beta_{4} (x_{i}-\xi)^{3}_{+}$$` **
+
+The goal is to fit ** `\(f_{1}(.)\)` ** and ** `\(f_{2}(.)\)` **, two cubic polymonials in `\(R_{1}(x_{i}\leq \xi)\)` and 
+`\(R_{2}(x_{i}&gt; \xi)\)`, that is 
+
+ ** `$$f_{1}(x_{i})= a_{1} +b_{1} x_{i} +c_{1} x_{i}^{2}+d_{1}x_{i}^{3}$$` **
+ ** `$$f_{2}(x_{i})= a_{2} +b_{2} x_{i} +c_{2} x_{i}^{2}+d_{2}x_{i}^{3}$$` **
+
+--
+
+&gt;First, re-write the coefficients ** `\(a_{r},b_{r},c_{r},d_{r}, r=1,2\)` ** in terms of ** `\(\beta_{j}\)`'s ** such that
+&gt; - ** `\(f_{1}(x_{i})=f(x_{i})\)` ** and ** `\(f_{2}(x_{i})=f(x_{i})\)` **
+
+--
+
+&gt;Then check the following conditions that ensure continuity and smoothness at the knot:
+&gt;- ** `\(f_{1}(\xi)=f_{2}(\xi)\)` **
+&gt;- ** `\(f^{'}_{1}(\xi)=f^{'}_{2}(\xi)\)` **
+- ** `\(f^{''}_{1}(\xi)=f^{''}_{2}(\xi)\)` **
+
+---
+class: animated fadeIn
+
+.my-pull-left[
+** `\(f_{1}(x_{i})=f(x_{i})\)` **
+]
+.my-pull-right[
+&gt;Define ** `\(a_{1},b_{1},c_{1},d_{1}\)` ** ; note that, in ** `\(R_{1}(x_{i}\leq \xi)\)` **, ** `\((x_{i}-\xi)^{3}_{+}=0\)` **, therefore
+&gt;
+&gt;  `$$f_{1}(x_{i}) = f(x_{i})$$` 
+&gt;  `$$a_{1} + b_{1} x_{i} + c_{1} x_{i}^{2} + d_{1}x_{i}^{3} = \beta_{0} + \beta_{1} x_{i} + \beta_{2} x_{i}^{2}+ \beta_{3} x_{i}^{3}$$` 
+&gt;
+&gt; and ** `\(a_{1}=\beta_{0}\)` ** , ** `\(b_{1}=\beta_{1}\)` ** , ** `\(c_{1}=\beta_{2}\)` ** , ** `\(d_{1}=\beta_{3}\)` **.
+]
+
+--
+
+.my-pull-left[
+** `\(f_{2}(x_{i})=f(x_{i})\)` **
+]
+.my-pull-right[
+
+&gt;Define ** `\(a_{2},b_{2},c_{2},d_{2}\)` ** ; note that, in ** `\(R_{2}(x_{i}&gt; \xi)\)` **, then
+&gt;
+&gt;  `$$(x_{i}-\xi)^{3}_{+}=(x_{i}-\xi)^{3}$$` 
+&gt;  `$$f_{2}(x_{i}) = \beta_{0} + \beta_{1} x_{i} + \beta_{2} x_{i}^{2}+ \beta_{3} x_{i}^{3}+\beta_{4}(x_{i}-\xi)^{3}$$` 
+&gt; re-writing
+&gt;  `$$(x_{i}-\xi)^{3}=x_{i}^{3} + 3x_{i}\xi^{2}-3x_{i}^{2}\xi - \xi^{3}$$` 
+&gt;
+&gt; and plugging it in 
+&gt;
+&gt;  `$$a_{2} + b_{2} x_{i} + c_{2} x_{i}^{2} + d_{2}x_{i}^{3} = \beta_{0} + \beta_{1} x_{i} + \beta_{2} x_{i}^{2}+ \beta_{3} x_{i}^{3}+\beta_{4}x_{i}^{3} + 3\beta_{4}x_{i}\xi^{2}-3\beta_{4}x_{i}^{2}\xi - \beta_{4}\xi^{3}$$` 
+&gt; then ** `\(a_{2}=\beta_{0} - \beta_{4} \xi^{3}\)`** , ** `\(b_{2}=\beta_{1}+ 3 \beta_{4}  \xi^{2}\)` **,
+&gt; ** `\(c_{2}=\beta_{2} -3 \beta_{4} \xi\)` ** and  ** `\(d_{2}=\beta_{3}  + \beta_{4}\)` **
+]
+
+---
+class: animated fadeIn
+### Check continuity at the knot: `\(f_{1}(\xi) = f_{2}(\xi)\)`
+
+`$$a_{1} +b_{1} \xi +c_{1} \xi^{2}+d_{1} \xi^{3} = a_{2} +b_{2} \xi +c_{2} \xi^{2}+d_{2} \xi^{3}$$` 
+recalling the difinitions of `\(a_{1},\ldots, d_{2}\)`, the above is re-written as
+
+$
+`\begin{align}
+\beta_{0} +\beta_{1} \xi +\beta_{2} \xi^{2}+\beta_{3} \xi^{3} &amp;= \underbrace{\beta_{0} - \beta_{4}\xi^{3}}_{a_{2}}  +\underbrace{(\beta_{1}+ 3 \beta_{4}  \xi^{2})}_{b_{2}} \xi + \underbrace{(\beta_{2} -3 \beta_{4} \xi)}_{c_{2}} \xi^{2}+\underbrace{(\beta_{3}  + \beta_{4})}_{d_{2}} \xi^{3}=\\
+&amp;= \beta_{0} - \beta_{4}\xi^{3}+\beta_{1}\xi+ 3 \beta_{4} \xi^{3}+\beta_{2}\xi^{2} -3 \beta_{4} \xi^{3}+
+\beta_{3}\xi^{3}  + \beta_{4}\xi^{3}=\\
+&amp;= \beta_{0} +\beta_{1}\xi+ \beta_{2}\xi^{2} +\beta_{3}\xi^{3}
+\end{align}`
+$
+
+---
+class: animated fadeIn
+### Check smoothness: `\(f^{'}_{1}(\xi) = f^{'}_{2}(\xi)\)`
+
+** `\(f^{'}_{1}(\xi) = b_{1} + 2 c_{1}\xi_{i}+3 d_{1}\xi^{2}_{i}\)`** and ** `\(f^{'}_{2}(\xi) = b_{2}+ 2 c_{2}\xi_{i}+3 d_{2}\xi^{2}_{i}\)` **
+
+recalling the definitions of `\(a_{1},\ldots, d_{2}\)`, the above is re-written as
+
+$
+`\begin{align}
+\beta_{1}  +2\beta_{2} \xi+3\beta_{3} \xi^{2} &amp;= \underbrace{(\beta_{1}+ 3 \beta_{4}  \xi^{2})}_{b_{2}}  + 2\underbrace{(\beta_{2} -3 \beta_{4} \xi)}_{c_{2}} \xi+3\underbrace{(\beta_{3}  + \beta_{4})}_{d_{2}} \xi^{2}=\\
+&amp;= \beta_{1}\xi+ 3 \beta_{4} \xi^{3} + 2\beta_{2}\xi - 6 \beta_{4} \xi^{2}+ 3\beta_{3}\xi^{2}+3\beta_{4}\xi^{2}=\\
+&amp;= \beta_{1}  +2\beta_{2} \xi+3\beta_{3} \xi^{2}
+\end{align}`
+$
+
+
+---
+class: animated fadeIn
+### Check smoothness: `\(f^{''}_{1}(\xi) = f^{''}_{2}(\xi)\)`
+
+** `\(f^{''}_{1}(\xi) =  c_{1}\xi+6 d_{1}\xi\)`** and ** `\(f^{''}_{2}(\xi) =  c_{2} + 6 d_{2}\xi\)` **
+
+recalling the definitions of `\(a_{1},\ldots, d_{2}\)`, the above is re-written as
+
+$
+`\begin{align}
+2\beta_{2} +6\beta_{3} \xi &amp;=   + 2\underbrace{(\beta_{2} -3 \beta_{4} \xi)}_{c_{2}}+6\underbrace{(\beta_{3}  + \beta_{4})}_{d_{2}} \xi=\\
+&amp;=  2\beta_{2} - 6 \beta_{4} \xi+ 6\beta_{3}\xi+6\beta_{4}\xi=\\
+&amp;= 2\beta_{2} + 6\beta_{3}\xi
+\end{align}`
+$
+
+
+---
+class: animated fadeIn center middle
+
+
+&lt;h1 style="color: orange"&gt;...end of check&lt;/h1&gt;
+
+---
+class: animated fadeIn
+### Cubic spline
+
+To fit a cubic spline, one has to specify the basis function, and then fit a linear model
+
+- the basis functions ** `\(b_{j}(.)'s\)` ** are defined in the `\(\texttt{recipe}\)` (pre-processing)
+
+- the model specification and fit do not change
+ 
+--
+
+** cubic spline with a single knot at `\(\texttt{age}=50\)` **
+
+```r
+pre_proc_w_vs_a = w_vs_a %&gt;%
+  recipe(wage~age) %&gt;%
+  step_bs(age,degree = 3,options= list( knots = 50))
+```
+
+--
+
+** model specification and fit **
+
+```r
+cubic_spline_wf = workflow() %&gt;%
+  add_recipe(pre_proc_w_vs_a) %&gt;%
+  add_model(linear_model_spec)
+
+cubic_spline_fit = cubic_spline_wf %&gt;%
+  fit(data=w_vs_a)
+```
+
+---
+class: animated fadeIn
+### Cubic spline
+
+
+** curve and bands data **
+
+```r
+cubic_spline_preds = cubic_spline_fit %&gt;% 
+  augment(new_data=grid_age) %&gt;% 
+  mutate(cubic_spline_fit %&gt;% 
+           predict(new_data=grid_age,type="conf_int"))
+```
+
+--
+
+
+.pull-left[
+
+```r
+two_regions_plot+
+  geom_point(data=cubic_spline_preds,aes(x=age,y=.pred),
+             size=.05,color="blue", inherit.aes = F)+
+  geom_ribbon(data=cubic_spline_preds,
+              aes(x=age,ymin=.pred_lower,ymax=.pred_upper),
+              fill="green",color="green",alpha=.25,
+              inherit.aes = F)+
+  theme_minimal() -&gt; cubic_spline_fit_plot
+```
+]
+
+
+.pull-right[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/cubic_spline_plot-1.png" width="75%" style="display: block; margin: auto 0 auto auto;" /&gt;
+]
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+*tibble(sizes=c(50,100,250,500,1000,2000,3000))
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+```
+## # A tibble: 7 × 1
+##   sizes
+##   &lt;dbl&gt;
+## 1    50
+## 2   100
+## 3   250
+## 4   500
+## 5  1000
+## 6  2000
+## 7  3000
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+* mutate(sizes=as.list(sizes),
+*        training_data = sizes %&gt;%
+*          map(~return(w_vs_a %&gt;%
+*                        slice(sample(1:n(),.x))))
+*        )
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+```
+## # A tibble: 7 × 2
+##   sizes     training_data       
+##   &lt;list&gt;    &lt;list&gt;              
+## 1 &lt;dbl [1]&gt; &lt;tibble [50 × 2]&gt;   
+## 2 &lt;dbl [1]&gt; &lt;tibble [100 × 2]&gt;  
+## 3 &lt;dbl [1]&gt; &lt;tibble [250 × 2]&gt;  
+## 4 &lt;dbl [1]&gt; &lt;tibble [500 × 2]&gt;  
+## 5 &lt;dbl [1]&gt; &lt;tibble [1,000 × 2]&gt;
+## 6 &lt;dbl [1]&gt; &lt;tibble [2,000 × 2]&gt;
+## 7 &lt;dbl [1]&gt; &lt;tibble [3,000 × 2]&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+  mutate(sizes=as.list(sizes),
+         training_data = sizes %&gt;%
+           map(~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+* mutate(grid_ages = sizes %&gt;% map(~grid_age)
+*        )
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+```
+## # A tibble: 7 × 3
+##   sizes     training_data        grid_ages           
+##   &lt;list&gt;    &lt;list&gt;               &lt;list&gt;              
+## 1 &lt;dbl [1]&gt; &lt;tibble [50 × 2]&gt;    &lt;tibble [6,201 × 1]&gt;
+## 2 &lt;dbl [1]&gt; &lt;tibble [100 × 2]&gt;   &lt;tibble [6,201 × 1]&gt;
+## 3 &lt;dbl [1]&gt; &lt;tibble [250 × 2]&gt;   &lt;tibble [6,201 × 1]&gt;
+## 4 &lt;dbl [1]&gt; &lt;tibble [500 × 2]&gt;   &lt;tibble [6,201 × 1]&gt;
+## 5 &lt;dbl [1]&gt; &lt;tibble [1,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 6 &lt;dbl [1]&gt; &lt;tibble [2,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 7 &lt;dbl [1]&gt; &lt;tibble [3,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+  mutate(sizes=as.list(sizes),
+         training_data = sizes %&gt;%
+           map(~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = sizes %&gt;% map(~grid_age)
+         ) %&gt;%
+* mutate(cubic_fit = map2(.x=training_data,.y=grid_ages,
+*             .f=function(x=.x,y=.y){
+*             pre_proc_w_vs_a = x %&gt;%
+*              recipe(wage~age) %&gt;%
+*               step_bs(age,degree = 3,
+*               options= list( knots = 50));
+*            cubic_spline_wf = workflow() %&gt;%
+*              add_recipe(pre_proc_w_vs_a) %&gt;%
+*              add_model(linear_model_spec);
+*            cubic_spline_fit = cubic_spline_wf %&gt;%
+*              fit(data=x)
+*            return(cubic_spline_fit)}
+*            )
+*        )
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+```
+## # A tibble: 7 × 4
+##   sizes     training_data        grid_ages            cubic_fit 
+##   &lt;list&gt;    &lt;list&gt;               &lt;list&gt;               &lt;list&gt;    
+## 1 &lt;dbl [1]&gt; &lt;tibble [50 × 2]&gt;    &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 2 &lt;dbl [1]&gt; &lt;tibble [100 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 3 &lt;dbl [1]&gt; &lt;tibble [250 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 4 &lt;dbl [1]&gt; &lt;tibble [500 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 5 &lt;dbl [1]&gt; &lt;tibble [1,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 6 &lt;dbl [1]&gt; &lt;tibble [2,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 7 &lt;dbl [1]&gt; &lt;tibble [3,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+  mutate(sizes=as.list(sizes),
+         training_data = sizes %&gt;%
+           map(~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = sizes %&gt;% map(~grid_age)
+         ) %&gt;%
+  mutate(cubic_fit = map2(.x=training_data,.y=grid_ages,
+              .f=function(x=.x,y=.y){
+              pre_proc_w_vs_a = x %&gt;%
+               recipe(wage~age) %&gt;%
+                step_bs(age,degree = 3,
+                options= list( knots = 50));
+             cubic_spline_wf = workflow() %&gt;%
+               add_recipe(pre_proc_w_vs_a) %&gt;%
+               add_model(linear_model_spec);
+             cubic_spline_fit = cubic_spline_wf %&gt;%
+               fit(data=x)
+             return(cubic_spline_fit)}
+             )
+         ) %&gt;%
+*  mutate(cubic_preds = map2(.x=cubic_fit,.y=grid_ages,
+*            .f=function(x=.x,y=.y){
+*            cubic_spline_preds = x %&gt;%
+*              augment(new_data=y) %&gt;%
+*              mutate(x %&gt;%
+*                       predict(new_data=y,
+*                               type="conf_int"));
+*            return(cubic_spline_preds)
+*          }
+*          )
+*  )
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+```
+## # A tibble: 7 × 5
+##   sizes     training_data        grid_ages            cubic_fit  cubic_preds
+##   &lt;list&gt;    &lt;list&gt;               &lt;list&gt;               &lt;list&gt;     &lt;list&gt;     
+## 1 &lt;dbl [1]&gt; &lt;tibble [50 × 2]&gt;    &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 2 &lt;dbl [1]&gt; &lt;tibble [100 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 3 &lt;dbl [1]&gt; &lt;tibble [250 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 4 &lt;dbl [1]&gt; &lt;tibble [500 × 2]&gt;   &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 5 &lt;dbl [1]&gt; &lt;tibble [1,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 6 &lt;dbl [1]&gt; &lt;tibble [2,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;   
+## 7 &lt;dbl [1]&gt; &lt;tibble [3,000 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt; &lt;tibble&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+  mutate(sizes=as.list(sizes),
+         training_data = sizes %&gt;%
+           map(~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = sizes %&gt;% map(~grid_age)
+         ) %&gt;%
+  mutate(cubic_fit = map2(.x=training_data,.y=grid_ages,
+              .f=function(x=.x,y=.y){
+              pre_proc_w_vs_a = x %&gt;%
+               recipe(wage~age) %&gt;%
+                step_bs(age,degree = 3,
+                options= list( knots = 50));
+             cubic_spline_wf = workflow() %&gt;%
+               add_recipe(pre_proc_w_vs_a) %&gt;%
+               add_model(linear_model_spec);
+             cubic_spline_fit = cubic_spline_wf %&gt;%
+               fit(data=x)
+             return(cubic_spline_fit)}
+             )
+         ) %&gt;%
+   mutate(cubic_preds = map2(.x=cubic_fit,.y=grid_ages,
+             .f=function(x=.x,y=.y){
+             cubic_spline_preds = x %&gt;%
+               augment(new_data=y) %&gt;%
+               mutate(x %&gt;%
+                        predict(new_data=y,
+                                type="conf_int"));
+             return(cubic_spline_preds)
+           }
+           )
+   ) %&gt;%
+* mutate(training_size=sizes) -&gt; sizes_exp
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+]
+
+---
+count: false
+ 
+#### **Cubic splines: training sample sizes**
+.panel1-cubic_sizes-auto[
+
+```r
+tibble(sizes=c(50,100,250,500,1000,2000,3000)) %&gt;%
+  mutate(sizes=as.list(sizes),
+         training_data = sizes %&gt;%
+           map(~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = sizes %&gt;% map(~grid_age)
+         ) %&gt;%
+  mutate(cubic_fit = map2(.x=training_data,.y=grid_ages,
+              .f=function(x=.x,y=.y){
+              pre_proc_w_vs_a = x %&gt;%
+               recipe(wage~age) %&gt;%
+                step_bs(age,degree = 3,
+                options= list( knots = 50));
+             cubic_spline_wf = workflow() %&gt;%
+               add_recipe(pre_proc_w_vs_a) %&gt;%
+               add_model(linear_model_spec);
+             cubic_spline_fit = cubic_spline_wf %&gt;%
+               fit(data=x)
+             return(cubic_spline_fit)}
+             )
+         ) %&gt;%
+   mutate(cubic_preds = map2(.x=cubic_fit,.y=grid_ages,
+             .f=function(x=.x,y=.y){
+             cubic_spline_preds = x %&gt;%
+               augment(new_data=y) %&gt;%
+               mutate(x %&gt;%
+                        predict(new_data=y,
+                                type="conf_int"));
+             return(cubic_spline_preds)
+           }
+           )
+   ) %&gt;%
+  mutate(training_size=sizes) -&gt; sizes_exp
+```
+]
+ 
+.panel2-cubic_sizes-auto[
+
+]
+
+&lt;style&gt;
+.panel1-cubic_sizes-auto {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-cubic_sizes-auto {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-cubic_sizes-auto {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+  
+---
+class: animated fadeIn
+
+
+** Pull the training sets from the list, labeled by size **
+
+```r
+training_points = sizes_exp %&gt;% 
+  select(starts_with("training")) %&gt;%
+  unnest(everything()) %&gt;% 
+  mutate(training_size=as.factor(training_size))
+```
+
+--
+
+** Pull the cubic preds from the list, labeled by size **
+
+```r
+curves_data = sizes_exp %&gt;% 
+  select(training_size,cubic_preds) %&gt;%
+  unnest(everything()) %&gt;% 
+  mutate(training_size=as.factor(training_size))
+```
+
+---
+class: animated fadeIn
+**Cubic splines: training sample sizes**
+
+
+
+```r
+fit_by_sizes_plot = w_vs_a %&gt;% 
+  ggplot(aes(x=age,y=wage))+theme_minimal()+geom_point(size=1,alpha=.4,color="lightgrey")+
+  geom_point(data=training_points,aes(x=age,y=wage),size=1,alpha=.25,color="green",inherit.aes = FALSE)+
+  geom_line(data=curves_data,aes(x=age,y=.pred), color="red",inherit.aes = FALSE)+
+  geom_ribbon(data=curves_data,aes(x=age,ymin=.pred_lower,ymax=.pred_upper),fill="cyan",color="blue",alpha=.2,inherit.aes = FALSE)+
+  facet_wrap(~training_size,scales = "free")
+```
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/cubic_plot_by, fit-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+
+
+---
+class: animated fadeIn
+
+count: false
+ 
+#### **Cubic splines: varying number of knots**
+.panel1-cubic_knots-auto[
+
+```r
+*tibble(degrees_freedom=5:10)
+```
+]
+ 
+.panel2-cubic_knots-auto[
+
+```
+## # A tibble: 6 × 1
+##   degrees_freedom
+##             &lt;int&gt;
+## 1               5
+## 2               6
+## 3               7
+## 4               8
+## 5               9
+## 6              10
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: varying number of knots**
+.panel1-cubic_knots-auto[
+
+```r
+tibble(degrees_freedom=5:10) %&gt;%
+* mutate(degrees_freedom=as.list(degrees_freedom),
+*        training_data =  map(.x=500,.f=~return(w_vs_a %&gt;%
+*                        slice(sample(1:n(),.x))))
+*        )
+```
+]
+ 
+.panel2-cubic_knots-auto[
+
+```
+## # A tibble: 6 × 2
+##   degrees_freedom training_data     
+##   &lt;list&gt;          &lt;list&gt;            
+## 1 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+## 2 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+## 3 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+## 4 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+## 5 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+## 6 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: varying number of knots**
+.panel1-cubic_knots-auto[
+
+```r
+tibble(degrees_freedom=5:10) %&gt;%
+  mutate(degrees_freedom=as.list(degrees_freedom),
+         training_data =  map(.x=500,.f=~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+* mutate(grid_ages = degrees_freedom %&gt;% map(~grid_age)
+*        )
+```
+]
+ 
+.panel2-cubic_knots-auto[
+
+```
+## # A tibble: 6 × 3
+##   degrees_freedom training_data      grid_ages           
+##   &lt;list&gt;          &lt;list&gt;             &lt;list&gt;              
+## 1 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 2 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 3 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 4 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 5 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+## 6 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: varying number of knots**
+.panel1-cubic_knots-auto[
+
+```r
+tibble(degrees_freedom=5:10) %&gt;%
+  mutate(degrees_freedom=as.list(degrees_freedom),
+         training_data =  map(.x=500,.f=~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = degrees_freedom %&gt;% map(~grid_age)
+         ) %&gt;%
+* mutate(cubic_fit = pmap(.l=list(x=training_data,
+*                              y=grid_ages,
+*                              z=degrees_freedom),
+*             .f=function(x,y,z){
+*             pre_proc_w_vs_a = x %&gt;%
+*              recipe(wage~age) %&gt;%
+*               step_bs(age,degree = 3,
+*               deg_free=z);
+*            cubic_spline_wf = workflow() %&gt;%
+*              add_recipe(pre_proc_w_vs_a) %&gt;%
+*              add_model(linear_model_spec);
+*            cubic_spline_fit = cubic_spline_wf %&gt;%
+*              fit(data=x)
+*            return(cubic_spline_fit)}
+*            )
+*        )
+```
+]
+ 
+.panel2-cubic_knots-auto[
+
+```
+## # A tibble: 6 × 4
+##   degrees_freedom training_data      grid_ages            cubic_fit 
+##   &lt;list&gt;          &lt;list&gt;             &lt;list&gt;               &lt;list&gt;    
+## 1 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 2 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 3 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 4 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 5 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+## 6 &lt;int [1]&gt;       &lt;tibble [500 × 2]&gt; &lt;tibble [6,201 × 1]&gt; &lt;workflow&gt;
+```
+]
+
+---
+count: false
+ 
+#### **Cubic splines: varying number of knots**
+.panel1-cubic_knots-auto[
+
+```r
+tibble(degrees_freedom=5:10) %&gt;%
+  mutate(degrees_freedom=as.list(degrees_freedom),
+         training_data =  map(.x=500,.f=~return(w_vs_a %&gt;%
+                         slice(sample(1:n(),.x))))
+         ) %&gt;%
+  mutate(grid_ages = degrees_freedom %&gt;% map(~grid_age)
+         ) %&gt;%
+  mutate(cubic_fit = pmap(.l=list(x=training_data,
+                               y=grid_ages,
+                               z=degrees_freedom),
+              .f=function(x,y,z){
+              pre_proc_w_vs_a = x %&gt;%
+               recipe(wage~age) %&gt;%
+                step_bs(age,degree = 3,
+                deg_free=z);
+             cubic_spline_wf = workflow() %&gt;%
+               add_recipe(pre_proc_w_vs_a) %&gt;%
+               add_model(linear_model_spec);
+             cubic_spline_fit = cubic_spline_wf %&gt;%
+               fit(data=x)
+             return(cubic_spline_fit)}
+             )
+         ) %&gt;%
+*  mutate(cubic_preds = map2(.x=cubic_fit,.y=grid_ages,
+*            .f=function(x=.x,y=.y){
+*            cubic_spline_preds = x %&gt;%
+*              augment(new_data=y) %&gt;%
+*              mutate(x %&gt;%
+*                       predict(new_data=y,
+*                               type="conf_int"));
+*            return(cubic_spline_preds)
+*          }
+*          )
+*  )-&gt; knots_exp
+```
+]
+ 
+.panel2-cubic_knots-auto[
+
+]
+
+&lt;style&gt;
+.panel1-cubic_knots-auto {
+  color: black;
+  width: 38.6060606060606%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-cubic_knots-auto {
+  color: black;
+  width: 59.3939393939394%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-cubic_knots-auto {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+  
+---
+class: animated fadeIn
+
+** Compute the number of knots out of the degrees of freedom: `\(knots= df-d-1\)`, where `\(d\)` is the degree of the polynomial**
+
+
+```r
+knots_exp = knots_exp %&gt;%  
+  unnest(degrees_freedom) %&gt;% 
+  mutate(n_knots=degrees_freedom-4)
+```
+
+--
+
+** Pull the training sets from the list, labeled by the number of knots **
+
+
+```r
+training_points = knots_exp %&gt;% 
+  select(training_data,n_knots) %&gt;%
+  unnest(everything()) %&gt;% 
+  mutate(n_knots=as.factor(n_knots))
+```
+
+--
+
+** Pull the cubic preds from the list, labeled by the number of knots **
+
+```r
+curves_data = knots_exp %&gt;% 
+  select(n_knots,cubic_preds) %&gt;%
+  unnest(everything()) %&gt;% 
+  mutate(n_knots=as.factor(n_knots))
+```
+
+---
+class: animated fadeIn
+**Cubic splines: 1 to 6 knots**
+
+
+
+```r
+fit_by_knots_plot = w_vs_a %&gt;% 
+  ggplot(aes(x=age,y=wage))+theme_minimal()+geom_point(size=1,alpha=.4,color="lightgrey")+
+  geom_point(data=training_points,aes(x=age,y=wage),size=1,alpha=.25,color="green",inherit.aes = FALSE)+
+  geom_line(data=curves_data,aes(x=age,y=.pred), color="red",inherit.aes = FALSE)+
+  geom_ribbon(data=curves_data,aes(x=age,ymin=.pred_lower,ymax=.pred_upper),fill="cyan",color="blue",alpha=.2,inherit.aes = FALSE)+
+  facet_wrap(~n_knots,scales = "free")
+```
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/cubic_plot_by_knots, fit-1.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn
+### Cubic splines and natural cubic splines
+
+
+&gt; - The higher the number of knots, the higher the flexibility of `\(\hat{f}(.)\)` (and, its variability)
+
+--
+
+&gt; - For larger the training set sizes, a higher number of knots can be selected (via e.g. cross-validation).  
+
+--
+
+&gt; - In the outer range of `\(X\)` there are usually fewer observations, and splines can have high variance
+
+--
+
+&gt; - To tackle this drawback, one can impose the function to be ** linear in the boundary regions ** 
+
+--
+
+&gt; - a cubic spline with the additional linearity constraints is defined a ** natural cubic spline **
+
+
+
+---
+class: animated fadeIn
+
+
+.pull-left[
+### cubic spline 
+]
+.pull-right[
+### natural spline 
+]
+
+
+```r
+w_vs_a_sample = w_vs_a %&gt;% slice_sample(n=250)
+```
+
+
+** pre-processing**
+
+.pull-left[
+
+```r
+pre_proc_w_vs_a_bs = w_vs_a_sample %&gt;%
+  recipe(wage~age) %&gt;%
+  step_bs(age,deg_free = 7)
+```
+]
+.pull-right[
+
+
+```r
+pre_proc_w_vs_a_ns = w_vs_a_sample %&gt;%
+  recipe(wage~age) %&gt;%
+  step_ns(age,deg_free = 7)
+```
+]
+
+--
+
+** model specification and fit**
+
+.pull-left[
+
+
+```r
+cubic_spline_wf = workflow() %&gt;%
+  add_recipe(pre_proc_w_vs_a_bs) %&gt;%
+  add_model(linear_model_spec)
+
+cubic_spline_fit = cubic_spline_wf %&gt;%
+  fit(data=w_vs_a_sample)
+```
+]
+.pull-right[
+
+
+```r
+natural_spline_wf = workflow() %&gt;%
+  add_recipe(pre_proc_w_vs_a_ns) %&gt;%
+  add_model(linear_model_spec)
+
+natural_spline_fit = natural_spline_wf %&gt;%
+  fit(data=w_vs_a_sample)
+```
+]
+
+** curve and bands data **
+
+.pull-left[
+
+
+```r
+cubic_spline_preds = cubic_spline_fit %&gt;% 
+  augment(new_data=grid_age) %&gt;% 
+  mutate(cubic_spline_fit %&gt;% 
+           predict(new_data=grid_age,type="conf_int"))
+```
+]
+.pull-right[
+
+
+```r
+natural_spline_preds = natural_spline_fit %&gt;% 
+  augment(new_data=grid_age) %&gt;% 
+  mutate(natural_spline_fit %&gt;% 
+           predict(new_data=grid_age,type="conf_int"))
+```
+]
+
+---
+class: animated fadeIn
+
+## cubic vs natural fit
+
+
+
+```r
+cub_vs_nat = rbind(cubic_spline_preds %&gt;% mutate(method="cubic"),
+                   natural_spline_preds %&gt;% mutate(method="natural"))
+
+w_vs_a %&gt;% 
+  ggplot(aes(x=age,y=wage))+theme_minimal()+geom_point(size=1,alpha=.2,color="lightgrey")+
+  geom_point(data=w_vs_a_sample,aes(x=age,y=wage),size=1,color="lightgreen",inherit.aes = FALSE)+
+  scale_linetype_manual(values = c("dotted","solid"))+
+  geom_line(data=cub_vs_nat,aes(x=age,y=.pred, colour = method,linetype=method),inherit.aes = FALSE)+
+  geom_ribbon(data=cub_vs_nat,aes(x=age,ymin=.pred_lower,ymax=.pred_upper,color=method,linetype=method),alpha=.05,inherit.aes = FALSE)
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/nat_cub_plot-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn inverse center middle
+
+
+# Smoothing splines
+
+---
+class: animated fadeIn
+
+##  Smoothing vs regression splines
+
+
+In **regression splines**
+&gt; - pick `\(K\)` knots 
+&gt; - define a basis function within each of the resulting regions
+&gt; - estimate the spline coefficients via least squares 
+
+
+
+--
+ In **smoothing splines** 
+&gt; - find `\(g(\cdot)\)` that minimizes the loss function ** `$$\sum_{i=1}^{n}\left(y_{i}-g(x_{i})\right)^{2}$$`**
+&gt; - with no restrictions, one could pick  ** `\(g(\cdot)\)`** so that `\(\sum_{i=1}^{n}\left(y_{i}-g(x_{i})\right)^{2}=0\)`
+&gt; - the fitted curve would **interpolate** the training observations (massive **overfitting**)
+--
+
+&gt; - to avoid this, a **roughness penalty** is included
+
+---
+class: animated fadeIn
+
+##  Smoothing splines
+
+&gt; the minimization problem is ** `\(loss+penalty\)`**, that is ** `$$\sum_{i=1}^{n}\left(y_{i}-g(x_{i})\right)^{2}+ \lambda\int g''(t) dt$$`**
+&gt; - where ** `\(g''(t)\)` ** is the second derivative of `\(g(\cdot)\)` at `\(t\)`, indicating if the slope of the function is changing (increasing/descreasing) or not
+
+--
+
+&amp;nbsp;
+
+- the rougher  `\(g(\cdot)\)`, the larger the value of ** `\(\int g''(t) dt\)`**; 
+
+- ** `\(\lambda\)`** is the penalty parameter that dictates how smooth ** `\(g(\cdot)\)`** will be
+
+
+---
+class: animated fadeIn
+
+##  (effective) degrees of freedom
+
+A smoothing spline has `\(n\)` ** nominal degrees of freedom ** since it has `\(n\)` parameters (equivalent to one knot per training observation).
+
+
+- Because of the roughness penalty, however, the `\(n\)` parameters are heavily shrunk.
+
+- To measure the model complexity/flexibility ** `\(df_{y}\)` ** is used instead: the **effective degrees of freedom** 
+
+--
+
+- Consider ** `\({\bf \hat g}_{\lambda}\)` ** to be the vector of estimated values (one per `\(x_{i}\)`, `\(i = 1,\ldots, n\)`) for a specific `\(\lambda\)` value, it is obtained ** `$${\bf \hat g}_{\lambda} = {\bf S}_{\lambda}{\bf y}$$` **
+where ** `\({\bf S}_{\lambda}\)` ** is the **smoothing matrix** that is, the smoothing spline analogue of the hat matrix 
+`\({\bf H} = {\bf X}\left({\bf X}^{\sf T}{\bf X}\right){\bf X}^{\sf T}\)` for the regression case.
+
+- then **effective degrees of freedom** are given by ** `\(df_{y}=trace\left({\bf S}_{\lambda}\right)\)`**
+
+
+---
+class: animated fadeIn
+
+##  Direct computation of the Leave-one-out cross validation estimate of the test error
+
+In fact the LOOCV estimate of the test RSS is computed by
+
+** `$$RSS_{cv}(\lambda)=\sum_{i =1}^{n}{\left(y_{i}-\hat{g}^{(-i)}_{\lambda}(x_{i})\right)^{2}}=\sum_{i =1}^{n}{\left[\frac{y_{i}-\hat{g}_{\lambda}(x_{i})}{1-\left\{{\bf S}_{\lambda}\right\}_{ii}} \right]}$$` **
+
+where `\(\hat{g}^{(-i)}_{\lambda}(\cdot)\)` is the function fitted on all but the  `\(i^{th}\)` training observations, and `\(\left\{{\bf S}_{\lambda}\right\}_{ii}\)` is the `\(i^{th}\)` element of the matrix `\({\bf S}_{\lambda}\)`
+
+
+
+
+
+```r
+wage_smooth_df_32 &lt;- smooth.spline(x = w_vs_a$age, y = w_vs_a$wage, df = 32)
+wage_smooth_df_16 &lt;- smooth.spline(x = w_vs_a$age, y = w_vs_a$wage, df = 16)
+wage_smooth_cv &lt;- smooth.spline(x = w_vs_a$age, y = w_vs_a$wage, cv = TRUE)
+tibble(wage_smooth_df_32$df,wage_smooth_df_16$df,wage_smooth_cv$df)%&gt;% kbl()
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; wage_smooth_df_32$df &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; wage_smooth_df_16$df &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; wage_smooth_cv$df &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 31.99591 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 16.00237 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 6.794596 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+class: animated fadeIn
+
+##  Collect the predictions from the three fitted models
+
+
+```r
+age_grid=seq(from=min(w_vs_a$age),to=max(w_vs_a$age),by=.1)
+
+all_preds = bind_rows(
+  as_tibble(predict(wage_smooth_df_32, age_grid)) %&gt;%
+    mutate(model = "32 degrees of freedom"),
+    as_tibble(predict(wage_smooth_df_16, age_grid)) %&gt;%
+    mutate(model = "16 degrees of freedom"),
+  as_tibble(predict(wage_smooth_cv, age_grid)) %&gt;%
+    mutate(model = "LOOCV")
+)
+```
+
+
+
+---
+class: animated fadeIn
+
+##  Plot the three smoothing splines
+
+
+```r
+w_vs_a %&gt;% 
+  ggplot(aes(x=age,y=wage))+theme_minimal()+geom_point(size=1,alpha=.2,color="lightgrey")+
+  geom_line(data = all_preds, aes(x=x,y=y,color=model))
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/smooth preds plot-1.png" width="55%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated fadeIn inverse center middle
+
+
+# Local regression
+
+
+---
+class: animated fadeIn
+### Local regression
+
+&gt; The local regression fit `\(\hat{f}(x_{0})\)` depends on the **span**, that is the proportion of points to be considered as **neighbors** of `\(x_{0}\)`. 
+&gt;
+&gt; In particular, a weighted linear regression is fitted by minimizing ** `$$\sum_{i=1}^{n}{K_{i0}}(y_{i}-\beta_{0}-\beta_{1}x_{i})^{2}$$`** 
+
+&gt; where `\(K_{i0}\)` is a weight proportional to the **closeness** of the `\(x_{i}\)`'s to `\(x_{0}\)`: for the neighbors  `\(K_{i0}&gt;0\)`, for the non-neighbors   `\(K_{i0}&gt;0\)`
+
+&gt; the weighted least squares minimizers ** `\(\hat{\beta_{0}}\)`** and ** `\(\hat{\beta_{1}}\)`** are then used to get the estimate of the function at `\(x_{0}\)` 
+** `$$\hat{f}(x_{0})=\hat{\beta_{0}}+ \hat{\beta_{1}}x_{0}$$`**
+
+
+---
+class: animated fadeIn
+### Local regression: tuning parameter(s) 
+
+- the weighting function to set the values for `\(K_{i0}\)`
+- the fit: a linear function is an option: it could be linear, or quadratic
+
+However, the parameter affecting `\(\hat{f}\)` the most is the **span**: a low value will correspond to a lower number of neighbours, so `\(\hat{f}\)` will be more flexible
+
+
+
+
+```r
+loess_data= tibble(span=c(.1,.3,.5,.7,.9)) %&gt;%
+  mutate(model_fit=map(.x=span,~loess(wage ~ age, data = w_vs_a, span = .x)),
+         preds=map(.x=model_fit,~predict(.x,age_grid)),
+         span=ordered(span),
+         age = map(1:5,\(x) age_grid)
+  ) %&gt;% select(-model_fit) %&gt;% unnest(preds,age)
+```
+
+---
+class: animated fadeIn
+### Local regression: tuning parameter(s) 
+
+- the weighting function to set the values for `\(K_{i0}\)`
+- the fit: a linear function is an option: it could be linear, or quadratic
+
+However, the parameter affecting `\(\hat{f}\)` the most is the **span**: a low value will correspond to a lower number of neighbours, so `\(\hat{f}\)` will be more flexible
+
+
+.pull-left[
+
+```r
+loess_plot = w_vs_a %&gt;% 
+  ggplot(aes(x=age,y=wage))+theme_minimal()+
+  geom_point(size=1,alpha=.2,color="lightgrey")+
+  geom_line(data = loess_data, aes(x=age,y=preds,color=span))
+```
+]
+.pull-right[
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: animated fadeIn inverse center middle
+
+
+# Generalized additive models:
+
+## putting it all together
+
+---
+class: animated fadeIn
+
+
+Generalized additive models (GAMs) extend a standard linear model to non-linear functions of each of the predictors
+
+** `$$y_{i} = \beta_{0}+\beta_{1}f(x_{i1}+\beta_{2}f(x_{i2}+\ldots+\beta_{p}f(x_{ip})+\epsilon_{i}$$`**
+
+---
+class: animated fadeIn
+
+
+```r
+library(gam)
+library(splines)
+data(Wage,package = "ISLR2")
+
+wage_gam_ns_fit &lt;- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+d &lt;- preplot(wage_gam_ns_fit)
+
+plot_structure=tibble(plot_name=names(d) , data = d %&gt;% map(~tibble(x=.$x,y=.$y,se_y=.$se.y) %&gt;% 
+                                                              mutate(y_lower=y-se_y,
+                                                                     y_upper=y+se_y)
+)
+) %&gt;% mutate(plots=map2(.x = data,.y=plot_name,
+                        function(x=.x,y=.y){
+                          if(!is.factor(x$x)){
+                            myplot=x %&gt;% ggplot(aes(x)) +
+                              geom_line(aes(y = y), color = "red") +
+                              geom_line(aes(y = y_lower), lty = 2, color = "red") +
+                              geom_line(aes(y = y_upper), lty = 2, color = "red") +
+                              ggtitle(y)+ theme(axis.text.x=element_text(angle=90)) 
+                          }else{
+                            myplot = x %&gt;% ggplot(aes(x)) +
+                              geom_errorbar(aes(y = y, ymin = y_lower, ymax = y_upper),color="red") +
+                              ggtitle(y)+ theme(axis.text.x=element_text(angle=90)) 
+                          }
+                        }
+)
+)
+```
+
+
+---
+class: animated fadeIn
+
+
+```r
+plot_structure$plots[[1]] + plot_structure$plots[[2]] + plot_structure$plots[[3]]
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/unnamed-chunk-7-1.png" width="75%" /&gt;
+
+
+
+
+---
+class: animated fadeIn
+
+
+
+```r
+wage_gam_smooth_fit &lt;-
+  gam(wage ~ s(year, 4) + s(age, 5) + education,
+      data = Wage)
+
+d &lt;- preplot(wage_gam_smooth_fit)
+
+plot_structure=tibble(plot_name=names(d) , data = d %&gt;% map(~tibble(x=.$x,y=.$y,se_y=.$se.y) %&gt;% 
+                                                              mutate(y_lower=y-se_y,
+                                                                     y_upper=y+se_y)
+)
+) %&gt;% mutate(plots=map2(.x = data,.y=plot_name,
+                        function(x=.x,y=.y){
+                          if(!is.factor(x$x)){
+                            myplot=x %&gt;% ggplot(aes(x)) +
+                              geom_line(aes(y = y), color = "blue") +
+                              geom_line(aes(y = y_lower), lty = 2, color = "blue") +
+                              geom_line(aes(y = y_upper), lty = 2, color = "blue") +
+                              ggtitle(y)+ theme(axis.text.x=element_text(angle=90)) 
+                          }else{
+                            myplot = x %&gt;% ggplot(aes(x)) +
+                              geom_errorbar(aes(y = y, ymin = y_lower, ymax = y_upper),color="blue") +
+                              ggtitle(y)+ theme(axis.text.x=element_text(angle=90)) 
+                          }
+                        }
+)
+)
+```
+
+
+---
+class: animated fadeIn
+
+
+```r
+plot_structure$plots[[1]] + plot_structure$plots[[2]] + plot_structure$plots[[3]]
+```
+
+&lt;img src="Intro_non_linear_and_GAM_files/figure-html/unnamed-chunk-9-1.png" width="75%" /&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"navigation": {
+"scroll": false
+},
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
