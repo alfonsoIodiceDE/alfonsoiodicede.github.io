@@ -3406,7 +3406,7 @@ class: animated fadeIn
 &gt;
 &gt; In particular, a weighted linear regression is fitted by minimizing ** `$$\sum_{i=1}^{n}{K_{i0}}(y_{i}-\beta_{0}-\beta_{1}x_{i})^{2}$$`** 
 
-&gt; where `\(K_{i0}\)` is a weight proportional to the **closeness** of the `\(x_{i}\)`'s to `\(x_{0}\)`: for the neighbors  `\(K_{i0}&gt;0\)`, for the non-neighbors   `\(K_{i0}&gt;0\)`
+&gt; where `\(K_{i0}\)` is a weight proportional to the **closeness** of the `\(x_{i}\)`'s to `\(x_{0}\)`: for the neighbors  `\(K_{i0}&gt;0\)`, for the non-neighbors `\(K_{i0}=0\)`
 
 &gt; the weighted least squares minimizers ** `\(\hat{\beta_{0}}\)`** and ** `\(\hat{\beta_{1}}\)`** are then used to get the estimate of the function at `\(x_{0}\)` 
 ** `$$\hat{f}(x_{0})=\hat{\beta_{0}}+ \hat{\beta_{1}}x_{0}$$`**
@@ -3470,7 +3470,7 @@ class: animated fadeIn
 
 Generalized additive models (GAMs) extend a standard linear model to non-linear functions of each of the predictors
 
-** `$$y_{i} = \beta_{0}+\beta_{1}f(x_{i1}+\beta_{2}f(x_{i2}+\ldots+\beta_{p}f(x_{ip})+\epsilon_{i}$$`**
+** `$$y_{i} = \beta_{0}+\beta_{1}f(x_{i1})+\beta_{2}f(x_{i2})+\ldots+\beta_{p}f(x_{ip})+\epsilon_{i}$$`**
 
 ---
 class: animated fadeIn
