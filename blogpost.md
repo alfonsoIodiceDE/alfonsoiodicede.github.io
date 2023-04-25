@@ -7,6 +7,15 @@ layout: default
 
 #### Association-based distances for mixed data
 
+Apr 25, 2023
+
+[On the Ward linkage](blogposts_archive/custom_hclust_check.html)
+
+
+---------------------
+
+#### Association-based distances for mixed data
+
 Jan 31, 2023
 
 [Association-based distances for mixed data](blogposts_archive/computing_delta_for_mixed_data.html)
