@@ -5,11 +5,11 @@ layout: default
 
 ---------------------
 
-#### Association-based distances for mixed data
+#### On the top-down vs bottom-up dendrogram
 
-Apr 25, 2023
+Apr 27, 2023
 
-[On the Ward linkage](blogposts_archive/custom_hclust_check.html)
+[small time experiments](blogposts_archive/custom_hclust_check.html)
 
 
 ---------------------
