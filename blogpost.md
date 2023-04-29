@@ -7,7 +7,7 @@ layout: default
 
 #### On the top-down vs bottom-up dendrogram
 
-Apr 27, 2023
+Apr 29, 2023
 
 [small time experiments](blogposts_archive/custom_hclust_check.html)
 

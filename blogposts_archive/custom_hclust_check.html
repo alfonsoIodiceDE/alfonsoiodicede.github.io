@@ -2648,9 +2648,12 @@ MISSQ:\frac{|L| \cdot |R|}{|L\cup R|}\|\mu_{L}-\mu_{R}\|{2} = \sum_{x_{i}\in (L\
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/linkage_maker.R&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/my_hclust.R&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(AmesHousing)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/linkage_maker.R&quot;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/my_hclust.R&quot;</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;R/single_div_step.R&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Two functions are created</p>
 <ul>
@@ -2790,6 +2793,36 @@ $d_R
   2 4 0</code></pre>
 </div>
 </div>
+<section id="a-more-serious-example" class="level3">
+<h3 class="anchored" data-anchor-id="a-more-serious-example">A more serious example</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ames_ready <span class="ot">=</span> ames_raw <span class="sc">|&gt;</span> <span class="fu">recipe</span>(<span class="at">formula =</span> <span class="sc">~</span>.) <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_select</span>(<span class="fu">all_numeric</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_knn</span>(<span class="fu">all_numeric</span>(),<span class="at">skip =</span> T) <span class="sc">|&gt;</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(<span class="at">fresh=</span>T,<span class="at">training=</span>ames_raw) <span class="sc">|&gt;</span> <span class="fu">bake</span>(<span class="at">new_data=</span><span class="cn">NULL</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>ames_dist<span class="ot">=</span>ames_ready <span class="sc">|&gt;</span> <span class="fu">dist</span>()</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ames_dist_mat<span class="ot">=</span><span class="fu">as.matrix</span>(ames_dist)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ames_dist_mat[1:5,1:5]</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(ames_dist_mat)<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ames_dist_mat)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(ames_dist_mat)<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ames_dist_mat)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="at">out_den=</span><span class="fu">hclust</span>(ames_dist,<span class="at">method=</span><span class="st">&quot;complete&quot;</span>),</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="at">out_div=</span><span class="fu">single_div_step</span>(ames_dist_mat),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="at">out_km=</span><span class="fu">kmeans</span>(ames_ready,<span class="at">centers =</span> <span class="dv">2</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+    expr        min         lq       mean     median        uq        max neval
+ out_den  62.478834  63.616215  67.850374  66.066600  69.17083  91.770423   100
+ out_div 198.879684 202.893277 215.808702 204.420793 207.16392 374.866444   100
+  out_km   1.955823   2.983447   3.115208   3.112351   3.20864   5.618722   100</code></pre>
+</div>
+</div>
+</section>
 </section>
 
 </main>
