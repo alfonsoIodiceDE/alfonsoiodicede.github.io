@@ -4,6 +4,8 @@ layout: default
 
 ### talks
 
+  [SIS23: Spectral clustering of mixed data via association-based distance](SIS23_speed_pres_SC_mix.html)
+
   [Data Journalism: Spot on Spotify: a playlist analysis](spotify_playground/spot_on_spotify.html)
 
   [ERCIM22: Mixed-type data spectral clustering with variable specific distances](spectral_mix/spectral_mix_ercim22.html)
