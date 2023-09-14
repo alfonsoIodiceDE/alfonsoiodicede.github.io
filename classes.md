@@ -4,6 +4,10 @@ layout: default
 
 ## Teaching related posts
 
+### Blended Intensive Programme
+
+[Hybrid approach for the analysis of complex data structures](teaching_related/hybrid_blip.html)
+
 ### Tidy data manipulation and visualization
 
 A quick intro to tidyverse for data manipulation and visualization in R
