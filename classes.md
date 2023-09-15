@@ -6,7 +6,7 @@ layout: default
 
 ### Blended Intensive Programme
 
-[Hybrid approach for the analysis of complex data structures](teaching_related/hybrid_blip.html)
+[Hybrid approach for the analysis of complex data structures](teaching_related/hybrid_bip.html)
 
 ### Tidy data manipulation and visualization
 
