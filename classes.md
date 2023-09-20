@@ -17,7 +17,7 @@ A quick intro to tidyverse for data manipulation and visualization in R
 ### Statistical Learning-related slides
 
 Slides illustrating SL instroductory topics, mostly (but not exclusively) based on the book: 
-[An introduction to Statistical Learning](https://www.statlearning.com):  the slides contain examples from the book, reproduced via tidymodels. Content-related comments and advices are more than welcome.  
+[An introduction to Statistical Learning](https://www.statlearning.com). The slides contain examples from the book, reproduced via tidymodels. Content-related comments and advices are more than welcome.  
 
 [Linear regression: part 1](teaching_related/Linear_regression/Linear-Regression-part_1.html) 
 
