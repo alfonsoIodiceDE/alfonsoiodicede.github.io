@@ -4,7 +4,6 @@ layout: default
 
 ### talks
 
-  CARME23_pres_mixKNN
 
   [CARME23: Association-based learning for mixed data](CARME23_pres_mixKNN.html)
 
