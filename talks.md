@@ -4,6 +4,10 @@ layout: default
 
 ### talks
 
+  CARME23_pres_mixKNN
+
+  [CARME23: Association-based learning for mixed data](CARME23_pres_mixKNN.html)
+
   [COMPSTAT23: Association-based distances for categorical and mixed-type data](COMPSTAT23_pres_mix.html)
 
   [SIS23: Spectral clustering of mixed data via association-based distance](SIS23_speed_pres_SC_mix.html)
