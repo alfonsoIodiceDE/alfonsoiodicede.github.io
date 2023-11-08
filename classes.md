@@ -4,9 +4,9 @@ layout: default
 
 ## Teaching related posts
 
-### Blended Intensive Programme
+### Master in Aritificial Intelligence for Humanities
 
-[Hybrid approach for the analysis of complex data structures](teaching_related/hybrid_bip.html)
+[Statistical learning: general concepts](teaching_related/hybrid_bip.html)
 
 ### Tidy data manipulation and visualization
 
