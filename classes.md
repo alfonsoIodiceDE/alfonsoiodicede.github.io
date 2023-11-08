@@ -6,7 +6,7 @@ layout: default
 
 ### Master in Aritificial Intelligence for Humanities
 
-[Statistical learning: general concepts](teaching_related/hybrid_bip.html)
+[Statistical learning: general concepts](teaching_related/intro_SL_master_AI_for_humanities.html)
 
 ### Tidy data manipulation and visualization
 
