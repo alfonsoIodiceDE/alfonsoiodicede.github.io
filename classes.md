@@ -34,7 +34,9 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 ### Extra's 
 
-[A simple SL flow](teaching_related/SL_flow.html) 
+[A simple SL flow](teaching_related/SL_flow.html)
+
+[SL performance assessment](teaching_related/SL_performance.html) 
 
 Some more SL related material    
 
