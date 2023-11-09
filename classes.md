@@ -34,6 +34,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 ### Extra's 
 
+[A simple SL flow](teaching_related/SL_flow.html) 
+
 Some more SL related material    
 
 [On the bias/variance trade-off](teaching_related/the_bias_and_the_variance.html)
