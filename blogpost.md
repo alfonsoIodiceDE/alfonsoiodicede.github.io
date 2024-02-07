@@ -3,6 +3,19 @@ layout: default
 ---
 
 
+
+---------------------
+
+#### Categorical distances: the delta framework
+
+Feb 2024
+
+Use of different distances/dissimilarities for categorical data on different datasets: experiments on supervised (KNN) and unsupervised (partitioning around medoids) distance-based methods. Repeated cross-validation assessment of the performace.
+
+[KNN and PAM experiments](blogposts_archive/SR_despota_mix_supplementary.html)
+
+
+
 ---------------------
 
 #### Categorical distances: the delta framework
@@ -14,7 +27,7 @@ Use of different distances/dissimilarities for categorical data on different dat
 [KNN and PAM experiments](blogposts_archive/delta_framework_experiment_for_pattern_recognition.html)
 
 
----------------------
+<!-- ---------------------
 
 
 #### On the top-down vs bottom-up dendrogram
@@ -22,7 +35,7 @@ Use of different distances/dissimilarities for categorical data on different dat
 Apr 29, 2023
 
 [small time experiments](blogposts_archive/custom_hclust_check.html)
-
+ -->
 
 ---------------------
 
