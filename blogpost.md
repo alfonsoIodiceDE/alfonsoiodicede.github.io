@@ -6,13 +6,13 @@ layout: default
 
 ---------------------
 
-#### Categorical distances: the delta framework
+#### Automatic dendrogram slicing for mixed-type data clustering: supplementary material
 
 Feb 2024
 
-Use of different distances/dissimilarities for categorical data on different datasets: experiments on supervised (KNN) and unsupervised (partitioning around medoids) distance-based methods. Repeated cross-validation assessment of the performace.
+Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
-[KNN and PAM experiments](blogposts_archive/SR_despota_mix_supplementary.html)
+[Automatic dendrogram slicing for mixed-type data clustering](blogposts_archive/SR_despota_mix_supplementary.html)
 
 
 
