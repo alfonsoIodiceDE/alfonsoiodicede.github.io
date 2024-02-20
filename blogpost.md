@@ -20,7 +20,7 @@ Code to reproduce the experiments/application from the paper (titled as this blo
 
 #### Categorical distances: the delta framework
 
-Oct 30, 2023
+Feb 2024
 
 Use of different distances/dissimilarities for categorical data on different datasets: experiments on supervised (KNN) and unsupervised (partitioning around medoids) distance-based methods. Repeated cross-validation assessment of the performace.
 
