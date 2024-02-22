@@ -14,7 +14,7 @@ Code to reproduce the experiments/application from the paper (titled as this blo
 
 [Automatic dendrogram slicing for mixed-type data clustering](blogposts_archive/SR_despota_mix_supplementary.html)
 
-
+[Automatic dendrogram slicing for mixed-type data clustering](https://github.com/alfonsoIodiceDE/Automatic_dendrogram_slicing_for_mixed-type_data_clustering/blob/main/SR_despota_mix_supplementary.html)
 
 ---------------------
 
