@@ -6,7 +6,7 @@ layout: default
 
 #### Unbiased mixed variables distance: supplementary material
 
-Ott 2024
+Oct 2024
 
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
