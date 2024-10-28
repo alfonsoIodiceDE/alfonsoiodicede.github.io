@@ -2,9 +2,6 @@
 layout: default
 ---
 
-
-Unbiased_mixed _variables_distance_supplementary_mat
-
 ---------------------
 
 #### Unbiased mixed variables distance: supplementary material
