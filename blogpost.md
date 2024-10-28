@@ -7,7 +7,7 @@ Unbiased_mixed _variables_distance_supplementary_mat
 
 ---------------------
 
-#### Automatic dendrogram slicing for mixed-type data clustering: supplementary material
+#### Unbiased mixed variables distance: supplementary material
 
 Ott 2024
 
