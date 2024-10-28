@@ -3,6 +3,18 @@ layout: default
 ---
 
 
+Unbiased_mixed _variables_distance_supplementary_mat
+
+---------------------
+
+#### Automatic dendrogram slicing for mixed-type data clustering: supplementary material
+
+Ott 2024
+
+Code to reproduce the experiments/application from the paper (titled as this blogpost).
+
+[Unbiased mixed variables distance](blogposts_archive/Unbiased_mixed _variables_distance_supplementary_mat.html)
+
 
 ---------------------
 
