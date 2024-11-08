@@ -23,7 +23,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [Classification](teaching_related/classification/Classification.html)
 
-[Model selection](teaching_related/model_selection/model_selection.html) 
+[Model selection](teaching_related/model_selection.html) 
 
 [Non-linear regression](teaching_related/nonlinear_regression.html)
 
