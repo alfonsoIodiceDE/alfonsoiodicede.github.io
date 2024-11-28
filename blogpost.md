@@ -2,16 +2,6 @@
 layout: default
 ---
 
----------------------
-
-#### Unbiased mixed variables distance: supplementary material
-
-Oct 2024
-
-Code to reproduce the experiments/application from the paper (titled as this blogpost).
-
-[Unbiased mixed variables distance](blogposts_archive/Unbiased_mixed _variables_distance_supplementary_mat.html)
-
 
 ---------------------
 
@@ -22,6 +12,19 @@ Feb 2024
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
 [Automatic dendrogram slicing for mixed-type data clustering](blogposts_archive/SR_despota_mix_supplementary.html)
+  -[Divisive clustering exmperiment](blogposts_archive/divisive_sim.html)
+
+
+---------------------
+
+#### Unbiased mixed variables distance: supplementary material
+
+Oct 2024
+
+Code to reproduce the experiments/application from the paper (titled as this blogpost).
+
+[Unbiased mixed variables distance](blogposts_archive/Unbiased_mixed _variables_distance_supplementary_mat.html)
+
 
 
 
