@@ -12,6 +12,7 @@ Feb 2024
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
 [Automatic dendrogram slicing for mixed-type data clustering](blogposts_archive/SR_despota_mix_supplementary.html)
+
   -[Divisive clustering exmperiment](blogposts_archive/divisive_sim.html)
 
 
