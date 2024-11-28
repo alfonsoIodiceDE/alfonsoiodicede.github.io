@@ -13,7 +13,7 @@ Code to reproduce the experiments/application from the paper (titled as this blo
 
 [Automatic dendrogram slicing for mixed-type data clustering](blogposts_archive/SR_despota_mix_supplementary.html)
 
-    -[Divisive clustering exmperiment](blogposts_archive/divisive_sim.html)
+- [Divisive clustering exmperiment](blogposts_archive/divisive_sim.html)
 
 
 ---------------------
