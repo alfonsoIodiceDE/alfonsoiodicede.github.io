@@ -7,7 +7,7 @@ layout: default
 
 #### Automatic dendrogram slicing for mixed-type data clustering: supplementary material
 
-Feb 2024
+Dec 2024
 
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
