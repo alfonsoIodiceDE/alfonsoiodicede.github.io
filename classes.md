@@ -41,13 +41,13 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [A simple SL flow](teaching_related/SL_flow.html)
 
-[SL performance assessment](teaching_related/SL_performance.html) 
+<!-- [SL performance assessment](teaching_related/SL_performance.html)  -->
 
-Some more SL related material    
+ <!-- Some more SL related material     -->
 
-[On the bias/variance trade-off](teaching_related/the_bias_and_the_variance.html)
+<!-- [On the bias/variance trade-off](teaching_related/the_bias_and_the_variance.html) -->
 
-Using synthetic data to explicitely compute the bias, the variance, the expected test MSE. 
+<!-- Using synthetic data to explicitely compute the bias, the variance, the expected test MSE.  -->
 
 [On the output of the MASS::lda()](teaching_related/Lda_MASS_wrap_up.html)
 
