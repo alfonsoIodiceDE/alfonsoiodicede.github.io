@@ -37,6 +37,14 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
  --> 
 
 
+### classes at Cassino PhD program
+
+[lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
+
+[quarto file for lab 1](teaching_related/penguins_student_session.qmd)
+
+
+
 ### Extra's 
 
 [A simple SL flow](teaching_related/SL_flow.html)

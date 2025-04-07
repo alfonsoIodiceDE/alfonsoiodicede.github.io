@@ -1,0 +1,39 @@
+---
+title: "Penguins"
+format: html
+knitr:
+  opts_chunk: 
+    collapse: true
+    R.options:
+    message: false
+    echo: false
+    warning: false
+    code-fold: false
+---
+
+Use `penguins` as part of the package `palmerpenguins`
+
+
+```{r echo=TRUE}
+library(tidyverse)
+library(palmerpenguins)
+library(tidymodels)
+library(janitor)
+library(kableExtra)
+pengs=palmerpenguins::penguins %>% na.omit()
+
+pengs %>% slice_sample(n=10) %>% kbl()
+
+
+```
+
+
+- compute the normalised asymmetry $\frac{media-mediana}{sd}$ for `bill_length` and `bill_depth` by species.
+
+
+
+- how many measurements are on  `Torgersen`island? 
+
+
+- create a scatteplot of `bill_length` vs `bill_depth`, points size proportional to bodymass index
+  
