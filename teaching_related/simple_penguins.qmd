@@ -1,5 +1,5 @@
 ---
-title: "Penguins"
+title: "a simple descriptive analysis of the penguins dataset"
 format: html
 code-fold: true
 code-tools: true
@@ -24,13 +24,11 @@ knitr:
 ```{r echo=TRUE}
 library(tidyverse)
 library(palmerpenguins)
-library(tidymodels)
-library(janitor)
 library(kableExtra)
 
-pengs=palmerpenguins::penguins %>% na.omit()
+pengs=palmerpenguins::penguins |> na.omit()
 
-pengs %>% slice_sample(n=10) %>% kbl()
+pengs |> slice_sample(n=10) |> kbl()
 
 ```
 
