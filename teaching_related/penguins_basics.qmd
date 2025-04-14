@@ -20,8 +20,6 @@ knitr:
     echo: true
 ---
 
-Use `penguins` as part of the package `palmerpenguins`
-
 
 ```{r echo=TRUE}
 library(tidyverse)
