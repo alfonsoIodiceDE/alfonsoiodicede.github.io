@@ -20,6 +20,7 @@ library(palmerpenguins)
 library(tidymodels)
 library(janitor)
 library(kableExtra)
+
 pengs=palmerpenguins::penguins %>% na.omit()
 
 pengs %>% slice_sample(n=10) %>% kbl()
@@ -27,9 +28,14 @@ pengs %>% slice_sample(n=10) %>% kbl()
 
 ```
 
+this is a description of my code
 
-- compute the normalised asymmetry $\frac{media-mediana}{sd}$ for `bill_length` and `bill_depth` by species.
+```{r}
+3+4 
+```
 
+
+- compute the syntetic indexes  for `bill_length` and `bill_depth` by species.
 
 
 - how many measurements are on  `Torgersen`island? 
@@ -37,3 +43,4 @@ pengs %>% slice_sample(n=10) %>% kbl()
 
 - create a scatteplot of `bill_length` vs `bill_depth`, points size proportional to bodymass index
   
+
