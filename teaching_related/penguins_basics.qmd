@@ -1,0 +1,60 @@
+---
+title: "Penguins"
+format: html
+code-fold: true
+code-tools: true
+embed-resources: true
+page-layout: full
+toc: true
+toc-title: toc
+toc-location: left
+toc-expand: 2
+theme: minty
+knitr:
+  opts_chunk: 
+    collapse: true
+    message: false
+    R.options:
+    warning: false
+    code-fold: false
+    echo: true
+---
+
+Use `penguins` as part of the package `palmerpenguins`
+
+
+```{r echo=TRUE}
+library(tidyverse)
+library(palmerpenguins)
+library(tidymodels)
+library(janitor)
+library(kableExtra)
+
+pengs=palmerpenguins::penguins %>% na.omit()
+
+pengs %>% slice_sample(n=10) %>% kbl()
+
+```
+
+
+```{r}
+
+```
+
+- compute the syntetic indexes  for `bill_length` and `bill_depth` by species.
+
+```{r}
+
+```
+
+- how many measurements are on  `Torgersen`island? 
+
+```{r}
+
+```
+
+- create a scatteplot of `bill_length` vs `bill_depth`, points size proportional to bodymass index
+  
+```{r}
+
+```
