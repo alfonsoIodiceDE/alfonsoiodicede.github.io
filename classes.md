@@ -41,7 +41,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
 
-[quarto file for lab 1](teaching_related/penguins_student_session.qmd)
+[quarto file for lab 1](teaching_related/penguins_basics.qmd)
 
 [quarto file for survey data](teaching_related/basic_anaylsis.qmd)
 

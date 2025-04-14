@@ -1,0 +1,60 @@
+---
+title: "Penguins"
+format: html
+knitr:
+  opts_chunk: 
+    collapse: true
+    R.options:
+    message: false
+    echo: false
+    warning: false
+    code-fold: false
+---
+
+Use `penguins` as part of the package `palmerpenguins`
+
+
+```{r echo=TRUE}
+library(tidyverse)
+library(palmerpenguins)
+library(tidymodels)
+library(janitor)
+library(kableExtra)
+
+pengs=palmerpenguins::penguins %>% na.omit()
+
+pengs %>% slice_sample(n=10) %>% kbl()
+
+
+```
+
+this is a description of my code
+
+```{r}
+pengs |> filter(species=="Adelie")
+
+pengs |> summary()
+
+pengs |> ggplot(aes(x=flipper_length_mm,y=body_mass_g,color=species,size=bill_length_mm)) +  geom_point(alpha=.5) + facet_wrap(~sex)
+  
+  
+  
+```
+
+```{r}
+pengs
+```
+
+- compute the syntetic indexes  for `bill_length` and `bill_depth` by species.
+
+```{r}
+pengs |> ggplot(aes(x=species)) + geom_bar(aes(fill=island))
+```
+
+
+- how many measurements are on  `Torgersen`island? 
+
+
+- create a scatteplot of `bill_length` vs `bill_depth`, points size proportional to bodymass index
+  
+
