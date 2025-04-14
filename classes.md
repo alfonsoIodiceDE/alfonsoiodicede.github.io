@@ -41,9 +41,12 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
 
-[quarto file for basic session with penguins](https://raw.githubusercontent.com/alfonsoiodicede/alfonsoiodicede.github.io/main/teaching_related/penguins_basics.qmd)
 
-[quarto file for survey data](teaching_related/https://raw.githubusercontent.com/alfonsoiodicede/alfonsoiodicede.github.io/main/teaching_related/basic_analysis.qmd)
+[quarto file for basic session with penguins](teaching_related/basic_anaylsis.qmd.zip)
+
+
+[quarto file for survey data](teaching_related/simple_penguins.qmd.zip)
+
 
 [tiny survey data](teaching_related/toy_data_phd.csv)
 
