@@ -31,11 +31,25 @@ pengs %>% slice_sample(n=10) %>% kbl()
 this is a description of my code
 
 ```{r}
-3+4 
+pengs |> filter(species=="Adelie")
+
+pengs |> summary()
+
+pengs |> ggplot(aes(x=flipper_length_mm,y=body_mass_g,color=species,size=bill_length_mm)) +  geom_point(alpha=.5) + facet_wrap(~sex)
+  
+  
+  
 ```
 
+```{r}
+pengs
+```
 
 - compute the syntetic indexes  for `bill_length` and `bill_depth` by species.
+
+```{r}
+pengs |> ggplot(aes(x=species)) + geom_bar(aes(fill=island))
+```
 
 
 - how many measurements are on  `Torgersen`island? 
