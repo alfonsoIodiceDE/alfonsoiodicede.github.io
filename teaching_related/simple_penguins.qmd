@@ -1,5 +1,5 @@
 ---
-title: "a simple descriptive analysis of the penguins dataset"
+title: "A basic analysis"
 format: html
 code-fold: true
 code-tools: true
@@ -21,11 +21,14 @@ knitr:
 ---
 
 
-```{r echo=TRUE}
-library(tidyverse)
+```{r}
+library(tidymodels)
+library(janitor)
 library(palmerpenguins)
 library(kableExtra)
+```
 
+```{r echo=TRUE}
 pengs=palmerpenguins::penguins |> na.omit()
 
 pengs |> slice_sample(n=10) |> kbl()
@@ -33,24 +36,10 @@ pengs |> slice_sample(n=10) |> kbl()
 ```
 
 
-```{r}
-
-```
-
 - compute the syntetic indexes  for `bill_length` and `bill_depth` by species.
 
-```{r}
-
-```
 
 - how many measurements are on  `Torgersen`island? 
 
-```{r}
-
-```
-
 - create a scatteplot of `bill_length` vs `bill_depth`, points size proportional to bodymass index
   
-```{r}
-
-```
