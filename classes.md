@@ -41,7 +41,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
 
-[lecture 2 (to be continued...)](teaching_related/Lecture_2_elements_of_inference.html)
+[lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
 
 [quarto file for basic session with penguins](teaching_related/basic_anaylsis.qmd.zip)
