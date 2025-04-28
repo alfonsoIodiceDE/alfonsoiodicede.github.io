@@ -45,10 +45,10 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 3](teaching_related/Lecture_3_elements_of_inference.html)
 
-[quarto file for basic session with penguins](teaching_related/basic_anaylsis_student.qmd.zip)
+[quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
 
-[quarto file for survey data](teaching_related/simple_penguins.qmd.zip)
+[quarto file for survey data analysis](teaching_related/basic_anaylsis_students.qmd.zip)
 
 
 [tiny survey data](teaching_related/toy_data_phd.csv)
