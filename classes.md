@@ -48,7 +48,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 [quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
 
-[quarto file for survey data analysis](teaching_related/basic_anaylsis_students.qmd.zip)
+[quarto file for survey data analysis](teaching_related/basic_anaylsis_student.qmd.zip)
 
 
 [tiny survey data](teaching_related/toy_data_phd.csv)
