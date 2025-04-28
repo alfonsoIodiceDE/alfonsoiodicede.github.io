@@ -43,6 +43,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
+[lecture 3](teaching_related/Lecture_3_elements_of_inference.html)
 
 [quarto file for basic session with penguins](teaching_related/basic_anaylsis.qmd.zip)
 
