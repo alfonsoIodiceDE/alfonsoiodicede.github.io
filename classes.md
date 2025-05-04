@@ -45,6 +45,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 3](teaching_related/Lecture_3_elements_of_inference.html)
 
+[lecture 4](teaching_related/Lecture_4_bivariate_interdependence.html)
+
 [quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
 
