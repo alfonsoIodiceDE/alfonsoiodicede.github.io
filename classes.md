@@ -52,6 +52,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [quarto file for survey data analysis](teaching_related/basic_anaylsis_student.qmd.zip)
 
+[tasks for the survey data analysis (may 5 update)](teaching_related/basic_anaylsis.html)
 
 [tiny survey data](teaching_related/toy_data_phd.csv)
 
