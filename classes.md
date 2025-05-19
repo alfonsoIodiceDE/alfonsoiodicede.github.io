@@ -47,6 +47,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 4](teaching_related/Lecture_4_bivariate_interdependence.html)
 
+[lecture 5](teaching_related/Lecture_5_supervised_learning.html)
+
 [quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
 
