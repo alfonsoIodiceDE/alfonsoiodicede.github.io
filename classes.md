@@ -49,6 +49,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 5](teaching_related/Lecture_5_supervised_learning.html)
 
+[lecture 5](teaching_related/Lecture_6_unsupervised_learning.html)
+
 [quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
 
