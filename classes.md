@@ -49,7 +49,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lecture 5](teaching_related/Lecture_5_supervised_learning.html)
 
-[lecture 5](teaching_related/Lecture_6_unsupervised_learning.html)
+[lecture 6](teaching_related/Lecture_6_unsupervised_learning.html)
 
 [quarto file for basic session with penguins](teaching_related/simple_penguins.qmd.zip)
 
@@ -59,6 +59,11 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 [tasks for the survey data analysis (may 5 update)](teaching_related/basic_anaylsis.html)
 
 [tiny survey data](teaching_related/toy_data_phd.csv)
+
+[example of supervised flow](teaching_related/regression_flow.qmd.zip)
+
+[example of unsupervised flow](teaching_related/unsupervised_flow.qmd.zip)
+
 
 
 ### Extra's 
