@@ -5,6 +5,17 @@ layout: default
 
 ---------------------
 
+#### A general framework for unbiased mixed variables distance: revised supplementary material
+
+Aug 2025
+
+Code to reproduce the experiments/application from the paper (titled as this blogpost).
+
+[A general framework for unbiased mixed variables distance](blogposts_archive/Unbiased_mixed_variables_suppl_R2.html)
+
+
+---------------------
+
 #### Automatic dendrogram slicing for mixed-type data clustering: supplementary material
 
 Dec 2024
@@ -15,16 +26,6 @@ Code to reproduce the experiments/application from the paper (titled as this blo
 
 - [Divisive clustering exmperiment](blogposts_archive/divisive_sim.html)
 
-
----------------------
-
-#### Unbiased mixed variables distance: supplementary material
-
-Oct 2024
-
-Code to reproduce the experiments/application from the paper (titled as this blogpost).
-
-[Unbiased mixed variables distance](blogposts_archive/Unbiased_mixed _variables_distance_supplementary_mat.html)
 
 
 
