@@ -4,6 +4,7 @@ layout: default
 
 ### talks
 
+  [CLADAG 2025: Association-based spectral clustering for mixed data](CLADAG25_pres_SC_mix.html)
 
   [CNAM_workshop_25: Distance-based learning for mixed-type data](paris_worskshop_2025_pres.html)
 
