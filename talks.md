@@ -4,6 +4,8 @@ layout: default
 
 ### talks
 
+  [GRASPA 2025: Model-agnostic interpretability of deep learning models for car emissions assessment](GRASPA25_interpretable_Eco_score.html)
+
   [CLADAG 2025: Association-based spectral clustering for mixed data](CLADAG25_pres_SC_mix.html)
 
   [CNAM_workshop_25: Distance-based learning for mixed-type data](paris_worskshop_2025_pres.html)
