@@ -37,7 +37,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
  --> 
 
 
-### classes at Cassino PhD program
+<!-- ### classes at Cassino PhD program
 
 [lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
 
@@ -64,7 +64,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [example of unsupervised flow](teaching_related/unsupervised_flow.qmd.zip)
 
-
+ -->
 
 ### Extra's 
 
