@@ -4,11 +4,13 @@ layout: default
 
 ### talks
 
-  [GRASPA 2025: Model-agnostic interpretability of deep learning models for car emissions assessment](GRASPA25_interpretable_Eco_score.html)
+[Workshop Bologna 2026: Association-based spectral clustering for mixed data](https://github.com/alfonsoIodiceDE/manydist_package/blob/main/spectral_cluster_experiments/Workshop_Bologna_26_pres_SC_mix.html)
 
-  [CLADAG 2025: Association-based spectral clustering for mixed data](CLADAG25_pres_SC_mix.html)
+[GRASPA 2025: Model-agnostic interpretability of deep learning models for car emissions assessment](GRASPA25_interpretable_Eco_score.html)
 
-  [CNAM_workshop_25: Distance-based learning for mixed-type data](paris_worskshop_2025_pres.html)
+<!--  [CLADAG 2025: Association-based spectral clustering for mixed data](CLADAG25_pres_SC_mix.html) -->
+
+ <!--  [CNAM_workshop_25: Distance-based learning for mixed-type data](paris_worskshop_2025_pres.html) -->
 
   <!-- [COMPSTAT23: Association-based distances for categorical and mixed-type data](COMPSTAT23_pres_mix.html) -->
 
