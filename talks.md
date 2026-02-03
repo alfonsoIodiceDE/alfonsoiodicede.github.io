@@ -4,7 +4,9 @@ layout: default
 
 ### talks
 
-[Workshop Bologna 2026: Association-based spectral clustering for mixed data](https://github.com/alfonsoIodiceDE/manydist_package/blob/main/spectral_cluster_experiments/Workshop_Bologna_26_pres_SC_mix.html)
+[Workshop Bologna 2026: Association-based spectral clustering for mixed data](Workshop_Bologna_26_pres_SC_mix.html)
+
+<!-- [Workshop Bologna 2026: Association-based spectral clustering for mixed data](https://github.com/alfonsoIodiceDE/manydist_package/blob/main/spectral_cluster_experiments/Workshop_Bologna_26_pres_SC_mix.html) -->
 
 [GRASPA 2025: Model-agnostic interpretability of deep learning models for car emissions assessment](GRASPA25_interpretable_Eco_score.html)
 
