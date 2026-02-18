@@ -51,7 +51,7 @@ Apr 29, 2023
 [small time experiments](blogposts_archive/custom_hclust_check.html)
  -->
 
----------------------
+<!-- ---------------------
 
 #### Association-based distances for mixed data
 
@@ -70,5 +70,6 @@ Comparison of spectral clustering solutions using matching and total variance di
 [Spectral clustering experiment](blogposts_archive/spectral_clust_mixed.html)
 
 ---------------------
-
+ -->
+ 
 [back](./)
