@@ -5,13 +5,13 @@ layout: default
 
 ---------------------
 
-#### A general framework for unbiased mixed variables distance: revised supplementary material
+#### Unbiased mixed-variable distance
 
-Aug 2025
+Feb 2026
 
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
-[A general framework for unbiased mixed variables distance](blogposts_archive/Unbiased_mixed_variables_suppl_R2.html)
+[Unbiased mixed-variable distance](blogposts_archive/Unbiased_mixed_variables_suppl_R2.html)
 
 
 ---------------------
