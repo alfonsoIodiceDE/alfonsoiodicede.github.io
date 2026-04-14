@@ -7,11 +7,11 @@ layout: default
 
 #### Unbiased mixed-variable distance
 
-Feb 2026
+Mar 2026
 
 Code to reproduce the experiments/application from the paper (titled as this blogpost).
 
-[Unbiased mixed-variable distance](blogposts_archive/Unbiased_mixed_variables_suppl_R2.html)
+[Unbiased mixed-variable distance](blogposts_archive/Unbiased_mixed_variables_suppl_R3.html)
 
 
 ---------------------
