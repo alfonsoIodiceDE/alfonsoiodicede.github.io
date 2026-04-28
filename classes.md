@@ -43,7 +43,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [2026 syllabus](teaching_related/ESDA_doctoral_studies_course_syllabus.html)
 
- <!-- [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
+ <!-- 
+ [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
 [lecture 3](teaching_related/Lecture_3_elements_of_inference.html)
 
@@ -64,7 +65,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [example of supervised flow](teaching_related/regression_flow.qmd.zip)
 
-[example of unsupervised flow](teaching_related/unsupervised_flow.qmd.zip) -->
+[example of unsupervised flow](teaching_related/unsupervised_flow.qmd.zip) 
+-->
 
 ### Extra's 
 
