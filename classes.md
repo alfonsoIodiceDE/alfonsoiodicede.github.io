@@ -37,9 +37,13 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
  --> 
 
 
-<!-- ### classes at Cassino PhD program
+### classes at Cassino PhD program
 
-[lecture 1](teaching_related/Lecture_1_elements_of_univariate_stat.html)
+#### Essential Statistical Data Analysis for Doctoral Studies Across Disciplines
+
+[2026 syllabus](teaching_related/ESDA_doctoral_studies_course_syllabus.html)
+
+ <!-- 
 
 [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
