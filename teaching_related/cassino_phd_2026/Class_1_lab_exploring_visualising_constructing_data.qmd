@@ -1,0 +1,705 @@
+---
+title: "Essential Statistical Data Analysis"
+subtitle: "Class 1 Lab — Exploring, visualising, and constructing data"
+author: "YOUR NAME GOES HERE"
+date: "May 4, 2026"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: false
+    code-tools: true
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+
+if (requireNamespace("palmerpenguins", quietly = TRUE)) {
+  library(palmerpenguins)
+}
+```
+
+# Lab overview
+
+In this lab, we practise the first steps of statistical data analysis:
+
+- inspecting a dataset;
+- identifying observational units and variables;
+- summarising numerical and categorical variables;
+- visualising one variable;
+- visualising relationships between variables;
+- working with text as data;
+- combining information from multiple data tables.
+
+You can edit the code chunks directly and re-run them.
+
+# Part 1 — Exploring a dataset
+
+We use the `penguins` dataset from the `palmerpenguins` package.
+
+Each row describes one penguin. The variables include species, island, bill measurements, flipper length, body mass, sex, and year.
+
+## Lab 1 — Inspect the dataset
+
+```{r}
+penguins <- palmerpenguins::penguins
+
+glimpse(penguins)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Identify:
+
+1. the observational unit;
+2. three numerical variables;
+3. three categorical variables.
+:::
+
+Write your answer here:
+
+```{markdown}
+Observational unit:
+
+Numerical variables:
+
+Categorical variables:
+```
+
+## Lab 2 — First rows and dimensions
+
+```{r}
+head(penguins)
+```
+
+```{r}
+dim(penguins)
+```
+
+```{r}
+names(penguins)
+```
+
+::: {.callout-tip}
+### Your turn
+
+How many observations are there?  
+How many variables are there?
+:::
+
+Write your answer here:
+
+```{markdown}
+Number of observations:
+
+Number of variables:
+```
+
+# Part 2 — One-variable summaries
+
+## Lab 3 — Summarise a categorical variable
+
+We can count how many observations belong to each category.
+
+```{r}
+penguins |>
+  count(species)
+```
+
+```{r}
+penguins |>
+  count(island)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Count the number of penguins by `sex`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 4 — Summarise a numerical variable
+
+```{r}
+penguins |>
+  summarise(
+    mean_body_mass = mean(body_mass_g, na.rm = TRUE),
+    median_body_mass = median(body_mass_g, na.rm = TRUE),
+    sd_body_mass = sd(body_mass_g, na.rm = TRUE)
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+Compute the mean, median, and standard deviation of `bill_length_mm`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 5 — Grouped summaries
+
+We can compute summaries separately for each group.
+
+```{r}
+penguins |>
+  group_by(species) |>
+  summarise(
+    mean_body_mass = mean(body_mass_g, na.rm = TRUE),
+    median_body_mass = median(body_mass_g, na.rm = TRUE),
+    sd_body_mass = sd(body_mass_g, na.rm = TRUE)
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+Compute the average `bill_length_mm` by `species`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+# Part 3 — Visualising one variable
+
+## Lab 6 — Histogram
+
+A histogram is useful for visualising the distribution of a numerical variable.
+
+```{r}
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_histogram(
+    bins = 30,
+    fill = "indianred",
+    color = "white",
+    alpha = 0.7
+  ) +
+  labs(
+    x = "Body mass (g)",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Change the variable from `body_mass_g` to `bill_length_mm`.  
+What changes in the distribution?
+:::
+
+```{r}
+# Write your code here
+
+```
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+
+```
+
+## Lab 7 — Density plot
+
+```{r}
+ggplot(penguins, aes(x = body_mass_g)) +
+  geom_density(fill = "indianred", alpha = 0.5) +
+  labs(
+    x = "Body mass (g)",
+    y = "Density"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Create a density plot for `flipper_length_mm`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 8 — Bar chart
+
+A bar chart is useful for visualising a categorical variable.
+
+```{r}
+ggplot(penguins, aes(x = species)) +
+  geom_bar(fill = "dodgerblue", alpha = 0.7) +
+  labs(
+    x = "Species",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Create a bar chart for `island`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+# Part 4 — Visualising relationships
+
+## Lab 9 — Two numerical variables
+
+A scatterplot is useful for visualising the relationship between two numerical variables.
+
+```{r}
+ggplot(
+  penguins,
+  aes(x = bill_length_mm, y = flipper_length_mm)
+) +
+  geom_point(alpha = 0.7) +
+  labs(
+    x = "Bill length (mm)",
+    y = "Flipper length (mm)"
+  ) +
+  theme_minimal()
+```
+
+## Lab 10 — Adding a grouping variable
+
+```{r}
+ggplot(
+  penguins,
+  aes(x = bill_length_mm, y = flipper_length_mm, colour = species)
+) +
+  geom_point(alpha = 0.7) +
+  labs(
+    x = "Bill length (mm)",
+    y = "Flipper length (mm)",
+    colour = "Species"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Add `facet_wrap(~ island)` to the plot.  
+Does the relationship look the same on every island?
+:::
+
+```{r}
+# Write your code here
+
+```
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+
+```
+
+## Lab 11 — One categorical and one numerical variable
+
+Boxplots are useful for comparing a numerical variable across categories.
+
+```{r}
+penguins |>
+  drop_na(species, body_mass_g) |>
+  ggplot(aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot(alpha = 0.6, show.legend = FALSE) +
+  labs(
+    x = "Species",
+    y = "Body mass (g)"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Compare `flipper_length_mm` across `species`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 12 — Violin plot, boxplot, and jitter
+
+```{r}
+penguins |>
+  drop_na(species, body_mass_g) |>
+  ggplot(aes(x = species, y = body_mass_g, fill = species)) +
+  geom_violin(alpha = 0.35, show.legend = FALSE) +
+  geom_boxplot(width = 0.12, outlier.shape = NA, show.legend = FALSE) +
+  geom_jitter(width = 0.08, alpha = 0.4, show.legend = FALSE) +
+  labs(
+    x = "Species",
+    y = "Body mass (g)"
+  ) +
+  theme_minimal()
+```
+
+# Part 5 — Categorical association
+
+## Lab 13 — Two categorical variables
+
+We can count combinations of two categorical variables.
+
+```{r}
+penguins |>
+  drop_na(species, island) |>
+  count(species, island)
+```
+
+## Lab 14 — Row profiles
+
+Row profiles show proportions within each row group.
+
+```{r}
+penguins |>
+  drop_na(species, island) |>
+  count(species, island) |>
+  group_by(species) |>
+  mutate(row_profile = n / sum(n))
+```
+
+::: {.callout-tip}
+### Your turn
+
+Compute row profiles for `species` and `sex`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 15 — Visualising categorical association
+
+```{r}
+penguins |>
+  drop_na(species, island) |>
+  ggplot(aes(x = species, fill = island)) +
+  geom_bar(position = "fill") +
+  labs(
+    x = "Species",
+    y = "Proportion",
+    fill = "Island"
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Create a proportional bar chart for `species` and `sex`.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+# Part 6 — Text as data
+
+Text is a useful example of non-standard data.
+
+It does not arrive as a clean numerical matrix. We must decide what the observational units are and how to transform text into variables.
+
+## Lab 16 — A small text dataset
+
+```{r}
+texts <- tibble::tribble(
+  ~doc_id, ~field, ~text,
+  1, "engineering", "The structure was tested under dynamic stress and material fatigue.",
+  2, "engineering", "Mechanical systems require models of vibration, load and failure.",
+  3, "engineering", "Sensors collect signals from machines under stress and vibration.",
+  4, "sport", "Training load, recovery and fatigue affect athletic performance.",
+  5, "sport", "Injury prevention requires monitoring intensity and recovery.",
+  6, "sport", "Athletes improve performance through training, recovery and adaptation.",
+  7, "economics", "Innovation and sustainability influence firms, markets and management.",
+  8, "economics", "Firms compete in markets through strategy, investment and innovation.",
+  9, "economics", "Management decisions affect costs, productivity and sustainability.",
+  10, "humanities", "Texts, sources and contexts shape historical interpretation.",
+  11, "humanities", "Archives preserve documents, memories and cultural heritage.",
+  12, "humanities", "Interpretation depends on language, context and historical sources."
+)
+
+texts |>
+  kbl() |>
+  kable_styling(full_width = FALSE)
+```
+
+## Lab 17 — Tokenisation
+
+Tokenisation means splitting text into smaller units, such as words.
+
+```{r}
+if (requireNamespace("tidytext", quietly = TRUE)) {
+  library(tidytext)
+}
+
+tokens_raw <- texts |>
+  tidytext::unnest_tokens(word, text)
+
+tokens_raw |>
+  slice_head(n = 15)
+```
+
+## Lab 18 — Remove stop words
+
+Common words such as *the*, *and*, *of*, and *to* are often removed.
+
+```{r}
+tokens <- tokens_raw |>
+  anti_join(tidytext::stop_words, by = "word")
+
+tokens |>
+  count(word, sort = TRUE)
+```
+
+## Lab 19 — Word frequencies
+
+```{r}
+tokens |>
+  count(word, sort = TRUE) |>
+  slice_max(n, n = 15) |>
+  ggplot(aes(x = n, y = reorder(word, n))) +
+  geom_col(fill = "indianred", alpha = 0.7) +
+  labs(
+    x = "Frequency",
+    y = NULL
+  ) +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Change the number of displayed words from 15 to 10.
+:::
+
+```{r}
+# Write your code here
+
+```
+
+## Lab 20 — Word frequencies by field
+
+```{r}
+tokens |>
+  count(field, word, sort = TRUE) |>
+  group_by(field) |>
+  slice_max(n, n = 5, with_ties = FALSE) |>
+  ungroup() |>
+  ggplot(aes(n, tidytext::reorder_within(word, n, field))) +
+  geom_col(fill = "indianred", alpha = 0.7) +
+  facet_wrap(~ field, scales = "free_y") +
+  tidytext::scale_y_reordered() +
+  labs(
+    x = "Frequency",
+    y = NULL
+  ) +
+  theme_minimal()
+```
+
+## Lab 21 — Document-term matrix
+
+Many statistical methods require a rectangular data table.
+
+A common representation is the document-term matrix:
+
+- rows are documents;
+- columns are words;
+- values are word frequencies.
+
+```{r}
+document_term_matrix <- tokens |>
+  count(doc_id, word) |>
+  pivot_wider(
+    names_from = word,
+    values_from = n,
+    values_fill = 0
+  )
+
+document_term_matrix |>
+  select(1:min(10, ncol(document_term_matrix))) |>
+  kbl() |>
+  kable_styling(full_width = FALSE)
+```
+
+::: {.callout-tip}
+### Your turn
+
+How many rows does the document-term matrix have?  
+What does each row represent?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+
+```
+
+## Optional — Word cloud
+
+```{r}
+#| eval: !expr requireNamespace("wordcloud", quietly = TRUE)
+
+library(wordcloud)
+
+tokens |>
+  count(word, sort = TRUE) |>
+  with(
+    wordcloud(
+      words = word,
+      freq = n,
+      max.words = 50,
+      min.freq = 1,
+      random.order = FALSE,
+      scale = c(3.5, 0.8)
+    )
+  )
+```
+
+::: {.callout-note}
+A word cloud is useful as a quick visual impression, but a bar chart is often easier to read and compare.
+:::
+
+# Part 7 — Data from multiple sources
+
+## Lab 22 — Why joins?
+
+Real research data often come from different tables:
+
+- students and projects;
+- patients and hospital records;
+- firms and balance sheets;
+- athletes and sensor measurements;
+- documents and metadata.
+
+A join is not just a technical operation: it can change the population being analysed.
+
+## Lab 23 — Two related tables
+
+```{r}
+students <- tibble::tribble(
+  ~student_id, ~name, ~programme,
+  1, "Anna", "Engineering",
+  2, "Marco", "Education/Sport",
+  3, "Sara", "Economics/Management",
+  4, "Luca", "Humanities"
+)
+
+projects <- tibble::tribble(
+  ~student_id, ~topic,
+  1, "Sensor data",
+  2, "Training load",
+  3, "Firm innovation",
+  5, "Archival sources"
+)
+
+students
+projects
+```
+
+## Lab 24 — Inner join
+
+An inner join keeps only records that match in both tables.
+
+```{r}
+students |>
+  inner_join(projects, by = "student_id")
+```
+
+::: {.callout-tip}
+### Your turn
+
+Which student is lost after the inner join?  
+Why?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+
+```
+
+## Lab 25 — Left join
+
+A left join keeps all records from the first table and adds matching information from the second table.
+
+```{r}
+students |>
+  left_join(projects, by = "student_id")
+```
+
+::: {.callout-tip}
+### Your turn
+
+Which student has missing project information?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+
+```
+
+## Lab 26 — Anti joins
+
+Anti joins find unmatched records.
+
+```{r}
+students |>
+  anti_join(projects, by = "student_id")
+```
+
+```{r}
+projects |>
+  anti_join(students, by = "student_id")
+```
+
+::: {.callout-important}
+Different joins answer different research questions. Always ask which observations are kept and which are lost.
+:::
+
+# Final reflection
+
+Write a short paragraph answering the following questions:
+
+1. What did you learn about visualising one variable?
+2. What did you learn about visualising relationships?
+3. What did you learn about transforming text into data?
+4. What did you learn about joins?
+
+```{markdown}
+Final reflection:
+
+```
