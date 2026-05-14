@@ -43,6 +43,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [2026 syllabus](teaching_related/cassino_phd_2026/ESDA_doctoral_studies_course_syllabus.html)
 
+[class 1](teaching_related/cassino_phd_2026/Class_1_exploring_visualising_constructing_data.html)
+
 [lab 1 quarto file](teaching_related/cassino_phd_2026/Class_1_lab_exploring_visualising_constructing_data.qmd)
 
 
