@@ -45,6 +45,8 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [class 1](teaching_related/cassino_phd_2026/Class_1_exploring_visualising_constructing_data.html)
 
+[quarto class 1](teaching_related/cassino_phd_2026/Class_1_lab_exploring_visualising_constructing_data.qmd.zip)
+
 [class 2](teaching_related/cassino_phd_2026/Class_2_classification_workflows.html)
 
 [quarto class 2](teaching_related/cassino_phd_2026/Class_2_lab_classification_workflows.qmd.zip)
