@@ -1,0 +1,1078 @@
+---
+title: "Essential Statistical Data Analysis"
+subtitle: "Class 2 — classification workflows"
+author: "Alfonso Iodice D'Enza"
+date: "May 18, 2026"
+title-slide-attributes:
+  data-background-color: "RoyalBlue"
+  data-background-image: figures/logo_unicas.png
+  data-background-position: center
+  data-background-size: contain
+  data-background-opacity: "0.05"
+format:
+  revealjs:
+    callout-icon: false
+    logo: figures/logo_unicas.png
+    theme: default
+    fontsize: 1.75em
+    preview-links: true
+    transition: fade
+    progress: true
+    slide-number: true
+    embed-resources: true
+    code-fold: true
+    echo: true
+html-math-method: mathjax
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+set.seed(123)
+library(tidyverse)
+library(kableExtra)
+library(magick)
+library(tidymodels)
+library(discrim)
+library(flipbookr)
+library(kableExtra)
+library(janitor)
+library(patchwork)
+```
+
+
+## classification
+
+In a classification problem the `response` is a `categorical` variable
+
+
+. . . 
+
+
+rather than predicting the value of $Y$, one wants to estimate the ` posterior probability `
+
+
+$$P(Y=k\mid X=x_{i})$$
+
+
+that is, the probability that the observation $i$ belongs the the class $k$, given that the predictor value for $i$ is $x_{i}$
+
+
+
+ 
+## will a credit card owner default? 
+
+```{r}
+set.seed(1234)
+default=read_csv("./data/Default.csv")
+default |> slice_sample(n=6) |> kbl() |> kable_styling(font_size=12)
+```
+
+
+## Do balance and income bring useful info to identify deafulters?
+
+```{r,fig.align='center',out.width="55%"}
+p1 = default |> ggplot(aes(x = balance, y=income,color=default))+
+  geom_point(alpha=.5,size=3)+theme_minimal() 
+p1
+```
+
+
+## Do balance and income bring useful info to identify deafulters?
+
+```{r,fig.align='center',out.width="55%"}
+p2 = default |> pivot_longer(names_to = "predictor",values_to="value",cols=c(balance,income)) |> 
+  ggplot(aes(x = default, y = value))+geom_boxplot(aes(fill=default))+
+  facet_wrap(~predictor,scales="free")+theme_minimal()
+p2
+```
+
+
+
+## balance is useful, income is not
+
+```{r,fig.align='center',out.width="45%"}
+p1 | p2
+```
+
+
+Note: to arrange multiple plots together, give a look at the 
+`patchwork` package
+
+
+## linear regression for non-numeric response?
+
+ if $Y$ is categorical 
+
+ With $K$ categories, one could code $Y$ as an integer vector
+
+. . .
+
+ - for non ordinal factors it would not make sense 
+
+. . .
+
+&nbsp;
+
+ - even for ordinal factors, one would implicitly assume constant differences between categories
+
+## linear regression for non-numeric response?
+
+ if $Y$ is binary 
+
+ The goal is estimate $P(Y=1|X)$, which is, in fact, numeric
+. . .
+
+ - So one can model $P(Y=1|X)=\beta_{0}+\beta_{1}X$
+. . .
+
+&nbsp;
+
+ - What can possibly be wrong with this approach?
+
+ 
+## linear regression for non-numeric response?
+
+ $P(\texttt{default}=\texttt{yes}|\texttt{balance})=\beta_{0}+\beta_{1}\texttt{balance}$  
+
+```{r, fig.align='center', out.width="35%"}
+default |> mutate(def_01 = ifelse(default== "Yes",1,0)) |>  
+  ggplot(aes(x=balance, y=def_01)) + geom_point(aes(color = default),size=4, alpha=.5) + 
+  geom_smooth(method="lm") + theme_minimal()
+```
+
+
+<center>
+ $P(\texttt{default}=\texttt{yes}|\texttt{balance})$  is bounded in $[0, 1]$, therefore the linear fit cannot be used </center>
+
+
+
+ 
+## use the logistic function instead
+
+ $P(\texttt{default}=\texttt{yes}|\texttt{balance})=\frac{e^{\beta_{0}+\beta_{1}\texttt{balance}}}{1+e^{\beta_{0}+\beta_{1}\texttt{balance}}}$  
+
+```{r, echo=FALSE, fig.align='center',out.width="35%"}
+def_rec = recipe(default~balance, data=default)
+def_model_spec = logistic_reg(mode="classification", engine="glm")
+def_wflow = workflow() |> add_recipe(def_rec) |> add_model(def_model_spec)
+def_fit = def_wflow |> fit(data=default) 
+bal_grid = tibble(balance = seq(from = min(default$balance),to = max(default$balance)+300,length=500))
+def_preds = def_fit |> augment(new_data = bal_grid)
+default |> mutate(def_01 = ifelse(default== "Yes",1,0)) |>  
+  ggplot(aes(x=balance, y=def_01)) + geom_point(aes(color = default),size=3, alpha=.5) + 
+  geom_line(data=def_preds,aes(x=balance, y=.pred_Yes),
+            lwd=3,alpha=.75,color="darkgreen",inherit.aes = FALSE) + theme_minimal()
+```
+
+
+
+modeling the posterior $P(Y=1|X)$ by means of a logistic function is the goal of [logistic regression]{.class style="color:red"} 
+
+. . .
+
+::: {.callout-note title="conditional expectation"}
+
+just like in linear regression, the fit refers to the conditional expectation of $Y$ given $X$; since $Y\in\{0,1\}$, it results that $$E[Y|X] \equiv P(Y=1|X)$$
+
+:::
+
+
+## The odds and the logit
+
+$$
+\begin{split}
+p(X)&=\frac{e^{\beta_{0}+\beta_{1}X}}{1+e^{\beta_{0}+\beta_{1}X}}\\
+\left(1+e^{\beta_{0}+\beta_{1}X}\right)p(X)&=e^{\beta_{0}+\beta_{1}X}\\
+p(X)+e^{\beta_{0}+\beta_{1}X}p(X)&=e^{\beta_{0}+\beta_{1}X}\\
+p(X)&=e^{\beta_{0}+\beta_{1}X}+e^{\beta_{0}-\beta_{1}X}p(X)\\
+p(X)&=e^{\beta_{0}+\beta_{1}X}\left(1-p(X)\right)\\
+\frac{p(X)}{\left(1-p(X)\right)}&=e^{\beta_{0}+\beta_{1}X}
+\end{split}
+$$
+
+. . .
+
+-  $\frac{p(X)}{\left(1-p(X)\right)}$  are the odds, that take value in $[0,\infty]$
+
+. . .
+
+-  $log\left(\frac{p(X)}{\left(1-p(X)\right)}\right)=\beta_{0}+\beta_{1}X$  is the logit: there is a linear relation between the logit and the predictor
+
+
+
+## Estimating the posterior probability via the logistic function
+
+ a toy sample 
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_1.pdf",pages = 1)
+```
+
+
+
+## Estimating the posterior probability via the logistic function
+
+ a toy sample : fit the logistic function
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_2.pdf",pages = 1)
+```
+
+
+
+## Estimating the posterior probability via the logistic function
+
+ a toy sample : for a new point  $\texttt{balance}=1400$ 
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_2_a.pdf",pages = 1)
+```
+
+
+## Estimating the posterior probability via the logistic function
+
+a toy sample: one can estimate  $P(\texttt{default=Yes}|\texttt{balance}=1400)$ 
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_2_b.pdf",pages = 1)
+```
+
+## Estimating the posterior probability via the logistic function
+
+a toy sample: one can estimate  $P(\texttt{default=Yes}|\texttt{balance}=1400)=.62$ 
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_2_c.pdf",pages = 1)
+```
+
+## Estimating the posterior probability via the logistic function
+
+How to find the logistic function?  estimate  its parameters  $P(Y=1|X) = \frac{e^{\beta_{0}+\beta_{1}X}}{1 + e^{\beta_{0}+\beta_{1}X}}$ 
+
+```{r, echo=FALSE,fig.align='center',out.width="40%"}
+magick::image_read_pdf("./figures/logitplot_3.pdf",pages = 1)
+```
+
+
+## Fitting the logistic regression
+
+ pre-process: specify the recipe 
+```{r}
+def_rec = recipe(default~balance, data=default)
+```
+. . .
+
+ specify the model 
+```{r}
+def_model_spec = logistic_reg(mode="classification", engine="glm")
+```
+
+. . .
+
+ put them together in the workflow 
+```{r}
+def_wflow = workflow() |> add_recipe(def_rec) |> add_model(def_model_spec)
+```
+
+. . .
+
+ fit the model 
+```{r}
+def_fit = def_wflow |> fit(data=default) 
+```
+
+## Fitting the logistic regression
+
+
+ Look at the results 
+```{r}
+def_fit |>  tidy() |> kbl() |> kable_styling(font_size=12)
+```
+
+```{r}
+def_fit |>  glance() |> kbl() |> kable_styling(font_size=12)
+```
+
+
+## Fitting the logistic regression: a qualitative predictor
+
+Suppose you want to use $\texttt{student}$ as the qualitative predictor for your logistic regression. 
+You can update, within the workflow, the recipe only.
+
+ update the recipe in the workflow and re-fit
+```{r}
+def_wflow2 = def_wflow |> update_recipe(recipe(default~student,data=default))
+def_fit2 = def_wflow2 |> fit(data=default) 
+```
+
+. . .
+
+ look at the results 
+```{r}
+def_fit2 |>  tidy() |> kbl() |> kable_styling(font_size=12)
+```
+
+
+## Fitting the logistic regression: a qualitative predictor
+
+It appears that if a customer is a student, he is more likely to default ( $\hat{\beta}_{1} = 0.4$ ).
+
+- For non students 
+$$
+\begin{split}
+log\left(\frac{p(X)}{1-p(X)}\right) = -3.504 &\rightarrow& \ \frac{p(X)}{1-p(X)} = e^{-3.504}\rightarrow\\
+p(X) = e^{-3.504}-e^{-3.504}p(X)&\rightarrow& \ p(X) +e^{-3.504}p(X) = e^{-3.504}\rightarrow\\
+p(X)(1 +e^{-3.504}) = e^{-3.504}  &\rightarrow & \ p(X) = \frac{e^{-3.504}}{1 +e^{-3.504}}=\color{blue}{0.029}
+\end{split}
+$$
+
+. . .
+
+- For students 
+$$
+p(X) = \frac{e^{-3.504+0.4}}{1 +e^{-3.504+0.4}}=\color{red}{0.042}
+$$
+
+
+## Multiple logistic regression
+
+In case of multiple predictors
+
+
+$$log\left(\frac{p(X)}{1-p(X)} \right)=\beta_{0}+\beta_{1}X_{1}+\beta_{2}X_{2}+\ldots+\beta_{p}X_{p}$$
+
+and following relation holds
+
+$$p(X)=\frac{e^{{\beta}_{0}+{\beta}_{1}X_{1}+{\beta}_{2}X_{2}+\ldots+{\beta}_{p}X_{p}}}{1+e^{{\beta}_{0}+{\beta}_{1}X_{1}+{\beta}_{2}X_{2}+\ldots+{\beta}_{p}X_{p}}}$$
+
+
+## Multiple logistic regression
+Let's consider two predictors $\texttt{balance}$ and $\texttt{student}$,
+again we just update the recipe within the workflow
+
+ update the recipe in the workflow and re-fit
+```{r}
+def_wflow3 = def_wflow |> update_recipe(recipe(default~balance+student,data=default))
+def_fit3 = def_wflow3 |> fit(data=default) 
+```
+
+
+ look at the results 
+```{r}
+def_fit3 |>  tidy() |> kbl() |> kable_styling(font_size=12)
+```
+
+
+&nbsp;
+
+. . .
+
+<center>
+<h1 style="color:indianred;">
+anything weird?
+</h1>
+</center>
+
+
+## Multiple logistic regression
+
+
+```{r, echo = TRUE, fig.align="center", out.width="50%"}
+p_stu = def_fit2 |> augment(new_data=default) |> 
+  ggplot(aes(x=balance, y= .pred_Yes,color=student))+geom_line(size=3)+
+  theme_minimal() + ylim(c(0,.1))+xlab("balance")+ylab("P(default=yes|student)")
+
+p_stu 
+```
+
+## Multiple logistic regression
+
+```{r, echo = TRUE, fig.align="center", out.width="50%"}
+p_bal_stu = def_fit3 |> augment(new_data=default) |> ggplot(aes(x=balance, y= .pred_Yes,color=student)) +
+  geom_line(size=3) + theme_minimal() + xlab("balance") + ylab("P(default=yes|balance,student)")
+
+p_bal_stu
+```
+
+## Multiple logistic regression
+
+
+```{r, echo = FALSE, fig.align="center", out.width="67%"}
+p_stu = def_fit2 |> augment(new_data=default) |> 
+  ggplot(aes(x=seq(min(balance),max(balance),length=length(balance)),
+             y= .pred_Yes,color=student))+geom_line(size=3)+
+  theme_minimal() + ylim(c(0,.1))+xlab("balance")+ylab("P(default=yes|student)")
+
+p_bal_stu = def_fit3 |> augment(new_data=default) |> 
+  ggplot(aes(x=balance, y= .pred_Yes,color=student))+geom_line(size=3) +     theme_minimal() + xlab("balance")+
+  ylab("P(default=yes|balance,student)")+ geom_vline(xintercept=2000)
+
+
+  (p_stu / p_bal_stu)
+```
+
+## Multiple logistic regression
+
+
+```{r, echo = FALSE, fig.align="center", out.width="67%"}
+p_stu = def_fit2 |> augment(new_data=default) |> 
+  ggplot(aes(x=seq(min(balance),max(balance),length=length(balance)),
+             y= .pred_Yes,color=student))+geom_line(size=2)+
+  theme_minimal() + ylim(c(0,.1))+xlab("balance")+ylab("P(default=yes|student)")
+
+p_bal_stu = def_fit3 |> augment(new_data=default) |> 
+  ggplot(aes(x=balance, y= .pred_Yes,color=student))+geom_line(size=2) +     theme_minimal() + xlab("balance")+
+  ylab("P(default=yes|balance,student)")+ geom_vline(xintercept=2000)
+
+pbox = default |> ggplot(aes(x=student,y=balance,fill=student))+
+  geom_boxplot()+theme_minimal()
+
+  (p_stu / p_bal_stu) | pbox
+```
+
+
+## Two ways to estimate class probabilities
+
+Suppose we want to estimate:
+
+$$
+P(Y = k \mid X = x)
+$$
+
+that is, the probability that an observation with predictors \(x\) belongs to class \(k\).
+
+::: {.columns}
+::: {.column width="50%"}
+
+### Discriminative approach
+
+Model the posterior probability directly:
+
+$$
+P(Y = k \mid X = x)
+$$
+
+Examples:
+
+- logistic regression
+- multinomial logistic regression
+
+:::
+
+::: {.column width="50%"}
+
+### Generative approach
+
+Model how the data are distributed within each class: $P(X = x \mid Y = k)$
+
+and combine this with the class proportions: $P(Y = k)$
+
+Examples:
+
+- LDA
+- QDA
+- naive Bayes
+
+:::
+:::
+
+
+## Bayes rule for classification
+
+Generative classifiers estimate class probabilities indirectly using Bayes' rule:
+
+$$
+P(Y = k \mid X = x)
+=
+\frac{
+P(X = x \mid Y = k)P(Y = k)
+}{
+P(X = x)
+}
+$$
+
+For classification, the denominator is the same for all classes, so we compare:
+
+$$
+P(X = x \mid Y = k)P(Y = k)
+$$
+
+and assign the observation to the class with the largest value:
+
+$$
+\widehat{Y}
+=
+\arg\max_k
+P(X = x \mid Y = k)P(Y = k)
+$$
+
+::: {.callout-important }
+## A generative classifier combines:
+
+1. how likely the observation is under each class;
+2. how frequent each class is overall.
+:::
+
+
+## From Bayes rule to LDA
+
+LDA is obtained by making a specific assumption about the class-conditional distributions:
+
+$$
+X \mid Y = k \sim N(\mu_k, \Sigma)
+$$
+
+That is, within each class the predictors are approximately normally distributed, and all classes share the same covariance structure.
+
+
+## Linear discriminant analysis: the idea
+
+LDA is a generative classifier.
+
+It assumes that, within each class, the predictor follows a normal distribution:
+
+$$
+X \mid Y = k \sim N(\mu_k, \sigma^2)
+$$
+
+For each class, LDA estimates: the class mean $\mu_k$; the common variability $\sigma^2$ and the class proportion $\pi_k$.
+
+Then it assigns a new observation to the class with the largest estimated posterior probability:
+
+$$
+\widehat{Y}
+=
+\arg\max_k \widehat{P}(Y = k \mid X = x)
+$$
+
+
+## LDA with one predictor
+
+With two classes, equal priors and common variance:
+
+$$
+X \mid Y = 1 \sim N(\mu_1, \sigma^2)
+$$
+
+$$
+X \mid Y = 2 \sim N(\mu_2, \sigma^2)
+$$
+
+the LDA decision boundary is:
+
+$$
+x =
+\frac{\mu_1 + \mu_2}{2}
+$$
+
+::: {.callout-note}
+## simple case 
+LDA classifies an observation according to which class mean it is closer to.
+:::
+
+
+## The boundary is estimated from data
+
+In practice, the true means are unknown.
+
+LDA estimates the class means from the training data:
+
+$$
+\hat{\mu}_1, \hat{\mu}_2
+$$
+
+and places the estimated boundary at:
+
+$$
+\frac{\hat{\mu}_1 + \hat{\mu}_2}{2}
+$$
+
+::: {.callout-note}
+## Approximate Bayes boundary
+The estimated boundary may be close to, but not exactly equal to, the theoretical Bayes boundary.
+:::
+
+
+
+
+
+## LDA with one predictor
+
+```{r, fig.align='center', out.width="45%"}
+set.seed(1234)
+
+p_1 <- ggplot() +
+  xlim(-10, 10) +
+  theme_minimal() +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = 4, sd = 2),
+    geom = "area",
+    fill = "dodgerblue",
+    alpha = .25
+  ) +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = -4, sd = 2),
+    geom = "area",
+    fill = "indianred",
+    alpha = .25
+  ) +
+  geom_vline(xintercept = 0, size = 2, alpha = .5) +
+  geom_vline(xintercept = -4, color = "grey", size = 3, alpha = .5) +
+  geom_vline(xintercept = 4, color = "grey", size = 3, alpha = .5) +
+  geom_point(
+    aes(x = -2, y = 0),
+    inherit.aes = FALSE,
+    size = 10,
+    alpha = .5,
+    color = "darkgreen"
+  ) +
+  geom_point(
+    aes(x = 1, y = 0),
+    inherit.aes = FALSE,
+    size = 10,
+    alpha = .5,
+    color = "magenta"
+  ) +
+  xlab("x")
+
+p_1
+```
+
+The $\color{darkgreen}{\text{green point}}$ is assigned to class 1; the $\color{magenta}{\text{pink point}}$ is assigned to class 2.
+
+
+
+## The boundary is estimated from data
+
+In practice, the true class means are unknown. LDA estimates them from the training data $\hat{\mu}_1, \hat{\mu}_2$ 
+- the estimated boundary at $\frac{\hat{\mu}_1 + \hat{\mu}_2}{2}$
+
+
+```{r, fig.align='center', out.width="75%"}
+set.seed(1234)
+
+class_12 <- tibble(
+  class_1 = rnorm(50, mean = -4, sd = 2),
+  class_2 = rnorm(50, mean = 4, sd = 2)
+) |>
+  pivot_longer(
+    names_to = "classes",
+    values_to = "values",
+    cols = 1:2
+  )
+
+mu_12 <- class_12 |>
+  group_by(classes) |>
+  summarise(means = mean(values), .groups = "drop")
+
+mu_12_mean <- mean(mu_12$means)
+
+p_2 <- class_12 |>
+  ggplot(aes(x = values, fill = classes)) +
+  theme_minimal() +
+  geom_histogram(aes(y = after_stat(density)), alpha = .5, color = "grey") +
+  xlim(-10, 10) +
+  geom_vline(
+    xintercept = mu_12 |> pull(means),
+    color = "grey",
+    size = 3,
+    alpha = .75
+  ) +
+  geom_vline(xintercept = mu_12_mean, size = 2, alpha = .75) +
+  theme(legend.position = "none")
+
+p_2
+```
+
+
+
+
+:::{.callout-note}
+## Optimal vs estimanted boundary
+The theoretical Bayes boundary is at $0$.  
+The estimated boundary is slightly off, at `r round(mu_12_mean, 2)`.
+:::
+
+
+
+
+## Fitting LDA
+
+```{r}
+default <- read_csv("./data/Default.csv") |>
+  mutate(default = as.factor(default))
+
+set.seed(1234)
+
+def_split <- initial_split(default, prop = 3/4, strata = default)
+
+default_train <- training(def_split)
+default_test  <- testing(def_split)
+
+def_rec <- recipe(default ~ balance, data = default_train)
+
+def_lda_spec <- discrim_linear(
+  mode = "classification",
+  engine = "MASS"
+)
+
+def_wflow_lda <- workflow() |>
+  add_recipe(def_rec) |>
+  add_model(def_lda_spec)
+
+def_fit_lda <- def_wflow_lda |>
+  fit(data = default_train)
+```
+
+:::{.callout-note}
+# just change the model spec
+The workflow is the same as before.  
+Only the model specification changes.
+:::
+
+
+## LDA with more than one predictor
+
+With several predictors, LDA assumes that within each class:
+
+$$
+X \mid Y = k \sim N(\mu_k, \Sigma)
+$$
+
+
+```{r, echo=FALSE, fig.align='center', out.width="45%"}
+magick::image_read_pdf("./figures/class3dim2.pdf", pages = 1)
+```
+
+
+## Class-specific errors
+
+A classifier can produce predicted probabilities.
+
+To obtain predicted classes, we choose a threshold.
+
+For example, in the default problem:
+
+$$
+\widehat{P}(\text{default} = \text{Yes} \mid X) > c
+$$
+
+where $c$ is the classification threshold.
+
+```{r}
+lda_pred <- def_fit_lda |>
+  augment(new_data = default_test) |>
+  dplyr::select(default, .pred_class, .pred_Yes) |>
+  mutate(
+    .pred_class_0_05 = as.factor(ifelse(.pred_Yes > .05, "Yes", "No")),
+    .pred_class_0_1  = as.factor(ifelse(.pred_Yes > .1,  "Yes", "No")),
+    .pred_class_0_2  = as.factor(ifelse(.pred_Yes > .2,  "Yes", "No")),
+    .pred_class_0_3  = as.factor(ifelse(.pred_Yes > .3,  "Yes", "No")),
+    .pred_class_0_4  = as.factor(ifelse(.pred_Yes > .4,  "Yes", "No")),
+    .pred_class_0_5  = as.factor(ifelse(.pred_Yes > .5,  "Yes", "No"))
+  )
+```
+
+:::{.callout-warning}
+## Moving the threshold
+Different thresholds lead to different types of classification errors.
+:::
+
+
+## Class-specific errors
+
+```{r, fig.align='center', out.width="55%", echo=FALSE}
+p1 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_05) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .05")
+
+p2 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_1) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .10")
+
+p3 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_2) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .20")
+
+p4 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_3) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .30")
+
+p5 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_4) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .40")
+
+p6 <- lda_pred |>
+  conf_mat(truth = default, estimate = .pred_class_0_5) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = .50")
+
+(p1 | p2 | p3) / (p4 | p5 | p6)
+```
+
+:::{.callout-note}
+## Moving the threshold
+Lowering the threshold usually identifies more defaulters, but may also increase false alarms.
+:::
+
+
+## ROC curve
+
+The ROC curve shows how sensitivity and specificity change as the threshold varies.
+
+```{r, fig.align='center', out.width="50%"}
+def_fit_lda |>
+  augment(new_data = default_test) |>
+  mutate(default = factor(default, levels = c("Yes", "No"))) |>
+  roc_curve(truth = default, .pred_Yes) |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  ggtitle("LDA ROC curve") +
+  geom_path(color = "indianred") +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_minimal()
+```
+
+
+# Quadratic discriminant analysis
+
+## QDA: the idea
+
+QDA is similar to LDA, but it relaxes one assumption.
+
+LDA assumes a common covariance matrix:
+
+$$
+X \mid Y = k \sim N(\mu_k, \Sigma)
+$$
+
+QDA allows each class to have its own covariance matrix:
+
+$$
+X \mid Y = k \sim N(\mu_k, \Sigma_k)
+$$
+
+:::{.callout-note}
+Because the covariance matrix can change across classes, QDA can produce curved decision boundaries.
+:::
+
+
+## Fitting QDA
+
+```{r}
+def_rec <- recipe(default ~ balance, data = default_train)
+
+def_qda_spec <- discrim_quad(
+  mode = "classification",
+  engine = "MASS"
+)
+
+def_wflow_qda <- workflow() |>
+  add_recipe(def_rec) |>
+  add_model(def_qda_spec)
+
+def_fit_qda <- def_wflow_qda |>
+  fit(data = default_train)
+```
+
+```{r, fig.align='center', out.width="45%"}
+def_fit_qda |>
+  augment(new_data = default_test) |>
+  dplyr::select(default, .pred_class, .pred_Yes) |>
+  mutate(default = factor(default, levels = c("Yes", "No"))) |>
+  roc_curve(truth = default, .pred_Yes) |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  ggtitle("QDA ROC curve") +
+  geom_path(color = "dodgerblue") +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_minimal()
+```
+
+
+# Naive Bayes
+
+## Naive Bayes: the idea
+
+Naive Bayes is also a generative classifier.
+
+Like LDA and QDA, it uses Bayes' rule.  
+However, it makes a simplifying assumption:
+
+$$
+f_k(X)
+=
+f_{k1}(X_1)
+\times
+f_{k2}(X_2)
+\times
+\cdots
+\times
+f_{kp}(X_p)
+$$
+
+That is, predictors are assumed to be independent within each class.
+
+:::{.callout-note}
+The assumption is often unrealistic, but it makes the model simple and stable, especially with many predictors or small samples.
+:::
+
+
+## Naive Bayes with different predictors
+
+For each predictor and each class, Naive Bayes estimates a separate distribution.
+
+For continuous predictors, one can use:
+
+$$
+f_{kj}(X_j) \sim N(\mu_{kj}, \sigma_{kj}^2)
+$$
+
+or a kernel density estimator.
+
+For categorical predictors, one can use class-specific relative frequencies.
+
+:::{.callout-note}
+Naive Bayes combines many simple one-variable models into a full classifier.
+:::
+
+
+## Fitting Naive Bayes
+
+```{r}
+def_rec <- recipe(default ~ balance, data = default_train)
+
+def_nb_spec <- naive_Bayes(
+  mode = "classification",
+  engine = "naivebayes"
+)
+
+def_wflow_nb <- workflow() |>
+  add_recipe(def_rec) |>
+  add_model(def_nb_spec)
+
+def_fit_nb <- def_wflow_nb |>
+  fit(data = default_train)
+```
+
+```{r, fig.align='center', out.width="45%"}
+def_fit_nb |>
+  augment(new_data = default_test) |>
+  dplyr::select(default, .pred_class, .pred_Yes) |>
+  mutate(default = factor(default, levels = c("Yes", "No"))) |>
+  roc_curve(truth = default, .pred_Yes) |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  ggtitle("Naive Bayes ROC curve") +
+  geom_path(color = "darkgreen") +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_minimal()
+```
+
+
+## Comparing classifiers
+
+```{r, fig.align='center', out.width="70%", echo=FALSE}
+def_model_spec <- logistic_reg(
+  mode = "classification",
+  engine = "glm"
+)
+
+def_wflow <- workflow() |>
+  add_recipe(def_rec) |>
+  add_model(def_model_spec)
+
+def_fit <- def_wflow |>
+  fit(data = default_train)
+
+roc_tbl <- rbind(
+  def_fit |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    mutate(default = factor(default, levels = c("Yes", "No"))) |>
+    roc_curve(truth = default, .pred_Yes) |>
+    mutate(method = "logistic regression"),
+
+  def_fit_lda |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    mutate(default = factor(default, levels = c("Yes", "No"))) |>
+    roc_curve(truth = default, .pred_Yes) |>
+    mutate(method = "LDA"),
+
+  def_fit_qda |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    mutate(default = factor(default, levels = c("Yes", "No"))) |>
+    roc_curve(truth = default, .pred_Yes) |>
+    mutate(method = "QDA"),
+
+  def_fit_nb |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    mutate(default = factor(default, levels = c("Yes", "No"))) |>
+    roc_curve(truth = default, .pred_Yes) |>
+    mutate(method = "naive Bayes")
+)
+
+roc_tbl |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = method)) +
+  geom_path(alpha = .6) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  theme_minimal() +
+  facet_wrap(~ method)
+```
+
+
+## Comparing classifiers
+
+```{r echo=FALSE}
+aucs <- rbind(
+  def_fit |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    roc_auc(truth = default, .pred_Yes) |>
+    mutate(method = "logistic regression"),
+
+  def_fit_lda |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    roc_auc(truth = default, .pred_Yes) |>
+    mutate(method = "LDA"),
+
+  def_fit_qda |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    roc_auc(truth = default, .pred_Yes) |>
+    mutate(method = "QDA"),
+
+  def_fit_nb |>
+    augment(new_data = default_test) |>
+    dplyr::select(default, .pred_Yes) |>
+    roc_auc(truth = default, .pred_Yes) |>
+    mutate(method = "naive Bayes")
+)
+
+aucs |>
+  dplyr::select(method, .estimate) |>
+  kbl() |>
+  kable_styling(font_size = 14)
+```
+
+:::{.callout-important}
+The same workflow can be used to compare different classifiers:
+
+model specification → fitting → predicted probabilities → ROC / AUC.
+:::
+
