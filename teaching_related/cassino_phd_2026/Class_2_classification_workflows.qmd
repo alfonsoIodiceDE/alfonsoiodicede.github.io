@@ -1073,6 +1073,7 @@ aucs |>
 :::{.callout-important}
 The same workflow can be used to compare different classifiers:
 
+
 model specification → fitting → predicted probabilities → ROC / AUC.
 :::
 
