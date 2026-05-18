@@ -1,0 +1,911 @@
+---
+title: "Essential Statistical Data Analysis"
+subtitle: "Class 2 Lab — Classification: from probabilities to decisions"
+author: "YOUR NAME GOES HERE"
+date: "May 18, 2026"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: false
+    code-tools: true
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+
+library(patchwork)
+library(tidyverse)
+library(tidymodels)
+library(kableExtra)
+library(palmerpenguins)
+
+# Some classifiers used later in the lab are available through additional packages.
+# If they are not installed, the optional sections will be skipped.
+has_discrim <- requireNamespace("discrim", quietly = TRUE)
+has_MASS <- requireNamespace("MASS", quietly = TRUE)
+has_naivebayes <- requireNamespace("naivebayes", quietly = TRUE)
+has_nnet <- requireNamespace("nnet", quietly = TRUE)
+
+if (has_discrim) {
+  library(discrim)
+}
+
+theme_set(theme_minimal())
+```
+
+# Lab overview
+
+In this lab, we practise the main steps of a classification analysis:
+
+- identifying a categorical response variable;
+- splitting data into training and test sets;
+- fitting a classification model;
+- obtaining predicted probabilities;
+- converting probabilities into predicted classes;
+- evaluating predictions with confusion matrices;
+- changing the classification threshold;
+- drawing ROC curves and computing AUC;
+- comparing different classifiers.
+
+You can edit the code chunks directly and re-run them.
+
+# Part 1 — The classification problem
+
+We use the `penguins` dataset from the `palmerpenguins` package.
+
+Each row describes one penguin. The variables include species, island, bill measurements, flipper length, body mass, sex, and year.
+
+To focus on binary classification, we create a new response variable:
+
+$$
+\texttt{adelie} =
+\begin{cases}
+\text{Yes}, & \text{if the penguin is Adelie} \\
+\text{No}, & \text{otherwise}
+\end{cases}
+$$
+
+The goal is to predict whether a penguin is an Adelie penguin from its measurements.
+
+## Lab 1 — Load and prepare the data
+
+```{r}
+penguins_binary <- palmerpenguins::penguins |>
+  drop_na(
+    species,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g,
+    island,
+    sex
+  ) |>
+  mutate(
+    adelie = factor(
+      if_else(species == "Adelie", "Yes", "No"),
+      levels = c("No", "Yes")
+    ),
+    species = as.factor(species),
+    island = as.factor(island),
+    sex = as.factor(sex)
+  )
+
+glimpse(penguins_binary)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Identify:
+
+1. the observational unit;
+2. the response variable;
+3. the predictor variables we could use.
+:::
+
+Write your answer here:
+
+```{markdown}
+Observational unit:
+
+Response variable:
+
+Possible predictor variables:
+```
+
+## Lab 2 — Class frequencies
+
+Before fitting a classifier, we should inspect the distribution of the response variable.
+
+```{r}
+penguins_binary |>
+  count(adelie)
+```
+
+```{r}
+penguins_binary |>
+  count(adelie) |>
+  mutate(proportion = n / sum(n))
+```
+
+::: {.callout-tip}
+### Your turn
+
+Is this a balanced or imbalanced classification problem?  
+Which class is more frequent?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 2 — Exploring predictors and classes
+
+## Lab 3 — Bill length and Adelie status
+
+```{r}
+penguins_binary |>
+  ggplot(aes(x = adelie, y = bill_length_mm, fill = adelie)) +
+  geom_boxplot(alpha = 0.6, show.legend = FALSE) +
+  labs(
+    x = "Adelie",
+    y = "Bill length (mm)"
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+Does `bill_length_mm` look useful for predicting whether a penguin is Adelie?  
+Why?
+:::
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+```
+
+## Lab 4 — Bill depth and Adelie status
+
+```{r}
+penguins_binary |>
+  ggplot(aes(x = adelie, y = bill_depth_mm, fill = adelie)) +
+  geom_boxplot(alpha = 0.6, show.legend = FALSE) +
+  labs(
+    x = "Adelie",
+    y = "Bill depth (mm)"
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+Does `bill_depth_mm` look useful for distinguishing Adelie penguins from other penguins?
+:::
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+```
+
+## Lab 5 — Two predictors at once
+
+```{r}
+penguins_binary |>
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm, colour = adelie)) +
+  geom_point(alpha = 0.7) +
+  labs(
+    x = "Bill length (mm)",
+    y = "Bill depth (mm)",
+    colour = "Adelie"
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+What do you notice about the position of Adelie penguins in the plot?
+:::
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+```
+
+# Part 3 — Training and test data
+
+## Lab 6 — Split the data
+
+We split the data into:
+
+- a training set, used to fit the model;
+- a test set, used to evaluate predictions on new observations.
+
+```{r}
+set.seed(1234)
+
+peng_split <- initial_split(
+  penguins_binary,
+  prop = 3/4,
+  strata = adelie
+)
+
+peng_train <- training(peng_split)
+peng_test <- testing(peng_split)
+```
+
+```{r}
+peng_train |>
+  count(adelie) |>
+  mutate(proportion = n / sum(n))
+```
+
+```{r}
+peng_test |>
+  count(adelie) |>
+  mutate(proportion = n / sum(n))
+```
+
+::: {.callout-tip}
+### Your turn
+
+Why did we use `strata = adelie` when splitting the data?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 4 — Logistic regression
+
+## Lab 7 — Recipe, model, workflow
+
+We first fit a logistic regression with one predictor: `bill_length_mm`.
+
+```{r}
+peng_rec <- recipe(adelie ~ bill_length_mm, data = peng_train)
+
+peng_log_spec <- logistic_reg(
+  mode = "classification",
+  engine = "glm"
+)
+
+peng_log_wflow <- workflow() |>
+  add_recipe(peng_rec) |>
+  add_model(peng_log_spec)
+
+peng_log_fit <- peng_log_wflow |>
+  fit(data = peng_train)
+```
+
+::: {.callout-note}
+The workflow has three ingredients: recipe, model specification, and fitted model.
+:::
+
+## Lab 8 — Look at the fitted model
+
+```{r}
+peng_log_fit |>
+  tidy()
+```
+
+::: {.callout-tip}
+### Your turn
+
+Look at the sign of the coefficient for `bill_length_mm`.  
+Does the probability of being Adelie increase or decrease when bill length increases?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+## Lab 9 — Predicted classes and probabilities
+
+A classifier can return:
+
+- a predicted class;
+- predicted probabilities for each class.
+
+```{r}
+log_pred <- peng_log_fit |>
+  augment(new_data = peng_test)
+
+log_pred |>
+  select(adelie, bill_length_mm, .pred_class, .pred_No, .pred_Yes) |>
+  slice_head(n = 10) |>
+  kbl() |>
+  kable_styling(full_width = FALSE)
+```
+
+::: {.callout-tip}
+### Your turn
+
+For the first 10 observations, find one observation with relatively high predicted probability of being Adelie.
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 5 — From probabilities to decisions
+
+## Lab 10 — Default threshold
+
+By default, predicted probabilities are usually converted into classes using threshold 0.5:
+
+$$
+\widehat{P}(\text{Adelie} = \text{Yes} \mid X) > 0.5
+$$
+
+```{r}
+log_pred <- log_pred |>
+  mutate(
+    pred_0_5 = factor(
+      if_else(.pred_Yes > 0.5, "Yes", "No"),
+      levels = levels(peng_test$adelie)
+    )
+  )
+
+log_pred |>
+  select(adelie, .pred_Yes, .pred_class, pred_0_5) |>
+  slice_head(n = 10)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Are `.pred_class` and `pred_0_5` the same for the first 10 observations?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+## Lab 11 — Confusion matrix
+
+```{r}
+log_pred |>
+  conf_mat(truth = adelie, estimate = .pred_class)
+```
+
+```{r}
+log_pred |>
+  conf_mat(truth = adelie, estimate = .pred_class) |>
+  autoplot(type = "heatmap")
+```
+
+::: {.callout-tip}
+### Your turn
+
+How many actual Adelie penguins were correctly predicted as Adelie?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+## Lab 12 — Accuracy, sensitivity and specificity
+
+```{r}
+log_pred |>
+  metrics(truth = adelie, estimate = .pred_class)
+```
+
+```{r}
+log_pred |>
+  sens(truth = adelie, estimate = .pred_class, event_level = "second")
+```
+
+```{r}
+log_pred |>
+  spec(truth = adelie, estimate = .pred_class, event_level = "second")
+```
+
+::: {.callout-note}
+Here the event of interest is `Yes`, so we use `event_level = "second"` because the factor levels are `No`, `Yes`.
+:::
+
+::: {.callout-tip}
+### Your turn
+
+Is the model better at identifying Adelie penguins or non-Adelie penguins?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 6 — Changing the threshold
+
+## Lab 13 — Several thresholds
+
+In some applications, the threshold 0.5 is not the best choice.
+
+For example, if failing to identify an Adelie penguin is costly, we may want to use a lower threshold.
+
+```{r}
+log_pred_thresholds <- log_pred |>
+  mutate(
+    pred_0_20 = factor(if_else(.pred_Yes > 0.20, "Yes", "No"), levels = levels(penguins_binary$adelie)),
+    pred_0_30 = factor(if_else(.pred_Yes > 0.30, "Yes", "No"), levels = levels(penguins_binary$adelie)),
+    pred_0_40 = factor(if_else(.pred_Yes > 0.40, "Yes", "No"), levels = levels(penguins_binary$adelie)),
+    pred_0_50 = factor(if_else(.pred_Yes > 0.50, "Yes", "No"), levels = levels(penguins_binary$adelie)),
+    pred_0_60 = factor(if_else(.pred_Yes > 0.60, "Yes", "No"), levels = levels(penguins_binary$adelie))
+  )
+```
+
+```{r}
+threshold_summary <- log_pred_thresholds |>
+  pivot_longer(
+    cols = starts_with("pred_0_"),
+    names_to = "threshold",
+    values_to = "prediction"
+  ) |>
+  group_by(threshold) |>
+  summarise(
+    accuracy = mean(adelie == prediction),
+    sensitivity = sens_vec(
+      truth = adelie,
+      estimate = prediction,
+      event_level = "second"
+    ),
+    specificity = spec_vec(
+      truth = adelie,
+      estimate = prediction,
+      event_level = "second"
+    ),
+    .groups = "drop"
+  )
+
+threshold_summary |>
+  kbl(digits = 3) |>
+  kable_styling(full_width = FALSE)
+```
+
+::: {.callout-tip}
+### Your turn
+
+What happens to sensitivity when the threshold decreases?  
+What happens to specificity?
+:::
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+```
+
+## Lab 14 — Confusion matrices for different thresholds
+
+```{r, fig.align='center', out.width="70%"}
+p_20 <- log_pred_thresholds |>
+  conf_mat(truth = adelie, estimate = pred_0_20) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = 0.20")
+
+p_40 <- log_pred_thresholds |>
+  conf_mat(truth = adelie, estimate = pred_0_40) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = 0.40")
+
+p_60 <- log_pred_thresholds |>
+  conf_mat(truth = adelie, estimate = pred_0_60) |>
+  autoplot(type = "heatmap") +
+  ggtitle("threshold = 0.60")
+
+p_20 | p_40 | p_60
+```
+
+::: {.callout-tip}
+### Your turn
+
+Which threshold would you choose if missing an Adelie penguin is very costly?  
+Why?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 7 — ROC curve and AUC
+
+## Lab 15 — ROC curve
+
+```{r}
+log_pred |>
+  roc_curve(truth = adelie, .pred_Yes, event_level = "second") |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  labs(
+    title = "Logistic regression ROC curve",
+    x = "1 - specificity",
+    y = "Sensitivity"
+  )
+```
+
+## Lab 16 — AUC
+
+```{r}
+log_pred |>
+  roc_auc(truth = adelie, .pred_Yes, event_level = "second")
+```
+
+::: {.callout-tip}
+### Your turn
+
+What does a larger AUC mean?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Part 8 — Adding more predictors
+
+## Lab 17 — Multiple logistic regression
+
+We now use several numerical predictors: bill measurements, flipper length, and body mass.
+
+```{r}
+peng_rec_multi <- recipe(
+  adelie ~ bill_length_mm + bill_depth_mm + flipper_length_mm + body_mass_g,
+  data = peng_train
+)
+
+peng_log_wflow_multi <- workflow() |>
+  add_recipe(peng_rec_multi) |>
+  add_model(peng_log_spec)
+
+peng_log_fit_multi <- peng_log_wflow_multi |>
+  fit(data = peng_train)
+
+log_pred_multi <- peng_log_fit_multi |>
+  augment(new_data = peng_test)
+```
+
+```{r}
+log_pred_multi |>
+  roc_auc(truth = adelie, .pred_Yes, event_level = "second")
+```
+
+::: {.callout-tip}
+### Your turn
+
+Compare the AUC of the simple model with the AUC of the multiple-predictor model.  
+Did the additional predictors help?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+## Lab 18 — Probability curve
+
+The simple model uses only `bill_length_mm`, so we can easily visualise how the predicted probability changes with bill length.
+
+```{r}
+new_penguins <- tibble(
+  bill_length_mm = seq(
+    from = min(peng_train$bill_length_mm),
+    to = max(peng_train$bill_length_mm),
+    length.out = 200
+  )
+)
+
+pred_grid <- peng_log_fit |>
+  augment(new_data = new_penguins)
+
+pred_grid |>
+  ggplot(aes(x = bill_length_mm, y = .pred_Yes)) +
+  geom_line(linewidth = 1) +
+  labs(
+    x = "Bill length (mm)",
+    y = "Predicted probability of being Adelie"
+  )
+```
+
+::: {.callout-tip}
+### Your turn
+
+How does the estimated probability of being Adelie change as bill length increases?
+:::
+
+Write your interpretation here:
+
+```{markdown}
+Interpretation:
+```
+
+# Part 9 — Other classifiers
+
+## Lab 19 — Linear discriminant analysis
+
+This section requires the `discrim` and `MASS` packages.
+
+```{r}
+#| eval: !expr has_discrim && has_MASS
+
+peng_rec_discrim <- recipe(
+  adelie ~ bill_length_mm + bill_depth_mm + flipper_length_mm + body_mass_g,
+  data = peng_train
+)
+
+peng_lda_spec <- discrim_linear(
+  mode = "classification",
+  engine = "MASS"
+)
+
+peng_lda_wflow <- workflow() |>
+  add_recipe(peng_rec_discrim) |>
+  add_model(peng_lda_spec)
+
+peng_lda_fit <- peng_lda_wflow |>
+  fit(data = peng_train)
+
+lda_pred <- peng_lda_fit |>
+  augment(new_data = peng_test)
+
+lda_pred |>
+  roc_auc(truth = adelie, .pred_Yes, event_level = "second")
+```
+
+::: {.callout-note}
+LDA is a generative classifier. It assumes that predictors are approximately normally distributed within each class and that classes share the same covariance structure.
+:::
+
+## Lab 20 — Quadratic discriminant analysis
+
+This section requires the `discrim` and `MASS` packages.
+
+```{r}
+#| eval: !expr has_discrim && has_MASS
+
+peng_qda_spec <- discrim_quad(
+  mode = "classification",
+  engine = "MASS"
+)
+
+peng_qda_wflow <- workflow() |>
+  add_recipe(peng_rec_discrim) |>
+  add_model(peng_qda_spec)
+
+peng_qda_fit <- peng_qda_wflow |>
+  fit(data = peng_train)
+
+qda_pred <- peng_qda_fit |>
+  augment(new_data = peng_test)
+
+qda_pred |>
+  roc_auc(truth = adelie, .pred_Yes, event_level = "second")
+```
+
+::: {.callout-note}
+QDA relaxes the common covariance assumption. This allows more flexible, curved decision boundaries.
+
+QDA can fail when predictors are highly redundant or when the class-specific covariance matrix cannot be estimated reliably.
+:::
+
+## Lab 21 — Naive Bayes
+
+This section requires the `discrim` and `naivebayes` packages.
+
+```{r}
+#| eval: !expr has_discrim && has_naivebayes
+
+peng_nb_spec <- naive_Bayes(
+  mode = "classification",
+  engine = "naivebayes"
+)
+
+peng_nb_wflow <- workflow() |>
+  add_recipe(peng_rec_discrim) |>
+  add_model(peng_nb_spec)
+
+peng_nb_fit <- peng_nb_wflow |>
+  fit(data = peng_train)
+
+nb_pred <- peng_nb_fit |>
+  augment(new_data = peng_test)
+
+nb_pred |>
+  roc_auc(truth = adelie, .pred_Yes, event_level = "second")
+```
+
+::: {.callout-note}
+Naive Bayes assumes that predictors are independent within each class. The assumption is strong, but the method can work well in practice.
+:::
+
+## Lab 22 — Compare classifiers
+
+```{r}
+#| eval: !expr has_discrim && has_MASS && has_naivebayes
+
+roc_all <- bind_rows(
+  log_pred_multi |>
+    roc_curve(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "Logistic regression"),
+
+  lda_pred |>
+    roc_curve(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "LDA"),
+
+  qda_pred |>
+    roc_curve(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "QDA"),
+
+  nb_pred |>
+    roc_curve(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "Naive Bayes")
+)
+
+roc_all |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity, colour = model)) +
+  geom_path(linewidth = 1, alpha = 0.8) +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  labs(
+    title = "ROC curves for different classifiers",
+    x = "1 - specificity",
+    y = "Sensitivity",
+    colour = "Model"
+  )
+```
+
+```{r}
+#| eval: !expr has_discrim && has_MASS && has_naivebayes
+
+auc_all <- bind_rows(
+  log_pred_multi |>
+    roc_auc(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "Logistic regression"),
+
+  lda_pred |>
+    roc_auc(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "LDA"),
+
+  qda_pred |>
+    roc_auc(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "QDA"),
+
+  nb_pred |>
+    roc_auc(truth = adelie, .pred_Yes, event_level = "second") |>
+    mutate(model = "Naive Bayes")
+)
+
+auc_all |>
+  select(model, .estimate) |>
+  arrange(desc(.estimate)) |>
+  kbl(digits = 3) |>
+  kable_styling(full_width = FALSE)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Which classifier has the largest AUC?  
+Is the difference large enough to matter in practice?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Optional — Multi-class classification
+
+So far, we transformed the problem into a binary classification task.
+
+We can also predict the original `species` variable.  
+This is a multi-class classification problem.
+
+## Lab 23 — Prepare the multi-class data
+
+```{r}
+penguins_multi <- palmerpenguins::penguins |>
+  drop_na(
+    species,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g
+  ) |>
+  mutate(species = as.factor(species))
+
+set.seed(1234)
+
+peng_multi_split <- initial_split(
+  penguins_multi,
+  prop = 3/4,
+  strata = species
+)
+
+peng_multi_train <- training(peng_multi_split)
+peng_multi_test <- testing(peng_multi_split)
+```
+
+## Lab 24 — Fit a multinomial logistic regression
+
+```{r}
+#| eval: !expr has_nnet
+
+peng_multi_rec <- recipe(
+  species ~ bill_length_mm + bill_depth_mm + flipper_length_mm + body_mass_g,
+  data = peng_multi_train
+)
+
+peng_multi_spec <- multinom_reg(
+  mode = "classification",
+  engine = "nnet"
+)
+
+peng_multi_wflow <- workflow() |>
+  add_recipe(peng_multi_rec) |>
+  add_model(peng_multi_spec)
+
+peng_multi_fit <- peng_multi_wflow |>
+  fit(data = peng_multi_train)
+
+peng_multi_pred <- peng_multi_fit |>
+  augment(new_data = peng_multi_test)
+
+peng_multi_pred |>
+  conf_mat(truth = species, estimate = .pred_class)
+```
+
+::: {.callout-tip}
+### Your turn
+
+Which species are easiest to classify?  
+Which species are most often confused?
+:::
+
+Write your answer here:
+
+```{markdown}
+Answer:
+```
+
+# Final reflection
+
+Write a short paragraph answering the following questions:
+
+1. What is the difference between a predicted probability and a predicted class?
+2. Why can changing the threshold change the type of errors we make?
+3. Why is accuracy sometimes misleading in imbalanced classification problems?
+4. Which part of the classification workflow would you use in your own research?
+
+```{markdown}
+Final reflection:
+```
