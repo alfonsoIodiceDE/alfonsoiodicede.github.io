@@ -49,6 +49,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [lab 2 quarto file](teaching_related/cassino_phd_2026/Class_2_lab_classification_workflows.html)
 
+[download lab 2 quarto file](teaching_related/cassino_phd_2026/Class_2_lab_classification_workflows.qmd.zip)
 
 <!-- [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
