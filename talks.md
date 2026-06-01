@@ -4,7 +4,7 @@ layout: default
 
 ### talks
 
-[ISI 20026: Model-agnostic interpretability of deep learning models for car emissions assessment: from SHAP explanations to behavioural archetypes and targeted recommendations](IASC_Malta_2026_presentation.html)
+[ISI 20026: Model-agnostic interpretability of deep learning models for car emissions assessment: from SHAP explanations to behavioural archetypes and targeted recommendations](ISI_Malta_2026_presentation.html)
 
 [Zakopane Conference 2026: Learning from Mixed-Type Data with Association-Aware Distances](zakopane_talk_may_26.html)
 
