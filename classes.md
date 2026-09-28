@@ -14,6 +14,8 @@ A quick intro to tidyverse for data manipulation and visualization in R
 
 [Tidy data manipulation and visualization](teaching_related/preprocessing/Tidy_data_manipulation_and_visualization.html)
 
+<!--
+
 ### Statistical Learning-related slides
 
 Slides illustrating SL instroductory topics, mostly (but not exclusively) based on the book: 
@@ -27,7 +29,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [Non-linear regression](teaching_related/nonlinear_regression.html)
 
-
+-->
 
 <!--
 [Classification: part 2](teaching_related/classification/Classification_part2.html)
@@ -36,10 +38,11 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
  --> 
 
-
+<!-- 
 ### classes at Cassino PhD program
 
 #### Essential Statistical Data Analysis for Doctoral Studies Across Disciplines
+
 
 [2026 syllabus](teaching_related/cassino_phd_2026/ESDA_doctoral_studies_course_syllabus.html)
 
@@ -55,7 +58,7 @@ Slides illustrating SL instroductory topics, mostly (but not exclusively) based 
 
 [quarto class 3](teaching_related/cassino_phd_2026/Class_3_lab_clustering_workflows.qmd.zip)
 
-<!-- [lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
+[lecture 2](teaching_related/Lecture_2_elements_of_prob.html)
 
 [lecture 3](teaching_related/Lecture_3_elements_of_inference.html)
 
